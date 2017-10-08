@@ -6,6 +6,7 @@ enum class Bonus {
     BURN_GRAY_BUILDING,
     BURN_BROWN_BUILDING,
     EXTRA_TURN,
-    BURN_THREE_COINS
+    BURN_THREE_COINS,
+    NONE
 
 }
