@@ -1,6 +1,6 @@
 import enums.*
 
-class GuildsDeck() : Deck(DeckName.FIRST_AGE) {
+class GuildsDeck() : Deck(DeckName.GUILDS) {
     init {
         val cards = ArrayList<Card>()
 
