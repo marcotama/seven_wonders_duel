@@ -7,5 +7,7 @@ enum class CardColor {
     BROWN,
     GRAY,
     PURPLE,
-    RED
+    RED,
+    WONDER,
+    PROGRESSTOKEN
 }

@@ -1,6 +1,6 @@
 import enums.*
 
-class SecondAgeDeck() : Deck(DeckName.FIRST_AGE) {
+class SecondAgeDeck() : Deck(DeckName.SECOND_AGE) {
     init {
         val cards = ArrayList<Card>()
 

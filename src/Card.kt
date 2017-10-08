@@ -153,7 +153,7 @@ class Card(val deck: DeckName, name: String, val color: CardColor,
                 coinsProduced: Int, victoryPoints: Int,
                 militaryPoints: Int,
                 bonuses: Set<Bonus>) :
-            this(deck = deck, name = name, color = CardColor.GOLD,
+            this(deck = deck, name = name, color = CardColor.WONDER,
                     resourceCost = resourceCost, coinCost = 0,
                     linkingSymbol = LinkingSymbol.NONE, linksTo = LinkingSymbol.NONE,
                     tradingBonuses = emptySet<Resource>(), resourceProduction = emptyMap<Resource, Int>(),
@@ -164,6 +164,4 @@ class Card(val deck: DeckName, name: String, val color: CardColor,
                     scienceSymbol = ScienceSymbol.NONE, militaryPoints = militaryPoints,
                     bonuses = bonuses
             )
-
-
 }
