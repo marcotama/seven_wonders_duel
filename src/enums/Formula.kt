@@ -10,5 +10,5 @@ enum class Formula {
     PER_BLUE_CARD,
     PER_GREEN_CARD,
     PER_WONDER,
-    PER_COIN
+    PER_THREE_COINS
 }
