@@ -1,4 +1,4 @@
-package enums
+package com.aigamelabs.swduel.enums
 
 enum class CityForFormula {
     YOUR_CITY,

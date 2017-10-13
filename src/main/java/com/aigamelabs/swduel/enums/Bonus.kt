@@ -1,4 +1,4 @@
-package enums
+package com.aigamelabs.swduel.enums
 
 enum class Bonus {
     DRAW_PROGRESS_TOKEN,

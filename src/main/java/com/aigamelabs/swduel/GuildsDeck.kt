@@ -1,4 +1,8 @@
-import enums.*
+package com.aigamelabs.swduel
+
+import com.aigamelabs.swduel.Deck
+import com.aigamelabs.swduel.enums.Formula
+import com.aigamelabs.swduel.enums.*
 
 class GuildsDeck() : Deck(DeckName.GUILDS) {
     init {

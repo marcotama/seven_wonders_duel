@@ -1,3 +1,0 @@
-class Dealer(seed: Int) {
-
-}

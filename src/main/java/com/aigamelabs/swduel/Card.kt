@@ -1,4 +1,7 @@
-import enums.*
+package com.aigamelabs.swduel
+
+import com.aigamelabs.swduel.enums.Formula
+import com.aigamelabs.swduel.enums.*
 
 class Card(val deck: DeckName, name: String, val color: CardColor,
            val resourceCost: Map<Resource, Int>, val coinCost: Int,

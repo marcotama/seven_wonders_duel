@@ -1,4 +1,4 @@
-package enums
+package com.aigamelabs.swduel.enums
 
 enum class CardColor {
     GREEN,
