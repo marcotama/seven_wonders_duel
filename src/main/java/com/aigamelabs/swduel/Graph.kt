@@ -2,7 +2,7 @@ package com.aigamelabs.swduel
 
 import io.vavr.collection.Vector
 
-class Graph<T>(private val vertices: Vector<T?>, private val adjMatrix : Vector<Boolean>) {
+data class Graph<T>(private val vertices: Vector<T?>, private val adjMatrix : Vector<Boolean>) {
     private val numVertices : Int = vertices.size()
 
     constructor(numVertices: Int) :

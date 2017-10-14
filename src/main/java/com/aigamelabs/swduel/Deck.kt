@@ -6,7 +6,7 @@ import com.aigamelabs.swduel.enums.CardGroup
 import io.vavr.collection.Vector
 import io.vavr.control.Try
 
-open class Deck(private val name: String, private val cards: Vector<Card>) {
+data class Deck(private val name: String, private val cards: Vector<Card>) {
 
     constructor(name: String) : this(name, Vector.empty())
 

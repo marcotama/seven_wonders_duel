@@ -3,7 +3,7 @@ package com.aigamelabs.swduel
 import com.aigamelabs.swduel.enums.Formula
 import com.aigamelabs.swduel.enums.*
 
-class Card(val cardGroup: CardGroup, val name: String, val color: CardColor,
+data class Card(val cardGroup: CardGroup, val name: String, val color: CardColor,
            val resourceCost: Map<Resource, Int>, val coinCost: Int,
            val linkingSymbol: LinkingSymbol, val linksTo: LinkingSymbol,
            val tradingBonuses: Set<Resource>, val resourceProduction: Map<Resource, Int>,
@@ -11,7 +11,7 @@ class Card(val cardGroup: CardGroup, val name: String, val color: CardColor,
            val victoryPoints: Int, val victoryPointsFormula: Formula,
            val coinsProduced: Int, val coinsProducedFormula: Formula,
            val referenceCity: CityForFormula,
-           val scienceSymbol: ScienceSymbol, militaryPoints: Int,
+           val scienceSymbol: ScienceSymbol, val militaryPoints: Int,
            val bonuses: Set<Bonus>
            ) {
     
