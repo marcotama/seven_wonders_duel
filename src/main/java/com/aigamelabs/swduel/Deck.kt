@@ -22,10 +22,11 @@ open class Deck(private val name: String, private val cards: Vector<Card>) {
         }
     }
 
-    fun addCard(first: Card) : Deck {
-        return Deck(
-                name,
-                cards.append(first)
-        )
+    fun add(first: Card) : Deck {
+        return Deck(name, cards.append(first))
+    }
+
+    fun addAll(deck : Deck) : Deck {
+        return Deck(name, cards.appendAll(deck.cards))
     }
 }
