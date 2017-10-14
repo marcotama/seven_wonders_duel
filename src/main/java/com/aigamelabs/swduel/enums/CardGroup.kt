@@ -1,6 +1,6 @@
 package com.aigamelabs.swduel.enums
 
-enum class DeckName {
+enum class CardGroup {
     FIRST_AGE,
     SECOND_AGE,
     THIRD_AGE,
