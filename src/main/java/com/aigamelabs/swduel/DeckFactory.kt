@@ -3,19 +3,19 @@ package com.aigamelabs.swduel
 object DeckFactory {
 
     fun createFirstAgeDeck() : Deck {
-        var firstAgedeck = CardFactory.createFromFirstAge()
+        var firstAgeDeck = Deck("First Age", CardFactory.createFromFirstAge())
 
         repeat(3, {
-            val drawOutcome = firstAgedeck.drawCard().getOrElseThrow({ -> Exception("Problem removing third age cards") })
-            firstAgedeck = drawOutcome.second
+            val drawOutcome = firstAgeDeck.drawCard().getOrElseThrow({ -> Exception("Problem removing third age cards") })
+            firstAgeDeck = drawOutcome.second
         })
 
-        return firstAgedeck
+        return firstAgeDeck
     }
 
 
     fun createSecondAgeDeck() : Deck {
-        var secondAgeDeck = CardFactory.createFromSecondAge()
+        var secondAgeDeck = Deck("Second Age", CardFactory.createFromSecondAge())
 
         repeat(3, {
             val drawOutcome = secondAgeDeck.drawCard().getOrElseThrow({ -> Exception("Problem removing third age cards") })
@@ -27,8 +27,8 @@ object DeckFactory {
 
 
     fun createThirdAgeDeck() : Deck {
-        var thirdAgeDeck = CardFactory.createFromThirdAge()
-        var guildsDeck = CardFactory.createFromGuilds()
+        var thirdAgeDeck = Deck("Third Age", CardFactory.createFromThirdAge())
+        var guildsDeck = Deck("Guilds", CardFactory.createFromGuilds())
 
         repeat(3, {
             val drawOutcome = thirdAgeDeck.drawCard().getOrElseThrow({ -> Exception("Problem removing third age cards") })
@@ -44,7 +44,7 @@ object DeckFactory {
 
 
     fun createWondersDeck() : Deck {
-        var wondersDeck = CardFactory.createFromWonders()
+        var wondersDeck = Deck("Wonders", CardFactory.createFromWonders())
 
         repeat(4, {
             val drawOutcome = wondersDeck.drawCard().getOrElseThrow({ -> Exception("Problem removing third age cards") })
