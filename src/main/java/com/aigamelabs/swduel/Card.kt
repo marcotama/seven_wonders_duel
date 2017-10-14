@@ -3,7 +3,7 @@ package com.aigamelabs.swduel
 import com.aigamelabs.swduel.enums.Formula
 import com.aigamelabs.swduel.enums.*
 
-class Card(val deck: DeckName, val name: String, val color: CardColor,
+class Card(val cardGroup: CardGroup, val name: String, val color: CardColor,
            val resourceCost: Map<Resource, Int>, val coinCost: Int,
            val linkingSymbol: LinkingSymbol, val linksTo: LinkingSymbol,
            val tradingBonuses: Set<Resource>, val resourceProduction: Map<Resource, Int>,
@@ -16,9 +16,9 @@ class Card(val deck: DeckName, val name: String, val color: CardColor,
            ) {
     
     // Constructor for (red) military cards
-    constructor(deck: DeckName, name: String, resourceCost: Map<Resource, Int>, coinCost: Int,
+    constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>, coinCost: Int,
                 linkingSymbol: LinkingSymbol, linksTo: LinkingSymbol, militaryPoints: Int) :
-            this(deck = deck, name = name, color = CardColor.RED,
+            this(cardGroup = cardGroup, name = name, color = CardColor.RED,
                     resourceCost = resourceCost, coinCost = coinCost,
                     linkingSymbol = linkingSymbol, linksTo = linksTo,
                     tradingBonuses = emptySet<Resource>(), resourceProduction = emptyMap<Resource, Int>(),
@@ -31,10 +31,10 @@ class Card(val deck: DeckName, val name: String, val color: CardColor,
             )
 
     // Constructor for (green) science cards
-    constructor(deck: DeckName, name: String, resourceCost: Map<Resource, Int>, coinCost: Int,
+    constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>, coinCost: Int,
                 linkingSymbol: LinkingSymbol, linksTo: LinkingSymbol,
                 victoryPoints: Int, scienceSymbol: ScienceSymbol) :
-            this(deck = deck, name = name, color = CardColor.GREEN,
+            this(cardGroup = cardGroup, name = name, color = CardColor.GREEN,
                     resourceCost = resourceCost, coinCost = coinCost,
                     linkingSymbol = linkingSymbol, linksTo = linksTo,
                     tradingBonuses = emptySet<Resource>(), resourceProduction = emptyMap<Resource, Int>(),
@@ -47,8 +47,8 @@ class Card(val deck: DeckName, val name: String, val color: CardColor,
             )
 
     // Constructor for (brown/gray) resources cards
-    constructor(deck: DeckName, name: String, color: CardColor, coinCost: Int, resourcesProduced: Map<Resource, Int>) :
-            this(deck = deck, name = name, color = color,
+    constructor(cardGroup: CardGroup, name: String, color: CardColor, coinCost: Int, resourcesProduced: Map<Resource, Int>) :
+            this(cardGroup = cardGroup, name = name, color = color,
                     resourceCost = emptyMap<Resource, Int>(), coinCost = coinCost,
                     linkingSymbol = LinkingSymbol.NONE, linksTo = LinkingSymbol.NONE,
                     tradingBonuses = emptySet<Resource>(), resourceProduction = resourcesProduced,
@@ -61,8 +61,8 @@ class Card(val deck: DeckName, val name: String, val color: CardColor,
             )
 
     // Constructor for (golden) trading cards
-    constructor(deck: DeckName, name: String, coinCost: Int, tradingBonuses: Set<Resource>) :
-            this(deck = deck, name = name, color = CardColor.GOLD,
+    constructor(cardGroup: CardGroup, name: String, coinCost: Int, tradingBonuses: Set<Resource>) :
+            this(cardGroup = cardGroup, name = name, color = CardColor.GOLD,
                     resourceCost = emptyMap<Resource, Int>(), coinCost = coinCost,
                     linkingSymbol = LinkingSymbol.NONE, linksTo = LinkingSymbol.NONE,
                     tradingBonuses = tradingBonuses, resourceProduction = emptyMap<Resource, Int>(),
@@ -75,8 +75,8 @@ class Card(val deck: DeckName, val name: String, val color: CardColor,
             )
 
     // Constructor for (golden) coin cards
-    constructor(deck: DeckName, name: String, coinsProduced: Int, linkingSymbol: LinkingSymbol) :
-            this(deck = deck, name = name, color = CardColor.GOLD,
+    constructor(cardGroup: CardGroup, name: String, coinsProduced: Int, linkingSymbol: LinkingSymbol) :
+            this(cardGroup = cardGroup, name = name, color = CardColor.GOLD,
                     resourceCost = emptyMap<Resource, Int>(), coinCost = 0,
                     linkingSymbol = linkingSymbol, linksTo = LinkingSymbol.NONE,
                     tradingBonuses = emptySet<Resource>(), resourceProduction = emptyMap<Resource, Int>(),
@@ -89,9 +89,9 @@ class Card(val deck: DeckName, val name: String, val color: CardColor,
             )
 
     // Constructor for (golden) alternative production cards
-    constructor(deck: DeckName, name: String, resourceCost: Map<Resource, Int>, coinCost: Int,
+    constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>, coinCost: Int,
                 resourceAlternativeProduction: ResourcesAlternative) :
-            this(deck = deck, name = name, color = CardColor.GOLD,
+            this(cardGroup = cardGroup, name = name, color = CardColor.GOLD,
                     resourceCost = resourceCost, coinCost = coinCost,
                     linkingSymbol = LinkingSymbol.NONE, linksTo = LinkingSymbol.NONE,
                     tradingBonuses = emptySet<Resource>(), resourceProduction = emptyMap<Resource, Int>(),
@@ -104,9 +104,9 @@ class Card(val deck: DeckName, val name: String, val color: CardColor,
             )
 
     // Constructor for (golden) bonus cards
-    constructor(deck: DeckName, name: String, resourceCost: Map<Resource, Int>, linksTo: LinkingSymbol,
+    constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>, linksTo: LinkingSymbol,
                 victoryPoints: Int, coinsProduced: Int, coinsProducedFormula: Formula) :
-            this(deck = deck, name = name, color = CardColor.GOLD,
+            this(cardGroup = cardGroup, name = name, color = CardColor.GOLD,
                     resourceCost = resourceCost, coinCost = 0,
                     linkingSymbol = LinkingSymbol.NONE, linksTo = linksTo,
                     tradingBonuses = emptySet<Resource>(), resourceProduction = emptyMap<Resource, Int>(),
@@ -119,10 +119,10 @@ class Card(val deck: DeckName, val name: String, val color: CardColor,
             )
 
     // Constructor for (blue) victory points cards
-    constructor(deck: DeckName, name: String, resourceCost: Map<Resource, Int>,
+    constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>,
                 linkingSymbol: LinkingSymbol, linksTo: LinkingSymbol,
                 victoryPoints: Int) :
-            this(deck = deck, name = name, color = CardColor.GOLD,
+            this(cardGroup = cardGroup, name = name, color = CardColor.GOLD,
                     resourceCost = resourceCost, coinCost = 0,
                     linkingSymbol = linkingSymbol, linksTo = linksTo,
                     tradingBonuses = emptySet<Resource>(), resourceProduction = emptyMap<Resource, Int>(),
@@ -135,10 +135,10 @@ class Card(val deck: DeckName, val name: String, val color: CardColor,
             )
 
     // Constructor for (purple) bonus cards
-    constructor(deck: DeckName, name: String, resourceCost: Map<Resource, Int>,
+    constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>,
                 victoryPoints: Int, victoryPointsFormula: Formula,
                 coinsProduced: Int, coinsProducedFormula: Formula) :
-            this(deck = deck, name = name, color = CardColor.GOLD,
+            this(cardGroup = cardGroup, name = name, color = CardColor.GOLD,
                     resourceCost = resourceCost, coinCost = 0,
                     linkingSymbol = LinkingSymbol.NONE, linksTo = LinkingSymbol.NONE,
                     tradingBonuses = emptySet<Resource>(), resourceProduction = emptyMap<Resource, Int>(),
@@ -151,12 +151,12 @@ class Card(val deck: DeckName, val name: String, val color: CardColor,
             )
 
     // Constructor for (wonder) bonus cards
-    constructor(deck: DeckName, name: String, resourceCost: Map<Resource, Int>,
+    constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>,
                 resourceAlternativeProduction: ResourcesAlternative,
                 coinsProduced: Int, victoryPoints: Int,
                 militaryPoints: Int,
                 bonuses: Set<Bonus>) :
-            this(deck = deck, name = name, color = CardColor.WONDER,
+            this(cardGroup = cardGroup, name = name, color = CardColor.WONDER,
                     resourceCost = resourceCost, coinCost = 0,
                     linkingSymbol = LinkingSymbol.NONE, linksTo = LinkingSymbol.NONE,
                     tradingBonuses = emptySet<Resource>(), resourceProduction = emptyMap<Resource, Int>(),
