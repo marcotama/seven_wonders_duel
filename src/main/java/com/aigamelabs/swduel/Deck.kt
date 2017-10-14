@@ -21,4 +21,11 @@ open class Deck(private val name: String, private val cards: Vector<Card>) {
             Try.failure(Exception("The cardGroup is empty."))
         }
     }
+
+    fun addCard(first: Card) : Deck {
+        return Deck(
+                name,
+                cards.append(first)
+        )
+    }
 }

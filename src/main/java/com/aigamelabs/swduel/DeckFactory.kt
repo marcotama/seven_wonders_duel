@@ -1,6 +1,7 @@
 package com.aigamelabs.swduel
 
 import com.aigamelabs.swduel.enums.*
+import io.vavr.collection.Stream
 import io.vavr.collection.Vector
 
 object DeckFactory {
@@ -123,7 +124,26 @@ object DeckFactory {
         cards_mutable.add(Card(cardGroup = deckName, name = "Lighthouse", resourceCost = mapOf(Resource.CLAY to 2, Resource.GLASS to 1), linksTo = LinkingSymbol.VASE, victoryPoints = 3, coinsProduced = 1, coinsProducedFormula = Formula.PER_GOLD_CARD))
         cards_mutable.add(Card(cardGroup = deckName, name = "Arena", resourceCost = mapOf(Resource.CLAY to 1, Resource.STONE to 1, Resource.WOOD to 1), linksTo = LinkingSymbol.BARREL, victoryPoints = 3, coinsProduced = 2, coinsProducedFormula = Formula.PER_WONDER))
 
-        return Deck("Third Age", Vector.ofAll(cards_mutable))
+        var thirdAgeCards = Deck(":Third Age", Vector.ofAll(cards_mutable))
+        var guildsCards = DeckFactory.createGuildsDeck()
+
+        // Remove 3 cards from the third age
+
+        Stream.of(0, 1, 2
+        ).forEach {
+            val drawOutcome = thirdAgeCards.drawCard().getOrElseThrow({ -> Exception("Problem removing third age cards") })
+            thirdAgeCards = drawOutcome.second
+        }
+
+        // Add 3 guild cards to deck
+
+        Stream.of(0, 1, 2
+        ).forEach {
+            val drawOutcome = guildsCards.drawCard().getOrElseThrow({ -> Exception("Problem removing guildCards age cards")})
+            guildsCards = drawOutcome.second
+            thirdAgeCards = thirdAgeCards.addCard(drawOutcome.first)
+        }
+        return thirdAgeCards
     }
 
 
