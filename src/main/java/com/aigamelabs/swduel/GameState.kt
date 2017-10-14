@@ -1,6 +1,8 @@
 package com.aigamelabs.swduel
 
-import io.vavr.collection.Stream
+import com.aigamelabs.swduel.enums.ProgressToken
+import io.vavr.collection.HashSet
+import java.util.*
 
 class GameState (
         var firstAgeDeck : Deck,
@@ -8,7 +10,9 @@ class GameState (
         var thirdAgeDeck : Deck,
         var wondersDeck : Deck,
         var burnedCardsDeck : Deck,
-        var currentGraph : Graph<Card>?
+        var currentGraph : Graph<Card>?,
+        var progressTokens : HashSet<ProgressToken>,
+        var militaryBoard: MilitaryBoard
 ) {
 
     constructor() : this(
@@ -17,10 +21,17 @@ class GameState (
             DeckFactory.createThirdAgeDeck(),
             DeckFactory.createWondersDeck(),
             Deck("Burned"),
-            null
+            null,
+            HashSet.empty(),
+            MilitaryBoard()
     ) {
+        // Setup graph for first age
         val graphCreationOutcome = GraphFactory.makeFirstAgeGraph(firstAgeDeck)
         currentGraph = graphCreationOutcome.first
         firstAgeDeck = graphCreationOutcome.second
+        // Setup progress tokens
+        val allTokens = ProgressToken.values().toMutableList()
+        Collections.shuffle(allTokens)
+        progressTokens.addAll(allTokens.subList(0, 5))
     }
 }

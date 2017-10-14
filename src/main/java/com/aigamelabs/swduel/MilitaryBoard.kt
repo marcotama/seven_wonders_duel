@@ -7,6 +7,8 @@ data class MilitaryBoard(
         val token1P2Present : Boolean,
         val token2P2Present : Boolean
 ) {
+    constructor() : this(0, true, true, true, true)
+
     fun moveTowardsBy(n : Int) : Pair<Int, MilitaryBoard> {
         val newPosition = militaryTokenPosition - n
         var cost = 0
