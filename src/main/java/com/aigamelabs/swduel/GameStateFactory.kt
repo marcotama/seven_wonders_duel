@@ -1,5 +1,7 @@
 package com.aigamelabs.swduel
 
+import com.aigamelabs.swduel.enums.GamePhase
+import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.swduel.enums.ProgressToken
 import io.vavr.collection.HashSet
 import java.util.Collections
@@ -19,6 +21,14 @@ object GameStateFactory {
         val wondersDeck = DeckFactory.createWondersDeck()
         val burnedCardsDeck = Deck("Burned")
 
+        // Initialise game phase
+
+        val gamePhase = GamePhase.WONDER_SELECTION_SELECT_ONE;
+
+        // Initialise first player
+
+        val playerTurn = PlayerTurn.PLAYER_1
+
         // Setup graph for first age
         val graphCreationOutcome = GraphFactory.makeFirstAgeGraph(firstAgeDeck)
         val currentGraph = graphCreationOutcome.first
@@ -36,6 +46,6 @@ object GameStateFactory {
         player2City = player2City.setOpponentCity(player1City)
 
         return GameState(firstAgeDeck, secondAgeDeck, thirdAgeDeck, wondersDeck, burnedCardsDeck, currentGraph,
-                progressTokens, MilitaryBoard(), player1City, player2City)
+                progressTokens, MilitaryBoard(), player1City, player2City, gamePhase, playerTurn)
     }
 }
