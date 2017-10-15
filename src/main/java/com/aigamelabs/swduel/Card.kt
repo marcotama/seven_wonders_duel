@@ -2,11 +2,12 @@ package com.aigamelabs.swduel
 
 import com.aigamelabs.swduel.enums.Formula
 import com.aigamelabs.swduel.enums.*
+import io.vavr.collection.HashMap
 
 data class Card(val cardGroup: CardGroup, val name: String, val color: CardColor,
-           val resourceCost: Map<Resource, Int>, val coinCost: Int,
+           val resourceCost: HashMap<Resource, Int>, val coinCost: Int,
            val linkingSymbol: LinkingSymbol, val linksTo: LinkingSymbol,
-           val tradingBonuses: Set<Resource>, val resourceProduction: Map<Resource, Int>,
+           val tradingBonuses: Set<Resource>, val resourceProduction: HashMap<Resource, Int>,
            val resourceAlternativeProduction: ResourcesAlternative,
            val victoryPoints: Int, val victoryPointsFormula: Formula,
            val coinsProduced: Int, val coinsProducedFormula: Formula,
@@ -16,12 +17,12 @@ data class Card(val cardGroup: CardGroup, val name: String, val color: CardColor
            ) {
     
     // Constructor for (red) military cards
-    constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>, coinCost: Int,
+    constructor(cardGroup: CardGroup, name: String, resourceCost: HashMap<Resource, Int>, coinCost: Int,
                 linkingSymbol: LinkingSymbol, linksTo: LinkingSymbol, militaryPoints: Int) :
             this(cardGroup = cardGroup, name = name, color = CardColor.RED,
                     resourceCost = resourceCost, coinCost = coinCost,
                     linkingSymbol = linkingSymbol, linksTo = linksTo,
-                    tradingBonuses = emptySet<Resource>(), resourceProduction = emptyMap<Resource, Int>(),
+                    tradingBonuses = emptySet<Resource>(), resourceProduction = HashMap.empty(),
                     resourceAlternativeProduction = ResourcesAlternative.NONE,
                     victoryPoints = 0, victoryPointsFormula = Formula.ABSOLUTE,
                     coinsProduced = 0, coinsProducedFormula = Formula.ABSOLUTE,
@@ -31,13 +32,13 @@ data class Card(val cardGroup: CardGroup, val name: String, val color: CardColor
             )
 
     // Constructor for (green) science cards
-    constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>, coinCost: Int,
+    constructor(cardGroup: CardGroup, name: String, resourceCost: HashMap<Resource, Int>, coinCost: Int,
                 linkingSymbol: LinkingSymbol, linksTo: LinkingSymbol,
                 victoryPoints: Int, scienceSymbol: ScienceSymbol) :
             this(cardGroup = cardGroup, name = name, color = CardColor.GREEN,
                     resourceCost = resourceCost, coinCost = coinCost,
                     linkingSymbol = linkingSymbol, linksTo = linksTo,
-                    tradingBonuses = emptySet<Resource>(), resourceProduction = emptyMap<Resource, Int>(),
+                    tradingBonuses = emptySet<Resource>(), resourceProduction = HashMap.empty(),
                     resourceAlternativeProduction = ResourcesAlternative.NONE,
                     victoryPoints = victoryPoints, victoryPointsFormula = Formula.ABSOLUTE,
                     coinsProduced = 0, coinsProducedFormula = Formula.ABSOLUTE,
@@ -47,9 +48,9 @@ data class Card(val cardGroup: CardGroup, val name: String, val color: CardColor
             )
 
     // Constructor for (brown/gray) resources cards
-    constructor(cardGroup: CardGroup, name: String, color: CardColor, coinCost: Int, resourcesProduced: Map<Resource, Int>) :
+    constructor(cardGroup: CardGroup, name: String, color: CardColor, coinCost: Int, resourcesProduced: HashMap<Resource, Int>) :
             this(cardGroup = cardGroup, name = name, color = color,
-                    resourceCost = emptyMap<Resource, Int>(), coinCost = coinCost,
+                    resourceCost = HashMap.empty(), coinCost = coinCost,
                     linkingSymbol = LinkingSymbol.NONE, linksTo = LinkingSymbol.NONE,
                     tradingBonuses = emptySet<Resource>(), resourceProduction = resourcesProduced,
                     resourceAlternativeProduction = ResourcesAlternative.NONE,
@@ -63,9 +64,9 @@ data class Card(val cardGroup: CardGroup, val name: String, val color: CardColor
     // Constructor for (golden) trading cards
     constructor(cardGroup: CardGroup, name: String, coinCost: Int, tradingBonuses: Set<Resource>) :
             this(cardGroup = cardGroup, name = name, color = CardColor.GOLD,
-                    resourceCost = emptyMap<Resource, Int>(), coinCost = coinCost,
+                    resourceCost = HashMap.empty(), coinCost = coinCost,
                     linkingSymbol = LinkingSymbol.NONE, linksTo = LinkingSymbol.NONE,
-                    tradingBonuses = tradingBonuses, resourceProduction = emptyMap<Resource, Int>(),
+                    tradingBonuses = tradingBonuses, resourceProduction = HashMap.empty(),
                     resourceAlternativeProduction = ResourcesAlternative.NONE,
                     victoryPoints = 0, victoryPointsFormula = Formula.ABSOLUTE,
                     coinsProduced = 0, coinsProducedFormula = Formula.ABSOLUTE,
@@ -77,9 +78,9 @@ data class Card(val cardGroup: CardGroup, val name: String, val color: CardColor
     // Constructor for (golden) coin cards
     constructor(cardGroup: CardGroup, name: String, coinsProduced: Int, linkingSymbol: LinkingSymbol) :
             this(cardGroup = cardGroup, name = name, color = CardColor.GOLD,
-                    resourceCost = emptyMap<Resource, Int>(), coinCost = 0,
+                    resourceCost = HashMap.empty(), coinCost = 0,
                     linkingSymbol = linkingSymbol, linksTo = LinkingSymbol.NONE,
-                    tradingBonuses = emptySet<Resource>(), resourceProduction = emptyMap<Resource, Int>(),
+                    tradingBonuses = emptySet<Resource>(), resourceProduction = HashMap.empty(),
                     resourceAlternativeProduction = ResourcesAlternative.NONE,
                     victoryPoints = 0, victoryPointsFormula = Formula.ABSOLUTE,
                     coinsProduced = coinsProduced, coinsProducedFormula = Formula.ABSOLUTE,
@@ -89,12 +90,12 @@ data class Card(val cardGroup: CardGroup, val name: String, val color: CardColor
             )
 
     // Constructor for (golden) alternative production cards
-    constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>, coinCost: Int,
+    constructor(cardGroup: CardGroup, name: String, resourceCost: HashMap<Resource, Int>, coinCost: Int,
                 resourceAlternativeProduction: ResourcesAlternative) :
             this(cardGroup = cardGroup, name = name, color = CardColor.GOLD,
                     resourceCost = resourceCost, coinCost = coinCost,
                     linkingSymbol = LinkingSymbol.NONE, linksTo = LinkingSymbol.NONE,
-                    tradingBonuses = emptySet<Resource>(), resourceProduction = emptyMap<Resource, Int>(),
+                    tradingBonuses = emptySet<Resource>(), resourceProduction = HashMap.empty(),
                     resourceAlternativeProduction = resourceAlternativeProduction,
                     victoryPoints = 0, victoryPointsFormula = Formula.ABSOLUTE,
                     coinsProduced = 0, coinsProducedFormula = Formula.ABSOLUTE,
@@ -104,12 +105,12 @@ data class Card(val cardGroup: CardGroup, val name: String, val color: CardColor
             )
 
     // Constructor for (golden) bonus cards
-    constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>, linksTo: LinkingSymbol,
+    constructor(cardGroup: CardGroup, name: String, resourceCost: HashMap<Resource, Int>, linksTo: LinkingSymbol,
                 victoryPoints: Int, coinsProduced: Int, coinsProducedFormula: Formula) :
             this(cardGroup = cardGroup, name = name, color = CardColor.GOLD,
                     resourceCost = resourceCost, coinCost = 0,
                     linkingSymbol = LinkingSymbol.NONE, linksTo = linksTo,
-                    tradingBonuses = emptySet<Resource>(), resourceProduction = emptyMap<Resource, Int>(),
+                    tradingBonuses = emptySet<Resource>(), resourceProduction = HashMap.empty(),
                     resourceAlternativeProduction = ResourcesAlternative.NONE,
                     victoryPoints = victoryPoints, victoryPointsFormula = Formula.ABSOLUTE,
                     coinsProduced = coinsProduced, coinsProducedFormula = coinsProducedFormula,
@@ -119,13 +120,13 @@ data class Card(val cardGroup: CardGroup, val name: String, val color: CardColor
             )
 
     // Constructor for (blue) victory points cards
-    constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>,
+    constructor(cardGroup: CardGroup, name: String, resourceCost: HashMap<Resource, Int>,
                 linkingSymbol: LinkingSymbol, linksTo: LinkingSymbol,
                 victoryPoints: Int) :
             this(cardGroup = cardGroup, name = name, color = CardColor.GOLD,
                     resourceCost = resourceCost, coinCost = 0,
                     linkingSymbol = linkingSymbol, linksTo = linksTo,
-                    tradingBonuses = emptySet<Resource>(), resourceProduction = emptyMap<Resource, Int>(),
+                    tradingBonuses = emptySet<Resource>(), resourceProduction = HashMap.empty(),
                     resourceAlternativeProduction = ResourcesAlternative.NONE,
                     victoryPoints = victoryPoints, victoryPointsFormula = Formula.ABSOLUTE,
                     coinsProduced = 0, coinsProducedFormula = Formula.ABSOLUTE,
@@ -135,13 +136,13 @@ data class Card(val cardGroup: CardGroup, val name: String, val color: CardColor
             )
 
     // Constructor for (purple) bonus cards
-    constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>,
+    constructor(cardGroup: CardGroup, name: String, resourceCost: HashMap<Resource, Int>,
                 victoryPoints: Int, victoryPointsFormula: Formula,
                 coinsProduced: Int, coinsProducedFormula: Formula) :
             this(cardGroup = cardGroup, name = name, color = CardColor.GOLD,
                     resourceCost = resourceCost, coinCost = 0,
                     linkingSymbol = LinkingSymbol.NONE, linksTo = LinkingSymbol.NONE,
-                    tradingBonuses = emptySet<Resource>(), resourceProduction = emptyMap<Resource, Int>(),
+                    tradingBonuses = emptySet<Resource>(), resourceProduction = HashMap.empty(),
                     resourceAlternativeProduction = ResourcesAlternative.NONE,
                     victoryPoints = victoryPoints, victoryPointsFormula = victoryPointsFormula,
                     coinsProduced = coinsProduced, coinsProducedFormula = coinsProducedFormula,
@@ -151,7 +152,7 @@ data class Card(val cardGroup: CardGroup, val name: String, val color: CardColor
             )
 
     // Constructor for (wonder) bonus cards
-    constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>,
+    constructor(cardGroup: CardGroup, name: String, resourceCost: HashMap<Resource, Int>,
                 resourceAlternativeProduction: ResourcesAlternative,
                 coinsProduced: Int, victoryPoints: Int,
                 militaryPoints: Int,
@@ -159,7 +160,7 @@ data class Card(val cardGroup: CardGroup, val name: String, val color: CardColor
             this(cardGroup = cardGroup, name = name, color = CardColor.WONDER,
                     resourceCost = resourceCost, coinCost = 0,
                     linkingSymbol = LinkingSymbol.NONE, linksTo = LinkingSymbol.NONE,
-                    tradingBonuses = emptySet<Resource>(), resourceProduction = emptyMap<Resource, Int>(),
+                    tradingBonuses = emptySet<Resource>(), resourceProduction = HashMap.empty(),
                     resourceAlternativeProduction = resourceAlternativeProduction,
                     victoryPoints = victoryPoints, victoryPointsFormula = Formula.ABSOLUTE,
                     coinsProduced = coinsProduced, coinsProducedFormula = Formula.ABSOLUTE,
