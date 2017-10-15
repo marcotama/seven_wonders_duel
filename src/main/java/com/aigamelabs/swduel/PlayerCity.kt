@@ -7,8 +7,15 @@ import io.vavr.collection.HashMap
 import io.vavr.collection.Stream
 import io.vavr.collection.Vector
 
-data class PlayerCity(val name : String, val coins : Int, val buildings : HashSet<Card>, val wonders : HashSet<Card>,
-                      val wondersDeck : Deck, val opponentCity : PlayerCity?) {
+data class PlayerCity(
+        val name : String,
+        val coins : Int,
+        val buildings : HashSet<Card>,
+        val wonders : HashSet<Card>,
+        val wondersDeck : Deck,
+        val opponentCity : PlayerCity?
+) {
+
     constructor(name : String) : this(name, 7, HashSet.empty(), HashSet.empty(), Deck("Wonders deck of " + name), null)
 
     fun setOpponentCity(oppCity : PlayerCity) : PlayerCity{
