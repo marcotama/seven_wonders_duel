@@ -30,7 +30,7 @@ data class GameState (
         return GameState(firstAgeDeck,secondAgeDeck,thirdAgeDeck,wondersDeck,burnedCardsDeck,currentGraph,progressTokens,militaryBoard,playerCities,gamePhase,decisionQueue.enqueue(decision))
     }
 
-    fun dequeueDecision () : Pair<Decision,GameState> {
+    fun dequeDecision() : Pair<Decision,GameState> {
         val dequeueOutcome = decisionQueue.dequeue()
         val decision = dequeueOutcome._1
         val newQueue = dequeueOutcome._2

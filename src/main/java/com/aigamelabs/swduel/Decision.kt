@@ -17,4 +17,5 @@ import io.vavr.collection.Vector
  * The `process` method also takes care of adding new decisions to the queue, if any.
  * Loop back and repeat.
  */
-data class Decision(val player: PlayerTurn, val options: Vector<Action>)
+data class Decision(val player: PlayerTurn, val options: Vector<Action>, val isMainTurn : Boolean)
+

@@ -6,6 +6,16 @@ import com.aigamelabs.swduel.GameStateFactory
 
 class Build(val card : Card) : Action() {
     override fun process(gameState: GameState) : GameState {
-        return GameStateFactory.createNewGameState() // TODO
+
+        //Draw card from appropriate deck
+
+        //Add card to appropriate player city
+
+        //Change the players turn
+
+        //Add change player turn to process to query vector
+
+
+        return GameStateFactory.createNewGameState() //TODO
     }
 }

@@ -7,7 +7,7 @@ class Game(private val players : HashMap<PlayerTurn,Player>) {
         var gameState = startingGameState
         while (!gameState.decisionQueue.isEmpty) {
             // Deque decision
-            val dequeOutcome = gameState.dequeueDecision() // TODO rename to deque
+            val dequeOutcome = gameState.dequeDecision() // TODO rename to deque
             val nextDecision = dequeOutcome.first
             gameState = dequeOutcome.second
 
