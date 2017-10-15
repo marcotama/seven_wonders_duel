@@ -2,7 +2,7 @@ package com.aigamelabs.swduel
 
 import com.aigamelabs.swduel.enums.ProgressToken
 import io.vavr.collection.HashSet
-import java.util.*
+import java.util.Collections
 
 object GameStateFactory {
 
