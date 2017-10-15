@@ -9,7 +9,7 @@ data class Graph<T>(private val vertices: Vector<T?>, private val adjMatrix : Ve
             this(Vector.fill(numVertices, {null}), Vector.fill(numVertices * numVertices, {false}))
 
 
-    fun setElement(i: Int, e: T?) : Graph<T> {
+    fun setVertex(i: Int, e: T?) : Graph<T> {
         return if (vertices[i] == e) {
             this
         }
