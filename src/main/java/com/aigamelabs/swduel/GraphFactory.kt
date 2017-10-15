@@ -14,7 +14,7 @@ object GraphFactory {
 
         // Set vertices
         vertices.forEach {
-            val drawOutcome = deck.drawCard().getOrElseThrow({ -> Exception("Deck did not have enough cards")})
+            val drawOutcome = deck.drawCard()!!
             deck = drawOutcome.second
             graph = graph.setVertex(0, drawOutcome.first)
         }

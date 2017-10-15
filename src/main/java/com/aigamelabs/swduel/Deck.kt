@@ -2,23 +2,49 @@ package com.aigamelabs.swduel
 
 import java.util.concurrent.ThreadLocalRandom
 
-import com.aigamelabs.swduel.enums.CardGroup
 import io.vavr.collection.Vector
-import io.vavr.control.Try
+import java.util.*
 
 data class Deck(private val name: String, private val cards: Vector<Card>) {
 
     constructor(name: String) : this(name, Vector.empty())
 
-    fun drawCard() : Try<Pair<Card, Deck>> {
+    fun update(
+            name_ : String? = null,
+            cards_ : Vector<Card>? = null
+    ) : Deck {
+        return Deck(
+                name_ ?: name,
+                cards_ ?: cards
+        )
+    }
+
+    fun removeCard(card : Card) : Deck {
+        return update(cards_ = cards.remove(card))
+    }
+
+    fun drawCard() : Pair<Card, Deck>? {
         return if (cards.size() > 0) {
             val card_index = ThreadLocalRandom.current().nextInt(0, cards.size() + 1)
             val drawnCard = cards[card_index]
-            val newDeck = Deck(name, cards.removeAt(card_index))
-            Try.success(Pair(drawnCard, newDeck))
+            val newDeck = update(cards_ = cards.removeAt(card_index))
+            Pair(drawnCard, newDeck)
         }
         else {
-            Try.failure(Exception("The cardGroup is empty."))
+            null
+        }
+    }
+
+    fun drawCards(n : Int = 1) : Pair<Vector<Card>, Deck>? {
+        return if (cards.size() >= n) {
+            val indices = (0..n).toMutableList()
+            Collections.shuffle(indices)
+            val drawnCards = indices.subList(0, n).map { i -> cards[indices[i]] }
+            val newDeck = update(cards_ = cards.filter { card -> drawnCards.contains(card) } )
+            Pair(Vector.ofAll(drawnCards), newDeck)
+        }
+        else {
+            null
         }
     }
 

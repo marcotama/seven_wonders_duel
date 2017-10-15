@@ -1,9 +1,11 @@
 package com.aigamelabs.swduel
 
-import com.aigamelabs.swduel.enums.GamePhase
+import com.aigamelabs.swduel.enums.GameDeck
 import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.swduel.enums.ProgressToken
 import io.vavr.collection.HashSet
+import io.vavr.collection.HashMap
+import io.vavr.collection.Queue
 import java.util.Collections
 
 object GameStateFactory {
@@ -14,25 +16,24 @@ object GameStateFactory {
 
     fun createNewGameState(p1Name : String, p2Name : String) : GameState {
 
-        // Initialize decks
-        var firstAgeDeck = DeckFactory.createFirstAgeDeck()
-        val secondAgeDeck = DeckFactory.createSecondAgeDeck()
-        val thirdAgeDeck = DeckFactory.createThirdAgeDeck()
-        val wondersDeck = DeckFactory.createWondersDeck()
-        val burnedCardsDeck = Deck("Burned")
-
-        // Initialise game phase
-
-        val gamePhase = GamePhase.WONDER_SELECTION_SELECT_ONE;
-
-        // Initialise first player
-
-        val playerTurn = PlayerTurn.PLAYER_1
+        // Initialize 2 groups of 4 wonders each
+        val draw4outcome1 = DeckFactory.createWondersDeck().drawCards(4)!!
+        val draw4outcome2 = draw4outcome1.second.drawCards(4)!!
 
         // Setup graph for first age
-        val graphCreationOutcome = GraphFactory.makeFirstAgeGraph(firstAgeDeck)
+        val graphCreationOutcome = GraphFactory.makeFirstAgeGraph(DeckFactory.createFirstAgeDeck())
         val currentGraph = graphCreationOutcome.first
-        firstAgeDeck = graphCreationOutcome.second
+        val firstAgeDeck = graphCreationOutcome.second
+
+        // Initialize decks
+        val decks : HashMap<GameDeck, Deck> = HashMap.of(
+                GameDeck.FIRST_AGE, firstAgeDeck,
+                GameDeck.SECOND_AGE, DeckFactory.createSecondAgeDeck(),
+                GameDeck.THIRD_AGE, DeckFactory.createThirdAgeDeck(),
+                GameDeck.WONDERS_1, Deck("Wonders of P1", draw4outcome1.first),
+                GameDeck.WONDERS_2, Deck("Wonders of P2", draw4outcome2.first),
+                GameDeck.BURNED, Deck("Burned")
+        )
 
         // Setup progress tokens
         val allTokens = ProgressToken.values().toMutableList()
@@ -44,8 +45,14 @@ object GameStateFactory {
         var player2City = PlayerCity(p2Name)
         player1City = player1City.setOpponentCity(player2City)
         player2City = player2City.setOpponentCity(player1City)
+        val playerCities = HashMap.of<PlayerTurn, PlayerCity>(
+                PlayerTurn.PLAYER_1, player1City,
+                PlayerTurn.PLAYER_2, player2City
+        )
 
-        return GameState(firstAgeDeck, secondAgeDeck, thirdAgeDeck, wondersDeck, burnedCardsDeck, currentGraph,
-                progressTokens, MilitaryBoard(), player1City, player2City, gamePhase, playerTurn)
+        val decisionQueue = Queue.empty<Decision>().enqueue(DecisionFactory.makeMainTurnDecision(PlayerTurn.PLAYER_1))
+
+        return GameState(GameDeck.FIRST_AGE, decks, currentGraph,
+                progressTokens, MilitaryBoard(), playerCities, decisionQueue)
     }
 }

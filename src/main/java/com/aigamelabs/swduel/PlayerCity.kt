@@ -1,11 +1,7 @@
 package com.aigamelabs.swduel
 
-import com.aigamelabs.swduel.enums.Resource
-import com.aigamelabs.swduel.enums.ResourcesAlternative
-import io.vavr.collection.HashSet
-import io.vavr.collection.HashMap
-import io.vavr.collection.Stream
-import io.vavr.collection.Vector
+import com.aigamelabs.swduel.enums.*
+import io.vavr.collection.*
 
 data class PlayerCity(
         val name : String,
@@ -17,6 +13,24 @@ data class PlayerCity(
 ) {
 
     constructor(name : String) : this(name, 7, HashSet.empty(), HashSet.empty(), Deck("Wonders deck of " + name), null)
+
+    fun update(
+            name_ : String? = null,
+            coins_ : Int? = null,
+            buildings_ : HashSet<Card>? = null,
+            wonders_ : HashSet<Card>? = null,
+            wondersDeck_ : Deck? = null,
+            opponentCity_ : PlayerCity? = null
+    ) : PlayerCity {
+        return PlayerCity(
+                name_ ?: name,
+                coins_ ?: coins,
+                buildings_ ?: buildings,
+                wonders_ ?: wonders,
+                wondersDeck_ ?: wondersDeck,
+                opponentCity_ ?: opponentCity
+        )
+    }
 
     fun setOpponentCity(oppCity : PlayerCity) : PlayerCity{
         return PlayerCity(name, coins, buildings, wonders, wondersDeck, oppCity)

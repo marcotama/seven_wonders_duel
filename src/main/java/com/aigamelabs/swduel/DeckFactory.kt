@@ -4,11 +4,8 @@ object DeckFactory {
 
     fun createFirstAgeDeck() : Deck {
         var firstAgeDeck = Deck("First Age", CardFactory.createFromFirstAge())
-
-        repeat(3, {
-            val drawOutcome = firstAgeDeck.drawCard().getOrElseThrow({ -> Exception("Problem removing third age cards") })
-            firstAgeDeck = drawOutcome.second
-        })
+        val drawOutcome = firstAgeDeck.drawCards(3)!!
+        firstAgeDeck = drawOutcome.second
 
         return firstAgeDeck
     }
@@ -16,11 +13,8 @@ object DeckFactory {
 
     fun createSecondAgeDeck() : Deck {
         var secondAgeDeck = Deck("Second Age", CardFactory.createFromSecondAge())
-
-        repeat(3, {
-            val drawOutcome = secondAgeDeck.drawCard().getOrElseThrow({ -> Exception("Problem removing third age cards") })
-            secondAgeDeck = drawOutcome.second
-        })
+        val drawOutcome = secondAgeDeck.drawCards(3)!!
+        secondAgeDeck = drawOutcome.second
 
         return secondAgeDeck
     }
@@ -28,16 +22,12 @@ object DeckFactory {
 
     fun createThirdAgeDeck() : Deck {
         var thirdAgeDeck = Deck("Third Age", CardFactory.createFromThirdAge())
-        var guildsDeck = Deck("Guilds", CardFactory.createFromGuilds())
+        val draw1Outcome = thirdAgeDeck.drawCards(3)!!
+        thirdAgeDeck = draw1Outcome.second
 
-        repeat(3, {
-            val drawOutcome = thirdAgeDeck.drawCard().getOrElseThrow({ -> Exception("Problem removing third age cards") })
-            thirdAgeDeck = drawOutcome.second
-        })
-        repeat(3, {
-            val drawOutcome = guildsDeck.drawCard().getOrElseThrow({ -> Exception("Problem removing guild cards") })
-            guildsDeck = drawOutcome.second
-        })
+        var guildsDeck = Deck("Guilds", CardFactory.createFromGuilds())
+        val draw2Outcome = guildsDeck.drawCards(3)!!
+        guildsDeck = draw2Outcome.second
 
         return thirdAgeDeck.addAll(guildsDeck)
     }
@@ -45,11 +35,8 @@ object DeckFactory {
 
     fun createWondersDeck() : Deck {
         var wondersDeck = Deck("Wonders", CardFactory.createFromWonders())
-
-        repeat(4, {
-            val drawOutcome = wondersDeck.drawCard().getOrElseThrow({ -> Exception("Problem removing third age cards") })
-            wondersDeck = drawOutcome.second
-        })
+        val drawOutcome = wondersDeck.drawCards(4)!!
+        wondersDeck = drawOutcome.second
 
         return wondersDeck
     }
