@@ -16,7 +16,7 @@ object GraphFactory {
         vertices.forEach {
             val drawOutcome = deck.drawCard().getOrElseThrow({ -> Exception("Deck did not have enough cards")})
             deck = drawOutcome.second
-            graph = graph.setElement(0, drawOutcome.first)
+            graph = graph.setVertex(0, drawOutcome.first)
         }
 
         return Pair(graph, deck)
