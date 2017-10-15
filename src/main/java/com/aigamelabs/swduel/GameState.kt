@@ -4,6 +4,7 @@ import com.aigamelabs.swduel.enums.GamePhase
 import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.swduel.enums.ProgressToken
 import io.vavr.collection.HashSet
+import io.vavr.collection.Queue
 
 data class GameState (
         val firstAgeDeck : Deck,
@@ -14,8 +15,32 @@ data class GameState (
         val currentGraph : Graph<Card>?,
         val progressTokens : HashSet<ProgressToken>,
         val militaryBoard: MilitaryBoard,
-        val player1City : PlayerCity,
-        val player2City : PlayerCity,
+        val playerCities : HashMap<PlayerTurn,PlayerCity>,
         val gamePhase: GamePhase,
-        val playerTurn: PlayerTurn
+        val decisionQueue: Queue<Decision>
 )
+
+{
+//    fun drawCard (card: Card) : GameState {
+//
+//
+//    }
+
+    fun enqueueDecision (decision: Decision) : GameState {
+        return GameState(firstAgeDeck,secondAgeDeck,thirdAgeDeck,wondersDeck,burnedCardsDeck,currentGraph,progressTokens,militaryBoard,playerCities,gamePhase,decisionQueue.enqueue(decision))
+    }
+
+    fun dequeueDecision () : Pair<Decision,GameState> {
+        val dequeueOutcome = decisionQueue.dequeue()
+        val decision = dequeueOutcome._1
+        val newQueue = dequeueOutcome._2
+        val newGameState = GameState(firstAgeDeck,secondAgeDeck,thirdAgeDeck,wondersDeck,burnedCardsDeck,currentGraph,progressTokens,militaryBoard,playerCities,gamePhase,newQueue)
+        return Pair(decision, newGameState)
+
+    }
+
+
+
+
+
+}
