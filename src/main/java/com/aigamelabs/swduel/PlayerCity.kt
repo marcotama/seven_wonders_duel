@@ -65,6 +65,13 @@ data class PlayerCity(
 
     }
 
+    fun buildWonder (card: Card) {
+        wondersDeck.removeCard(card)
+        wonders.add(card)
+    }
+
+
+
     /**
      * Calculates the production of a given resource from brown/gray cards.
      */

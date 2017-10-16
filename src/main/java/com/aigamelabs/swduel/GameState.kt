@@ -6,6 +6,9 @@ import com.aigamelabs.swduel.enums.ProgressToken
 import io.vavr.collection.HashSet
 import io.vavr.collection.HashMap
 import io.vavr.collection.Queue
+import io.vavr.collection.Vector
+import com.aigamelabs.swduel.actions.Action
+import io.vavr.control.Option
 
 data class GameState (
         val activeDeck : GameDeck,
@@ -71,9 +74,5 @@ data class GameState (
     //Add Choose wonder to build action
 
     //Add card to appropriate player city
-
-
-
-
 
 }
