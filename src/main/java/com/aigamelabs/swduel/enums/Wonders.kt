@@ -1,0 +1,17 @@
+package com.aigamelabs.swduel.enums
+
+enum class Wonders {
+    THE_GREAT_LIBRARY,
+    THE_HANGING_GARDENS,
+    THE_MAUSOLEUM,
+    THE_COLOSSUS,
+    THE_GREAT_LIGHTHOUSE,
+    CIRCUS_MAXIMUS,
+    THE_STATUE_OF_ZEUS,
+    THE_TEMPLE_OF_ARTEMIS,
+    THE_APPIAN_WAY,
+    THE_SPHINX,
+    THE_PYRAMIDS,
+    PIRAEUS,
+    NONE
+}

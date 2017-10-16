@@ -2,6 +2,7 @@ package com.aigamelabs.swduel
 
 import com.aigamelabs.swduel.enums.Formula
 import com.aigamelabs.swduel.enums.*
+import com.aigamelabs.swduel.enums.Wonders.NONE
 import io.vavr.collection.HashMap
 import io.vavr.collection.HashSet
 
@@ -23,7 +24,8 @@ data class Card(
         val referenceCity: CityForFormula = CityForFormula.NOT_APPLICABLE,
         val scienceSymbol: ScienceSymbol = ScienceSymbol.NONE,
         val militaryPoints: Int = 0,
-        val bonuses: Set<Bonus> = emptySet()
+        val bonuses: Set<Bonus> = emptySet(),
+        val wonders: Wonders = NONE
 ) {
     
     // Constructor for (red) military cards
@@ -112,7 +114,7 @@ data class Card(
                 resourceAlternativeProduction: ResourcesAlternative,
                 coinsProduced: Int, victoryPoints: Int,
                 militaryPoints: Int,
-                bonuses: Set<Bonus>) :
+                bonuses: Set<Bonus>, wonders: Wonders) :
             this(cardGroup = cardGroup, name = name, color = CardColor.WONDER,
                     resourceCost = HashMap.ofAll(resourceCost),
                     resourceAlternativeProduction = resourceAlternativeProduction,
@@ -120,6 +122,7 @@ data class Card(
                     coinsProduced = coinsProduced,
                     referenceCity = CityForFormula.CITY_WITH_MOST_UNITS,
                     militaryPoints = militaryPoints,
-                    bonuses = bonuses
+                    bonuses = bonuses,
+                    wonders = Wonders.NONE
             )
 }
