@@ -26,7 +26,7 @@ object DeckFactory {
         thirdAgeDeck = draw1Outcome.second
 
         var guildsDeck = Deck("Guilds", CardFactory.createFromGuilds())
-        val draw2Outcome = guildsDeck.drawCards(3)!!
+        val draw2Outcome = guildsDeck.drawCards(4)!!
         guildsDeck = draw2Outcome.second
 
         return thirdAgeDeck.addAll(guildsDeck)
@@ -39,5 +39,10 @@ object DeckFactory {
         wondersDeck = drawOutcome.second
 
         return wondersDeck
+    }
+
+    fun createScienceTokenDeck () : Deck {
+        var scienceTokenDeck = Deck("Science Tokens", CardFactory.createFromScience())
+        return scienceTokenDeck
     }
 }

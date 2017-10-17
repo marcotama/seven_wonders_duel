@@ -10,5 +10,6 @@ enum class CardGroup {
     SECOND_AGE,
     THIRD_AGE,
     GUILDS,
-    WONDERS
+    WONDERS,
+    SCIENCE
 }

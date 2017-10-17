@@ -1,24 +1,29 @@
 package com.aigamelabs.swduel
 
 import com.aigamelabs.swduel.enums.*
-import io.vavr.collection.*
+import io.vavr.collection.Vector
+import io.vavr.collection.HashMap
+import io.vavr.collection.HashSet
+import io.vavr.collection.Stream
 
 data class PlayerCity(
         val name : String,
         val coins : Int,
         val buildings : HashSet<Card>,
         val wonders : HashSet<Card>,
+        val scienceTokens: HashSet<Card>,
         val wondersDeck : Deck,
         val opponentCity : PlayerCity?
 ) {
 
-    constructor(name : String) : this(name, 7, HashSet.empty(), HashSet.empty(), Deck("Wonders deck of " + name), null)
+    constructor(name : String) : this(name, 7, HashSet.empty(), HashSet.empty(), HashSet.empty(), Deck("Wonders deck of " + name), null)
 
     fun update(
             name_ : String? = null,
             coins_ : Int? = null,
             buildings_ : HashSet<Card>? = null,
             wonders_ : HashSet<Card>? = null,
+            scienceTokens_ : HashSet<Card>? = null,
             wondersDeck_ : Deck? = null,
             opponentCity_ : PlayerCity? = null
     ) : PlayerCity {
@@ -27,13 +32,14 @@ data class PlayerCity(
                 coins_ ?: coins,
                 buildings_ ?: buildings,
                 wonders_ ?: wonders,
+                scienceTokens_ ?: scienceTokens,
                 wondersDeck_ ?: wondersDeck,
                 opponentCity_ ?: opponentCity
         )
     }
 
     fun setOpponentCity(oppCity : PlayerCity) : PlayerCity{
-        return PlayerCity(name, coins, buildings, wonders, wondersDeck, oppCity)
+        return PlayerCity(name, coins, buildings, wonders, scienceTokens, wondersDeck, oppCity)
     }
 
     /**
@@ -64,13 +70,6 @@ data class PlayerCity(
         return if (minCost >= coins) null else minCost
 
     }
-
-    fun buildWonder (card: Card) {
-        wondersDeck.removeCard(card)
-        wonders.add(card)
-    }
-
-
 
     /**
      * Calculates the production of a given resource from brown/gray cards.

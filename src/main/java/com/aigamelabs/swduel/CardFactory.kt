@@ -159,4 +159,21 @@ object CardFactory {
             Card(cardGroup = deckName, name = "Piraeus", resourceCost = hashMapOf(Resource.WOOD to 2, Resource.STONE to 1, Resource.CLAY to 1), resourceAlternativeProduction = ResourcesAlternative.GLASS_OR_PAPER, coinsProduced = 0, victoryPoints = 2, militaryPoints = 0, bonuses = setOf(Bonus.EXTRA_TURN), wonders = Wonders.PIRAEUS)
         )
     }
+
+    fun createFromScience() : Vector<Card> {
+        val deckName = CardGroup.SCIENCE
+        return Vector.of(
+             Card(cardGroup = deckName, name = "Economy", enhancement = Enhancement.ECONOMY),
+             Card(cardGroup = deckName, name = "Agriculture", coinsProduced = 6, victoryPoints = 4, enhancement = Enhancement.NONE),
+             Card(cardGroup = deckName, name = "Urbanism", coinsProduced = 6, enhancement = Enhancement.URBANISM),
+             Card(cardGroup = deckName, name = "Philosophy", victoryPoints = 7, enhancement = Enhancement.NONE),
+             Card(cardGroup = deckName, name = "Strategy", enhancement = Enhancement.STRATEGY),
+             Card(cardGroup = deckName, name = "Architecture", enhancement = Enhancement.ARCHITECTURE),
+             Card(cardGroup = deckName, name = "Mathematics", enhancement = Enhancement.MATHEMATICS),
+             Card(cardGroup = deckName, name = "Masonry", enhancement = Enhancement.MASONRY),
+             Card(cardGroup = deckName, name = "Law", enhancement = Enhancement.LAW),
+             Card(cardGroup = deckName, name = "Theology", enhancement = Enhancement.THEOLOGY)
+        )
+    }
+
 }

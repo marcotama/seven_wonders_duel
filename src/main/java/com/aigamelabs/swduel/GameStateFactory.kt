@@ -20,6 +20,12 @@ object GameStateFactory {
         val draw4outcome1 = DeckFactory.createWondersDeck().drawCards(4)!!
         val draw4outcome2 = draw4outcome1.second.drawCards(4)!!
 
+
+        // Initialise the 2 Science token decks
+        val scienceTokensDraw = DeckFactory.createScienceTokenDeck().drawCards(5)!!
+        val activeScienceDeck = Deck("Active Science Tokens", scienceTokensDraw.first)
+        val unusedScienceDeck = scienceTokensDraw.second.update("Unused Science Tokens")
+
         // Setup graph for first age
         val graphCreationOutcome = GraphFactory.makeFirstAgeGraph(DeckFactory.createFirstAgeDeck())
         val currentGraph = graphCreationOutcome.first
@@ -32,7 +38,9 @@ object GameStateFactory {
                 GameDeck.THIRD_AGE, DeckFactory.createThirdAgeDeck(),
                 GameDeck.WONDERS_1, Deck("Wonders of P1", draw4outcome1.first),
                 GameDeck.WONDERS_2, Deck("Wonders of P2", draw4outcome2.first),
-                GameDeck.BURNED, Deck("Burned")
+                GameDeck.BURNED, Deck("Burned"),
+                GameDeck.ACTIVE_SCIENCE_TOKENS, activeScienceDeck,
+                GameDeck.UNUSED_SCIENCE_TOKENS, unusedScienceDeck
         )
 
         // Setup progress tokens

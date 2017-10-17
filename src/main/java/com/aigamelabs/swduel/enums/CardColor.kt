@@ -9,5 +9,5 @@ enum class CardColor {
     PURPLE,
     RED,
     WONDER,
-    PROGRESSTOKEN
+    PROGRESS_TOKEN
 }

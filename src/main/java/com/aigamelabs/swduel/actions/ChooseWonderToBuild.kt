@@ -17,7 +17,8 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(play
         val playerCity =  gameState.playerCities.get(playerTurn)
                 .getOrElseThrow { -> Exception("The player  does not have a city") }
         val newWondersDeck = playerCity.wondersDeck.removeCard(card)
-        val newWonders = playerCity.wonders.add(card)
+        val newWonders = playerCity.wonders
+        newWonders.add(card)
         val newPlayerCity = playerCity.update(wonders_ = newWonders, wondersDeck_ = newWondersDeck)
         val newPlayerCities = gameState.playerCities.put(playerTurn, newPlayerCity)
 
@@ -28,8 +29,9 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(play
     fun processWonders(gameState: GameState): GameState {
         when (card.wonders) {
             Wonders.THE_GREAT_LIBRARY -> {
-                val newdecisionQueue = gameState.decisionQueue.insert(0, addScienceTokenSelectionAction(gameState))
-                return gameState.update(decisionQueue_ = newdecisionQueue)
+                val newDecisionQueue = gameState.decisionQueue.
+                        insert(0, addScienceTokenSelectionAction(gameState))
+                return gameState.update(decisionQueue_ = newDecisionQueue)
             }
             Wonders.THE_HANGING_GARDENS -> {
 
@@ -72,13 +74,11 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(play
         //build the action list
         var scienceSelectionActions: Vector<Action>
 
-        val actions = gameState.decks.get(GameDeck.UNUSED_SCIENCE)
+        val actions = gameState.decks.get(GameDeck.UNUSED_SCIENCE_TOKENS)
                 .getOrElseThrow { -> Exception("No unused sicence deck") }
                 .cards
-                .map { c -> ChooseUnusedProgressToken(playerTurn, c) }
-        val decision = Decision(playerTurn, Vector.ofAll(actions), false)
+                .map { c -> ChooseUnusedScienceToken(playerTurn, c) }
+        return Decision(playerTurn, Vector.ofAll(actions), false)
 
-        //TODO we need a deck of the tokens that are not the buyable tokens
-    return decision
     }
 }

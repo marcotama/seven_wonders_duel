@@ -11,5 +11,7 @@ enum class GameDeck {
     THIRD_AGE,
     BURNED,
     WONDERS_1,
-    WONDERS_2
+    WONDERS_2,
+    ACTIVE_SCIENCE_TOKENS,
+    UNUSED_SCIENCE_TOKENS
 }
