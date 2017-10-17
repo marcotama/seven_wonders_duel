@@ -8,6 +8,7 @@ import io.vavr.collection.HashMap
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
 import com.aigamelabs.swduel.actions.Action
+import com.aigamelabs.swduel.actions.Build
 import io.vavr.control.Option
 
 data class GameState (
@@ -61,18 +62,7 @@ data class GameState (
         return Pair(decision, newGameState)
     }
 
-    //Draw card from appropriate deck
-
-    //Draw card from appropriate deck/remove from graph
-
-    //Add card to the burned deck
-
-    //Add money to a player
-
-    //Change the players turn
-
-    //Add Choose wonder to build action
-
-    //Add card to appropriate player city
-
+    fun allAvailableAction () : Vector<Action> {
+        return Vector.empty() //TODO build all available actions
+    }
 }
