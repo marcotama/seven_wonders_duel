@@ -66,13 +66,30 @@ data class PlayerCity(
             }
         }
 
+        // Handle Architecture and Masonry discounts
+        if (newBuilding.color == CardColor.WONDER) {
+            if (!scienceTokens.filter { t -> t.enhancement == Enhancement.ARCHITECTURE}.isEmpty) {
+                altProduction.appendAll(Stream.of(ResourcesAlternative.ANY, ResourcesAlternative.ANY))
+            }
+        }
+        if (newBuilding.color == CardColor.BLUE) {
+            if (!scienceTokens.filter { t -> t.enhancement == Enhancement.MASONRY}.isEmpty) {
+                altProduction.appendAll(Stream.of(ResourcesAlternative.ANY, ResourcesAlternative.ANY))
+            }
+        }
+
+        // Calculate remaining coin cost given optimal choices
         val minCost = calcMinCost(resourceCost, altProduction) + newBuilding.coinCost
+
         return if (minCost >= coins) null else minCost
 
     }
 
     /**
      * Calculates the production of a given resource from brown/gray cards.
+     *
+     * @param resource the resource of interest
+     * @return the total production of the given resource
      */
     private fun pureResourceProduction(resource : Resource) : Int {
         var resourceProduction = 0
@@ -86,6 +103,9 @@ data class PlayerCity(
 
     /**
      * Checks whether this city has a trading agreement for a given resource.
+     *
+     * @param resource the resource of interest
+     * @return `true` if this city has a trading agreement for the given resource, `false` otherwise
      */
     private fun hasTradingAgreement(resource : Resource) : Boolean {
         buildings.forEach { building ->
@@ -103,8 +123,13 @@ data class PlayerCity(
 
 
     /**
-     * Calculates the minimum cost in coins to cover a given amount of resources given a set of resource-alternatives
-     * productions. Note: this considers both trading agreements and the production of the opponent city.
+     * Calculates the cost in coins to cover what remains of a given amount of resources after an optimal choice for
+     * resource-alternative productions.
+     * Note: this also considers both trading agreements and the production of the opponent city.
+     *
+     * @param cost the resources to cover
+     * @param altProduction the alternative production choices
+     * @return the minimum remaining cost to cover the given amount of resources
      */
     private fun calcMinCost(cost: HashMap<Resource, Int>, altProduction: Vector<ResourcesAlternative>) : Int {
         // Base case
@@ -127,6 +152,12 @@ data class PlayerCity(
             val newProduction = altProduction.removeAt(last)
 
             when (alternative) {
+                ResourcesAlternative.ANY -> {
+                    return Stream.of(Resource.WOOD, Resource.CLAY, Resource.STONE, Resource.GLASS, Resource.PAPER)
+                            .map { resource -> calcMinCost(costAfterPaying(resource, cost), newProduction) }
+                            .minBy { c -> c?.toFloat() ?: Float.POSITIVE_INFINITY }
+                            .orNull
+                }
                 ResourcesAlternative.WOOD_OR_CLAY_OR_STONE -> {
                     return Stream.of(Resource.WOOD, Resource.CLAY, Resource.STONE)
                             .map { resource -> calcMinCost(costAfterPaying(resource, cost), newProduction) }
