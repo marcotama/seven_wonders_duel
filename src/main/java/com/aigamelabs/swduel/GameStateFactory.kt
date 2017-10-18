@@ -58,7 +58,7 @@ object GameStateFactory {
                 PlayerTurn.PLAYER_2, player2City
         )
 
-        val decisionQueue = Queue.empty<Decision>().enqueue(DecisionFactory.makeMainTurnDecision(PlayerTurn.PLAYER_1))
+        val decisionQueue = Queue.empty<Decision>().enqueue(DecisionFactory.makeTurnDecision(PlayerTurn.PLAYER_1))
 
         return GameState(GameDeck.FIRST_AGE, decks, currentGraph,
                 progressTokens, MilitaryBoard(), playerCities, decisionQueue)

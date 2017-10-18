@@ -20,7 +20,7 @@ object DecisionFactory {
      * @param gameState the state of the game when the decision is to be made
      * @return a [Decision] including all possible actions a player can do at the start of her turn
      */
-    fun makeMainTurnDecision(playerTurn: PlayerTurn, gameState: GameState) : Decision {
+    fun makeTurnDecision(playerTurn: PlayerTurn, gameState: GameState, main : Boolean) : Decision {
         val playerCity = gameState.playerCities[playerTurn]
                 .getOrElseThrow { Exception("Player not found") }
         val canBuildSomeWonders = !playerCity.wonders
@@ -39,6 +39,6 @@ object DecisionFactory {
                 availCards.filter { card -> playerCity.canBuild(card) != null }
                         .map { card -> Build(playerTurn, card) }
         )
-        return Decision(playerTurn, actions, true)
+        return Decision(playerTurn, actions, main)
     }
 }
