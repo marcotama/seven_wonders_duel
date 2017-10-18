@@ -1,5 +1,7 @@
 package com.aigamelabs.swduel
 
+import com.aigamelabs.swduel.enums.PlayerTurn
+
 data class MilitaryBoard(
         val militaryTokenPosition : Int,
         val token1P1Present : Boolean,
@@ -25,7 +27,18 @@ data class MilitaryBoard(
         )
     }
 
-    fun moveTowardsBy(n : Int) : Pair<Int, MilitaryBoard> {
+    fun advantagePlayer(n : Int, playerTurn: PlayerTurn) : Pair<Int,MilitaryBoard> {
+        return when (playerTurn) {
+            PlayerTurn.PLAYER_1 -> {
+                advantagePlayer1 (n)
+            }
+            PlayerTurn.PLAYER_2 -> {
+                advantagePlayer2(n)
+            }
+        }
+    }
+
+    fun advantagePlayer1(n : Int) : Pair<Int, MilitaryBoard> {
         val newPosition = militaryTokenPosition - n
         var cost = 0
         cost += if (token1P1Present && newPosition <= -3) 2 else 0
@@ -39,7 +52,7 @@ data class MilitaryBoard(
         )
         return Pair(cost, newBoard)
     }
-    fun moveRightBy(n : Int) : Pair<Int, MilitaryBoard> {
+    fun advantagePlayer2(n : Int) : Pair<Int, MilitaryBoard> {
         val newPosition = militaryTokenPosition + n
         var cost = 0
         cost += if (token1P2Present && newPosition >= +3) 2 else 0
