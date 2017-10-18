@@ -68,12 +68,12 @@ data class PlayerCity(
 
         // Handle Architecture and Masonry discounts
         if (newBuilding.color == CardColor.WONDER) {
-            if (!scienceTokens.filter { t -> t.enhancement == Enhancement.ARCHITECTURE}.isEmpty) {
+            if (hasProgressToken(Enhancement.ARCHITECTURE)) {
                 altProduction.appendAll(Stream.of(ResourcesAlternative.ANY, ResourcesAlternative.ANY))
             }
         }
         if (newBuilding.color == CardColor.BLUE) {
-            if (!scienceTokens.filter { t -> t.enhancement == Enhancement.MASONRY}.isEmpty) {
+            if (hasProgressToken(Enhancement.MASONRY)) {
                 altProduction.appendAll(Stream.of(ResourcesAlternative.ANY, ResourcesAlternative.ANY))
             }
         }
@@ -83,6 +83,10 @@ data class PlayerCity(
 
         return if (minCost >= coins) null else minCost
 
+    }
+
+    fun hasProgressToken(enhancement: Enhancement) : Boolean {
+        return !scienceTokens.filter { t -> t.enhancement == enhancement}.isEmpty
     }
 
     /**

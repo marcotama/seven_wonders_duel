@@ -5,7 +5,7 @@ import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.GameStateFactory
 import com.aigamelabs.swduel.enums.PlayerTurn
 
-class BurnOpponentGreyCard(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
+class BurnOpponentCard(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
     override fun process(gameState: GameState) : GameState {
         return GameStateFactory.createNewGameState() // TODO
     }
