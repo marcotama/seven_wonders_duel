@@ -6,18 +6,22 @@ class Game(private val players : HashMap<PlayerTurn,Player>) {
     fun mainLoop(startingGameState : GameState) {
         var gameState = startingGameState
         while (!gameState.decisionQueue.isEmpty) {
-            // Deque decision
-            val dequeOutcome = gameState.dequeDecision() // TODO rename to deque
-            val nextDecision = dequeOutcome.first
-            gameState = dequeOutcome.second
+
+            // Dequeue decision and enqueue the next one
+            val dequeueOutcome = gameState.decisionQueue.dequeue()
+            val thisDecision = dequeueOutcome._1
+            val nextDecision = DecisionFactory.makeTurnDecision(thisDecision.player.opponent(), gameState, true)
+            val newDecisionsQueue = dequeueOutcome._2.enqueue(nextDecision)
+
+            gameState = gameState.update(decisionQueue_ = newDecisionsQueue)
 
             // Query player for action
-            val action = players[nextDecision.player]!!.decide(gameState, nextDecision.options)
+            val action = players[thisDecision.player]!!.decide(gameState, thisDecision.options)
 
             // Check for cheating
-            if (!nextDecision.options.contains(action)) {
+            if (!thisDecision.options.contains(action)) {
                 throw Exception("Player cheated: selected action\n" + action +
-                        "\nbut available actions are\n" + nextDecision.options)
+                        "\nbut available actions are\n" + thisDecision.options)
             }
 
             // Process action

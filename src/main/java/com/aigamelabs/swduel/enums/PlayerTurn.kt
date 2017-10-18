@@ -4,7 +4,7 @@ enum class PlayerTurn {
     PLAYER_1,
     PLAYER_2;
 
-    fun other() : PlayerTurn {
+    fun opponent() : PlayerTurn {
         return if (this == PLAYER_1) PLAYER_2 else PLAYER_1
     }
 }

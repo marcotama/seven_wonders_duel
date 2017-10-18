@@ -9,6 +9,7 @@ import io.vavr.collection.Queue
 import io.vavr.collection.Vector
 import com.aigamelabs.swduel.actions.Action
 import com.aigamelabs.swduel.actions.Build
+import com.aigamelabs.swduel.enums.GamePhase
 import io.vavr.control.Option
 
 data class GameState (
@@ -18,7 +19,8 @@ data class GameState (
         val progressTokens : HashSet<ProgressToken>,
         val militaryBoard: MilitaryBoard,
         val playerCities : HashMap<PlayerTurn,PlayerCity>,
-        val decisionQueue: Queue<Decision>
+        val decisionQueue: Queue<Decision>,
+        val gamePhase: GamePhase
 ) {
 
     fun update(
@@ -28,7 +30,8 @@ data class GameState (
             progressTokens_ : HashSet<ProgressToken>? = null,
             militaryBoard_ : MilitaryBoard? = null,
             playerCities_ : HashMap<PlayerTurn,PlayerCity>? = null,
-            decisionQueue_ : Queue<Decision>? = null
+            decisionQueue_ : Queue<Decision>? = null,
+            gamePhase_: GamePhase? = null
     ) : GameState {
         return GameState(
                 activeDeck_ ?: activeDeck,
@@ -37,7 +40,8 @@ data class GameState (
                 progressTokens_ ?: progressTokens,
                 militaryBoard_ ?: militaryBoard,
                 playerCities_ ?: playerCities,
-                decisionQueue_ ?: decisionQueue
+                decisionQueue_ ?: decisionQueue,
+                gamePhase_ ?: gamePhase
         )
     }
 
@@ -54,7 +58,7 @@ data class GameState (
     }
 
 
-    fun dequeDecision() : Pair<Decision,GameState> {
+    fun dequeueDecision() : Pair<Decision,GameState> {
         val dequeueOutcome = decisionQueue.dequeue()
         val decision = dequeueOutcome._1
         val newQueue = dequeueOutcome._2
