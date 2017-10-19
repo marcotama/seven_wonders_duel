@@ -6,6 +6,8 @@ import com.aigamelabs.swduel.MilitaryBoard
 import com.aigamelabs.swduel.enums.CardColor
 import com.aigamelabs.swduel.enums.GamePhase
 import com.aigamelabs.swduel.enums.PlayerTurn
+import com.aigamelabs.swduel.enums.ScienceSymbol
+import io.vavr.collection.HashSet
 
 class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
     override fun process(gameState: GameState) : GameState {
@@ -21,7 +23,6 @@ class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
 
         // Handle military cards
         val newMilitaryBoard : MilitaryBoard
-        val newGamePhase : GamePhase
         if (card.color == CardColor.RED) {
             val additionOutcome = gameState.militaryBoard.addMilitaryPointsTo(card.militaryPoints, playerTurn)
             newMilitaryBoard = additionOutcome.second
@@ -32,16 +33,23 @@ class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
                 val newPlayer2City = opponentCity.update(coins_ = opponentCity.coins - opponentPenalty)
                 newPlayerCities = gameState.playerCities.put(playerTurn.opponent(), newPlayer2City)
             }
-            // If a player achieved military supremacy, change game phase
-            newGamePhase = if (newMilitaryBoard.isMilitarySupremacy()) GamePhase.MILITARY_SUPREMACY else GamePhase.IN_GAME
         }
         else {
-            // Unaltered
+            // Unchanged
             newMilitaryBoard = gameState.militaryBoard
-            newGamePhase = GamePhase.IN_GAME
         }
 
-        // TODO handle science
+        // Count science symbols
+        val distinctScienceSymbols = if (card.color == CardColor.GREEN)
+            playerCity.buildings.map { c -> c.scienceSymbol }.distinct().size()
+        else 0
+
+
+        val newGamePhase = when {
+            newMilitaryBoard.isMilitarySupremacy() -> GamePhase.MILITARY_SUPREMACY
+            distinctScienceSymbols >= 5 -> GamePhase.SCIENCE_SUPREMACY
+            else -> GamePhase.IN_GAME
+        }
 
         return gameState.update(decks_ = newDecks, playerCities_ = newPlayerCities,
                 militaryBoard_ = newMilitaryBoard, gamePhase_ = newGamePhase)
