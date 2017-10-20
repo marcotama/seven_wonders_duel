@@ -6,7 +6,7 @@ import io.vavr.collection.HashMap
 import io.vavr.collection.HashSet
 
 data class Card(
-        val cardGroup: CardGroup,
+        override val cardGroup: CardGroup,
         val color: CardColor,
         val name: String,
         val resourceCost: HashMap<Resource, Int> = HashMap.empty(),
@@ -26,7 +26,7 @@ data class Card(
         val bonuses: Set<Bonus> = emptySet(),
         val wonders: Wonders = Wonders.NONE,
         val enhancement: Enhancement = Enhancement.NONE
-) {
+) : CardPlaceholder (cardGroup){
     
     // Constructor for (red) military cards
     constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>, coinCost: Int,
