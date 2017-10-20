@@ -26,6 +26,9 @@ class Game(private val players : HashMap<PlayerTurn,Player>) {
 
             // Process action
             gameState = action.process(gameState)
+
+            // TODO check if the cardStructure is empty: if so, add a ChooseNextPlayer decision
+            // ChooseNextPlayer.process() should take care of switching the age and calling gameState.initGamePhase()
         }
     }
 }
