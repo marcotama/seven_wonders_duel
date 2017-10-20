@@ -39,7 +39,7 @@ data class Graph<T>(private val vertices: Vector<T?>, private val adjMatrix : Ve
 
     /**
      * Stores the given element as the i-th vertex.
-     * 
+     *
      * @param i the index in which to store the given element.
      * @param e the element to be stored
      * @return a new instance updated as requested
@@ -52,6 +52,23 @@ data class Graph<T>(private val vertices: Vector<T?>, private val adjMatrix : Ve
             val newVertices = vertices.toJavaList()
             newVertices[i] = e
             Graph(Vector.ofAll(newVertices), adjMatrix)
+        }
+    }
+
+    /**
+     * Replaces a given element with another given one.
+     *
+     * @param oe the index in which to store the given element.
+     * @param ne the element to be stored
+     * @return a new instance updated as requested
+     */
+    fun replaceVertex(oe: T?, ne: T?) : Graph<T> {
+        val i = vertices.indexOf(oe)
+        if (i == -1) {
+            throw Exception("Element not found in graph")
+        }
+        else {
+            return setVertex(i, ne)
         }
     }
 
@@ -73,7 +90,7 @@ data class Graph<T>(private val vertices: Vector<T?>, private val adjMatrix : Ve
             Graph(vertices, Vector.ofAll(newAdjMatrix))
         }
     }
-    
+
     /**
      * Removes an edge to the graph.
      *
