@@ -8,3 +8,6 @@ TODO When someone is going to build from burned pile if the pile is empty just d
 TODO Write function in the GameState Class that is able to build a Vector of all actions (before it is made into a decision). This method is needed for wonders.
 
 TODO Factor the buildBurned and addScienceTokenSelectionAction methods in ChooseWonderToBuild class.
+
+TODO handle switch of age
+TODO keep the game random generator a secret (not in the game state) but make the game state actions accept a generator for reproducibility?

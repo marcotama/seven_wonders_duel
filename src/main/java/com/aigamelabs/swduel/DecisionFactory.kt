@@ -25,7 +25,7 @@ object DecisionFactory {
                 .getOrElseThrow { Exception("Player not found") }
         val canBuildSomeWonders = !playerCity.wonders
                 .filter { w -> playerCity.canBuild(w) != null }
-                .isEmpty
+                .isEmpty // TODO check if the opponent has already built 4 wonders
 
         val availCards = gameState.currentGraph.verticesWithNoIncomingEdges()
         // The player can always burn any uncovered card for money
