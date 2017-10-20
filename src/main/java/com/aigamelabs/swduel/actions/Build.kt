@@ -4,6 +4,7 @@ import com.aigamelabs.swduel.Card
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.MilitaryBoard
 import com.aigamelabs.swduel.enums.CardColor
+import com.aigamelabs.swduel.enums.Enhancement
 import com.aigamelabs.swduel.enums.GamePhase
 import com.aigamelabs.swduel.enums.PlayerTurn
 
@@ -38,14 +39,18 @@ class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
         }
 
         // Count science symbols
+
         val distinctScienceSymbols = if (card.color == CardColor.GREEN)
-            playerCity.buildings.map { c -> c.scienceSymbol }.distinct().size()
+            if (!newPlayer1City.scienceTokens.filter{ c-> c.enhancement == Enhancement.LAW}.isEmpty)
+                playerCity.buildings.map { c -> c.scienceSymbol }.distinct().size() + 1
+            else
+                playerCity.buildings.map { c -> c.scienceSymbol }.distinct().size()
         else 0
 
 
         val newGamePhase = when {
             newMilitaryBoard.isMilitarySupremacy() -> GamePhase.MILITARY_SUPREMACY
-            distinctScienceSymbols >= 5 -> GamePhase.SCIENCE_SUPREMACY
+            distinctScienceSymbols >= 6 -> GamePhase.SCIENCE_SUPREMACY
             else -> gameState.gamePhase
         }
 
