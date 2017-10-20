@@ -13,7 +13,7 @@ import com.aigamelabs.swduel.enums.GamePhase
 data class GameState (
         val activeDeck : GameDeck,
         val decks : HashMap<GameDeck, Deck>,
-        val cardStructures : HashMap<GamePhase,CardStructure>,
+        val cardStructure : CardStructure,
         val progressTokens : HashSet<ProgressToken>,
         val militaryBoard: MilitaryBoard,
         val playerCities : HashMap<PlayerTurn,PlayerCity>,
@@ -24,7 +24,7 @@ data class GameState (
     fun update(
             activeDeck_ : GameDeck? = null,
             decks_ : HashMap<GameDeck, Deck>? = null,
-            cardStructures_ : HashMap<GamePhase,CardStructure>? = null,
+            cardStructure_ : CardStructure? = null,
             progressTokens_ : HashSet<ProgressToken>? = null,
             militaryBoard_ : MilitaryBoard? = null,
             playerCities_ : HashMap<PlayerTurn,PlayerCity>? = null,
@@ -34,17 +34,13 @@ data class GameState (
         return GameState(
                 activeDeck_ ?: activeDeck,
                 decks_ ?: decks,
-                cardStructures_ ?: cardStructures,
+                cardStructure_ ?: cardStructure,
                 progressTokens_ ?: progressTokens,
                 militaryBoard_ ?: militaryBoard,
                 playerCities_ ?: playerCities,
                 decisionQueue_ ?: decisionQueue,
                 gamePhase_ ?: gamePhase
         )
-    }
-
-    fun getActiveCardStructure() : CardStructure {
-        return cardStructures.get(gamePhase).getOrElseThrow { Exception("Active deck not found") }
     }
 
     fun getPlayerCity(playerTurn : PlayerTurn) : PlayerCity {
@@ -66,5 +62,34 @@ data class GameState (
 
     fun allAvailableAction () : Vector<Action> {
         return Vector.empty() //TODO build all available actions
+    }
+
+    fun initGamePhase() {
+        when (gamePhase) {
+            GamePhase.WONDERS_SELECTION_1 -> {
+                // create deck of 4 wonders
+                // add decision for P1 to choose 1 wonder
+                // ChooseStartingWonder.process should take care of adding the following ChooseStartingWonder decision
+            }
+            GamePhase.WONDERS_SELECTION_2 -> {
+                // create deck of 4 wonders
+                // add decision for P2 to choose 1 wonder
+                // ChooseStartingWonder.process should take care of adding the following ChooseStartingWonder decision
+            }
+            GamePhase.FIRST_AGE -> {
+                val newCardStructure = CardStructureFactory.makeFirstAgeCardStructure()
+            }
+            GamePhase.SECOND_AGE -> {
+                val newCardStructure = CardStructureFactory.makeFirstAgeCardStructure()
+                // add decision for who starts this age
+            }
+            GamePhase.THIRD_AGE -> {
+                val newCardStructure = CardStructureFactory.makeThirdAgeCardStructure()
+                // add decision for who starts this age
+            }
+            GamePhase.MILITARY_SUPREMACY -> {}
+            GamePhase.SCIENCE_SUPREMACY -> {}
+            GamePhase.CIVILIAN_VICTORY -> {}
+        }
     }
 }

@@ -16,10 +16,10 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(play
         val cost = playerCity.canBuild(card)!!
         val playerCoins = playerCity.coins
 
-        val newWondersDeck = playerCity.wondersDeck.removeCard(card)
+        val newUnbuiltWonders = playerCity.unbuiltWonders.remove(card)
         val newWonders = playerCity.wonders.add(card)
 
-        val newPlayerCity = playerCity.update(wonders_ = newWonders, wondersDeck_ = newWondersDeck, coins_ = playerCoins - cost)
+        val newPlayerCity = playerCity.update(wonders_ = newWonders, unbuiltWonders_ = newUnbuiltWonders, coins_ = playerCoins - cost)
         val newPlayerCities = gameState.playerCities.put(playerTurn, newPlayerCity)
 
 
