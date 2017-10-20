@@ -6,15 +6,13 @@ import com.aigamelabs.swduel.MilitaryBoard
 import com.aigamelabs.swduel.enums.CardColor
 import com.aigamelabs.swduel.enums.GamePhase
 import com.aigamelabs.swduel.enums.PlayerTurn
-import com.aigamelabs.swduel.enums.ScienceSymbol
-import io.vavr.collection.HashSet
 
 class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
     override fun process(gameState: GameState) : GameState {
 
         // Draw card from appropriate deck
-        val newActiveDeck = gameState.getActiveDeck().removeCard(card)
-        val newDecks = gameState.decks.put(gameState.activeDeck, newActiveDeck)
+        val newCardStructure = gameState.getActiveCardStructure().pickUpCard(card)
+        val newCardStructures = gameState.cardStructures.put(gameState.gamePhase, newCardStructure)
 
         // Add card to appropriate player city
         val playerCity = gameState.getPlayerCity(playerTurn)
@@ -48,10 +46,10 @@ class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
         val newGamePhase = when {
             newMilitaryBoard.isMilitarySupremacy() -> GamePhase.MILITARY_SUPREMACY
             distinctScienceSymbols >= 5 -> GamePhase.SCIENCE_SUPREMACY
-            else -> GamePhase.IN_GAME
+            else -> gameState.gamePhase
         }
 
-        return gameState.update(decks_ = newDecks, playerCities_ = newPlayerCities,
+        return gameState.update(cardStructures_ = newCardStructures, playerCities_ = newPlayerCities,
                 militaryBoard_ = newMilitaryBoard, gamePhase_ = newGamePhase)
     }
 }

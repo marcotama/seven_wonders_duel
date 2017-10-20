@@ -23,15 +23,15 @@ data class Deck(val name: String, val cards: Vector<Card>) {
         return update(cards_ = cards.remove(card))
     }
 
-    fun drawCard() : Pair<Card, Deck>? {
+    fun drawCard() : Pair<Card, Deck> {
         return if (cards.size() > 0) {
-            val card_index = ThreadLocalRandom.current().nextInt(0, cards.size() + 1)
-            val drawnCard = cards[card_index]
-            val newDeck = update(cards_ = cards.removeAt(card_index))
+            val cardIdx = ThreadLocalRandom.current().nextInt(0, cards.size() + 1)
+            val drawnCard = cards[cardIdx]
+            val newDeck = update(cards_ = cards.removeAt(cardIdx))
             Pair(drawnCard, newDeck)
         }
         else {
-            null
+            throw Exception("The deck is empty")
         }
     }
 

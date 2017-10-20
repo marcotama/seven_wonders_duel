@@ -6,7 +6,7 @@ import io.vavr.collection.Vector
 /**
  * Implements a graph using an adjacency matrix.
  */
-data class Graph<T>(private val vertices: Vector<T?>, private val adjMatrix : Vector<Boolean>) {
+data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
     private val numVertices : Int = vertices.size()
 
     /**
@@ -143,6 +143,18 @@ data class Graph<T>(private val vertices: Vector<T?>, private val adjMatrix : Ve
         return Stream.ofAll(0..vertices.size())
                 .filter { i -> !hasIncomingEdges(i) }
                 .map { i -> vertices[i]!! }
+                .toVector()
+    }
+
+    /**
+     * Finds the index j of all vertices that are connected to the given vertex i via an edge (i, j).
+     *
+     * @param i the edge of interest
+     * @return a list of vertices connected to the given one by an outgoing edge
+     */
+    fun getOutgoingEdges(i : Int) : Vector<Int> {
+        return Stream.ofAll(0..vertices.size())
+                .filter { j -> adjMatrix[toIndex(i, j)] }
                 .toVector()
     }
 

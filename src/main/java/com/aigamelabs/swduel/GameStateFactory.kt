@@ -1,6 +1,7 @@
 package com.aigamelabs.swduel
 
 import com.aigamelabs.swduel.enums.GameDeck
+import com.aigamelabs.swduel.enums.GamePhase
 import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.swduel.enums.ProgressToken
 import io.vavr.collection.HashSet
@@ -27,15 +28,14 @@ object GameStateFactory {
         val unusedScienceDeck = scienceTokensDraw.second.update("Unused Science Tokens")
 
         // Setup graph for first age
-        val graphCreationOutcome = GraphFactory.makeFirstAgeGraph(DeckFactory.createFirstAgeDeck())
-        val currentGraph = graphCreationOutcome.first
-        val firstAgeDeck = graphCreationOutcome.second
+        val cardStructures = HashMap.of(
+                GamePhase.FIRST_AGE, CardStructureFactory.makeFirstAgeCardStructure(),
+                GamePhase.SECOND_AGE, CardStructureFactory.makeSecondCardStructure(),
+                GamePhase.THIRD_AGE, CardStructureFactory.makeThirdAgeCardStructure()
+        )
 
         // Initialize decks
         val decks : HashMap<GameDeck, Deck> = HashMap.of(
-                GameDeck.FIRST_AGE, firstAgeDeck,
-                GameDeck.SECOND_AGE, DeckFactory.createSecondAgeDeck(),
-                GameDeck.THIRD_AGE, DeckFactory.createThirdAgeDeck(),
                 GameDeck.WONDERS_1, Deck("Wonders of P1", draw4outcome1.first),
                 GameDeck.WONDERS_2, Deck("Wonders of P2", draw4outcome2.first),
                 GameDeck.BURNED, Deck("Burned"),
@@ -58,9 +58,12 @@ object GameStateFactory {
                 PlayerTurn.PLAYER_2, player2City
         )
 
-        val decisionQueue = Queue.empty<Decision>().enqueue(DecisionFactory.makeTurnDecision(PlayerTurn.PLAYER_1))
+        val gameState = GameState(GameDeck.FIRST_AGE, decks, cardStructures,
+                progressTokens, MilitaryBoard(), playerCities, Queue.empty(), GamePhase.FIRST_AGE)
 
-        return GameState(GameDeck.FIRST_AGE, decks, currentGraph,
-                progressTokens, MilitaryBoard(), playerCities, decisionQueue)
+        val newDecisionQueue = gameState.decisionQueue
+                .enqueue(DecisionFactory.makeTurnDecision(PlayerTurn.PLAYER_1, gameState, true))
+
+        return gameState.update(decisionQueue_ = newDecisionQueue)
     }
 }

@@ -8,14 +8,12 @@ import io.vavr.collection.HashMap
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
 import com.aigamelabs.swduel.actions.Action
-import com.aigamelabs.swduel.actions.Build
 import com.aigamelabs.swduel.enums.GamePhase
-import io.vavr.control.Option
 
 data class GameState (
         val activeDeck : GameDeck,
         val decks : HashMap<GameDeck, Deck>,
-        val currentGraph : Graph<Card>,
+        val cardStructures : HashMap<GamePhase,CardStructure>,
         val progressTokens : HashSet<ProgressToken>,
         val militaryBoard: MilitaryBoard,
         val playerCities : HashMap<PlayerTurn,PlayerCity>,
@@ -26,7 +24,7 @@ data class GameState (
     fun update(
             activeDeck_ : GameDeck? = null,
             decks_ : HashMap<GameDeck, Deck>? = null,
-            currentGraph_ : Graph<Card>? = null,
+            cardStructures_ : HashMap<GamePhase,CardStructure>? = null,
             progressTokens_ : HashSet<ProgressToken>? = null,
             militaryBoard_ : MilitaryBoard? = null,
             playerCities_ : HashMap<PlayerTurn,PlayerCity>? = null,
@@ -36,7 +34,7 @@ data class GameState (
         return GameState(
                 activeDeck_ ?: activeDeck,
                 decks_ ?: decks,
-                currentGraph_ ?: currentGraph,
+                cardStructures_ ?: cardStructures,
                 progressTokens_ ?: progressTokens,
                 militaryBoard_ ?: militaryBoard,
                 playerCities_ ?: playerCities,
@@ -45,12 +43,12 @@ data class GameState (
         )
     }
 
-    fun getActiveDeck() : Deck {
-        return decks.get(activeDeck).getOrElseThrow { -> Exception("Active deck not found") }
+    fun getActiveCardStructure() : CardStructure {
+        return cardStructures.get(gamePhase).getOrElseThrow { Exception("Active deck not found") }
     }
 
     fun getPlayerCity(playerTurn : PlayerTurn) : PlayerCity {
-        return playerCities.get(playerTurn).getOrElseThrow { -> Exception("Active deck not found") }
+        return playerCities.get(playerTurn).getOrElseThrow { Exception("Active deck not found") }
     }
 
     fun enqueueDecision (decision: Decision) : GameState {
