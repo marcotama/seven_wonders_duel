@@ -23,4 +23,10 @@ class CardStructure(var graph: Graph<CardPlaceholder>, var faceDownPool: Deck) {
         }
         return CardStructure(graph, faceDownPool)
     }
+
+    fun availableCards() : Vector<Card> {
+        val availableCards = graph.verticesWithNoIncomingEdges()
+                .map { cp -> cp as Card }
+        return availableCards as Vector<Card>
+    }
 }

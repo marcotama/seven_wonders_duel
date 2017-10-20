@@ -27,7 +27,7 @@ object DecisionFactory {
                 .filter { w -> playerCity.canBuild(w) != null }
                 .isEmpty // TODO check if the opponent has already built 4 wonders
 
-        val availCards = gameState.currentGraph.verticesWithNoIncomingEdges()
+        val availCards = gameState.getActiveCardStructure().availableCards()
         // The player can always burn any uncovered card for money
         var actions : Vector<Action> = availCards.map { card -> BurnForMoney(playerTurn, card) }
         // If the player can afford at least a wonder, then he can also sacrifice any uncovered card to build the wonder
