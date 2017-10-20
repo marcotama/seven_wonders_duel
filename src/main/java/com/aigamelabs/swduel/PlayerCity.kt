@@ -12,11 +12,11 @@ data class PlayerCity(
         val buildings : HashSet<Card>,
         val wonders : HashSet<Card>,
         val scienceTokens: HashSet<Card>,
-        val wondersDeck : Deck,
+        val unbuiltWonders: HashSet<Card>,
         val opponentCity : PlayerCity?
 ) {
 
-    constructor(name : String) : this(name, 7, HashSet.empty(), HashSet.empty(), HashSet.empty(), Deck("Wonders deck of " + name), null)
+    constructor(name : String) : this(name, 7, HashSet.empty(), HashSet.empty(), HashSet.empty(), HashSet.empty(), null)
 
     fun update(
             name_ : String? = null,
@@ -24,7 +24,7 @@ data class PlayerCity(
             buildings_ : HashSet<Card>? = null,
             wonders_ : HashSet<Card>? = null,
             scienceTokens_ : HashSet<Card>? = null,
-            wondersDeck_ : Deck? = null,
+            unbuiltWonders_ : HashSet<Card>? = null,
             opponentCity_ : PlayerCity? = null
     ) : PlayerCity {
         return PlayerCity(
@@ -33,13 +33,13 @@ data class PlayerCity(
                 buildings_ ?: buildings,
                 wonders_ ?: wonders,
                 scienceTokens_ ?: scienceTokens,
-                wondersDeck_ ?: wondersDeck,
+                unbuiltWonders_ ?: unbuiltWonders,
                 opponentCity_ ?: opponentCity
         )
     }
 
     fun setOpponentCity(oppCity : PlayerCity) : PlayerCity{
-        return PlayerCity(name, coins, buildings, wonders, scienceTokens, wondersDeck, oppCity)
+        return PlayerCity(name, coins, buildings, wonders, scienceTokens, unbuiltWonders, oppCity)
     }
 
     /**

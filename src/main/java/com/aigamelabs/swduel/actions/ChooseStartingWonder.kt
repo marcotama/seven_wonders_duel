@@ -7,6 +7,8 @@ import com.aigamelabs.swduel.enums.PlayerTurn
 
 class ChooseStartingWonder(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
     override fun process(gameState: GameState) : GameState {
-        return GameStateFactory.createNewGameState() // TODO
+        // TODO
+        // add next starting wonder decision
+        return GameStateFactory.createNewGameState() // remove me
     }
 }
