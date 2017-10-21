@@ -21,10 +21,10 @@ object DecisionFactory {
      * @return a [Decision] including all possible actions a player can do at the start of her turn
      */
     fun makeTurnDecision(playerTurn: PlayerTurn, gameState: GameState, main : Boolean) : Decision {
-        val playerCity = gameState.playerCities[playerTurn]
-                .getOrElseThrow { Exception("Player not found") }
+        val playerCity = gameState.getPlayerCity(playerTurn)
+        val opponentCity = gameState.getPlayerCity(playerTurn.opponent())
         val canBuildSomeWonders = !playerCity.wonders
-                .filter { w -> playerCity.canBuild(w) != null }
+                .filter { w -> playerCity.canBuild(w, opponentCity) != null }
                 .isEmpty && gameState.getPlayerCity(playerTurn.opponent()).wonders.size() < 4
 
         val availCards = gameState.cardStructure!!.availableCards()
@@ -35,9 +35,9 @@ object DecisionFactory {
             actions = actions.appendAll(availCards.map { card -> BurnForWonder(playerTurn, card) })
         }
         // The player can also build a card, if the city can afford it
-        actions = actions.appendAll(
-                availCards.filter { card -> playerCity.canBuild(card) != null }
-                        .map { card -> Build(playerTurn, card) }
+        actions = actions.appendAll(availCards
+                .filter { card -> playerCity.canBuild(card, opponentCity) != null }
+                .map { card -> Build(playerTurn, card) }
         )
         return Decision(playerTurn, actions, main)
     }

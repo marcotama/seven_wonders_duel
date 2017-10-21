@@ -6,11 +6,11 @@ import com.aigamelabs.swduel.enums.PlayerTurn
  * Represents the military situation.
  */
 data class MilitaryBoard(
-        val conflictPawnPosition: Int,
-        val token1P1Present : Boolean,
-        val token2P1Present : Boolean,
-        val token1P2Present : Boolean,
-        val token2P2Present : Boolean
+        private val conflictPawnPosition: Int,
+        private val token1P1Present : Boolean,
+        private val token2P1Present : Boolean,
+        private val token1P2Present : Boolean,
+        private val token2P2Present : Boolean
 ) {
     /*
     Stores an integer representing the position of the conflict pawn, with positive values indicating an advantage for
@@ -98,12 +98,10 @@ data class MilitaryBoard(
     }
 
     fun getDisadvantagedPlayer() : PlayerTurn? {
-        return if (conflictPawnPosition > 0) {
-            PlayerTurn.PLAYER_2
-        } else if (conflictPawnPosition < 0)
-            PlayerTurn.PLAYER_1
-        else {
-            null
+        return when {
+            conflictPawnPosition > 0 -> PlayerTurn.PLAYER_2
+            conflictPawnPosition < 0 -> PlayerTurn.PLAYER_1
+            else -> null
         }
     }
 }

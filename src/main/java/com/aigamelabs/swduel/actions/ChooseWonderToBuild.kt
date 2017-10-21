@@ -11,7 +11,8 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card: Card) : Action(playe
     override fun process(gameState: GameState): GameState {
 
         val playerCity = gameState.getPlayerCity(playerTurn)
-        val cost = playerCity.canBuild(card) ?: throw Exception("Wonder not affordable")
+        val opponentCity = gameState.getPlayerCity(playerTurn.opponent())
+        val cost = playerCity.canBuild(card, opponentCity) ?: throw Exception("Wonder not affordable")
         val playerCoins = playerCity.coins
 
         val newUnbuiltWonders = playerCity.unbuiltWonders.remove(card)

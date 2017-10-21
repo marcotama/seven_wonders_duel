@@ -13,8 +13,9 @@ class BurnForWonder(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn
         val newCardStructure = gameState.cardStructure!!.pickUpCard(card)
 
         val playerCity = gameState.getPlayerCity(playerTurn)
+        val opponentCity = gameState.getPlayerCity(playerTurn.opponent())
         val wondersToBuild = playerCity.unbuiltWonders
-        val affordableWonders = wondersToBuild.filter { w -> playerCity.canBuild(w) != null }
+        val affordableWonders = wondersToBuild.filter { w -> playerCity.canBuild(w, opponentCity) != null }
         val chooseWonderToBuildActions = affordableWonders.map { c -> ChooseWonderToBuild(playerTurn, c) }
         val decisionQueue = gameState.decisionQueue
                 .insert(0, Decision(playerTurn, Vector.ofAll(chooseWonderToBuildActions), false))

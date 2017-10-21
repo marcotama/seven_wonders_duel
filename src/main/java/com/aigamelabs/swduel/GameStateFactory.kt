@@ -44,13 +44,9 @@ object GameStateFactory {
         val progressTokens = HashSet.ofAll(allTokens.subList(0, 5))
 
         // Set cities
-        var player1City = PlayerCity(p1Name)
-        var player2City = PlayerCity(p2Name)
-        player1City = player1City.setOpponentCity(player2City)
-        player2City = player2City.setOpponentCity(player1City)
         val playerCities = HashMap.of<PlayerTurn, PlayerCity>(
-                PlayerTurn.PLAYER_1, player1City,
-                PlayerTurn.PLAYER_2, player2City
+                PlayerTurn.PLAYER_1, PlayerCity(p1Name),
+                PlayerTurn.PLAYER_2, PlayerCity(p2Name)
         )
 
         return GameState(activeScienceDeck, unusedScienceDeck, wondersForPickDeck, unusedWondersDeck,

@@ -12,11 +12,10 @@ data class PlayerCity(
         val buildings : HashSet<Card>,
         val wonders : HashSet<Card>,
         val scienceTokens: HashSet<Card>,
-        val unbuiltWonders: HashSet<Card>,
-        val opponentCity : PlayerCity?
+        val unbuiltWonders: HashSet<Card>
 ) {
 
-    constructor(name : String) : this(name, 7, HashSet.empty(), HashSet.empty(), HashSet.empty(), HashSet.empty(), null)
+    constructor(name : String) : this(name, 7, HashSet.empty(), HashSet.empty(), HashSet.empty(), HashSet.empty())
 
     fun update(
             name_ : String? = null,
@@ -24,8 +23,7 @@ data class PlayerCity(
             buildings_ : HashSet<Card>? = null,
             wonders_ : HashSet<Card>? = null,
             scienceTokens_ : HashSet<Card>? = null,
-            unbuiltWonders_ : HashSet<Card>? = null,
-            opponentCity_ : PlayerCity? = null
+            unbuiltWonders_ : HashSet<Card>? = null
     ) : PlayerCity {
         return PlayerCity(
                 name_ ?: name,
@@ -33,20 +31,15 @@ data class PlayerCity(
                 buildings_ ?: buildings,
                 wonders_ ?: wonders,
                 scienceTokens_ ?: scienceTokens,
-                unbuiltWonders_ ?: unbuiltWonders,
-                opponentCity_ ?: opponentCity
+                unbuiltWonders_ ?: unbuiltWonders
         )
-    }
-
-    fun setOpponentCity(oppCity : PlayerCity) : PlayerCity{
-        return PlayerCity(name, coins, buildings, wonders, scienceTokens, unbuiltWonders, oppCity)
     }
 
     /**
      * Calculates whether this city can afford building a given new building and returns the cost associated with an
      * optimal choice of alternatively produced resources.
      */
-    fun canBuild(newBuilding: Card) : Int? {
+    fun canBuild(newBuilding: Card, opponentCity: PlayerCity) : Int? {
         var resourceCost = newBuilding.resourceCost
 
         val resourceProduction = HashMap<Resource, Int>()
@@ -79,7 +72,7 @@ data class PlayerCity(
         }
 
         // Calculate remaining coin cost given optimal choices
-        val minCost = calcMinCost(resourceCost, altProduction) + newBuilding.coinCost
+        val minCost = calcMinCost(resourceCost, altProduction, opponentCity) + newBuilding.coinCost
 
         return if (minCost >= coins) null else minCost
 
@@ -135,14 +128,15 @@ data class PlayerCity(
      * @param altProduction the alternative production choices
      * @return the minimum remaining cost to cover the given amount of resources
      */
-    private fun calcMinCost(cost: HashMap<Resource, Int>, altProduction: Vector<ResourcesAlternative>) : Int {
+    private fun calcMinCost(cost: HashMap<Resource, Int>, altProduction: Vector<ResourcesAlternative>,
+                            opponentCity: PlayerCity) : Int {
         // Base case
         if (altProduction.isEmpty) {
             var coinCost = 0
             // Calculate coin cost of missing resources
             cost.forEach { resource, tot ->
                 if (tot > 0) {
-                    val opponentProduction = opponentCity!!.pureResourceProduction(resource)
+                    val opponentProduction = opponentCity.pureResourceProduction(resource)
                     val costPerUnit = if (hasTradingAgreement(resource)) 1 else 2 + opponentProduction
                     coinCost += tot * costPerUnit
                 }
@@ -158,24 +152,24 @@ data class PlayerCity(
             when (alternative) {
                 ResourcesAlternative.ANY -> {
                     return Stream.of(Resource.WOOD, Resource.CLAY, Resource.STONE, Resource.GLASS, Resource.PAPER)
-                            .map { resource -> calcMinCost(costAfterPaying(resource, cost), newProduction) }
+                            .map { resource -> calcMinCost(costAfterPaying(resource, cost), newProduction, opponentCity) }
                             .minBy { c -> c?.toFloat() ?: Float.POSITIVE_INFINITY }
                             .orNull
                 }
                 ResourcesAlternative.WOOD_OR_CLAY_OR_STONE -> {
                     return Stream.of(Resource.WOOD, Resource.CLAY, Resource.STONE)
-                            .map { resource -> calcMinCost(costAfterPaying(resource, cost), newProduction) }
+                            .map { resource -> calcMinCost(costAfterPaying(resource, cost), newProduction, opponentCity) }
                             .minBy { c -> c?.toFloat() ?: Float.POSITIVE_INFINITY }
                             .orNull
                 }
                 ResourcesAlternative.GLASS_OR_PAPER -> {
                     return Stream.of(Resource.GLASS, Resource.PAPER)
-                            .map { resource -> calcMinCost(costAfterPaying(resource, cost), newProduction) }
+                            .map { resource -> calcMinCost(costAfterPaying(resource, cost), newProduction, opponentCity) }
                             .minBy { c -> c?.toFloat() ?: Float.POSITIVE_INFINITY }
                             .orNull
                 }
                 else -> {
-                    return calcMinCost(cost, newProduction)
+                    return calcMinCost(cost, newProduction, opponentCity)
                 }
             }
         }
