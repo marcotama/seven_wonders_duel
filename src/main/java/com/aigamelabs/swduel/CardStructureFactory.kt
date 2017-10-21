@@ -2,12 +2,13 @@ package com.aigamelabs.swduel
 
 import com.aigamelabs.swduel.enums.CardGroup
 import io.vavr.collection.Stream
+import java.util.Random
 
 object CardStructureFactory {
 
 
     private fun makeCardStructure(origDeck : Deck, vertices : Stream<Int>, edges : Stream<Pair<Int,Int>>,
-                                  faceDownCard: FaceDownCard) : CardStructure {
+                                  faceDownCard: FaceDownCard, generator : Random) : CardStructure {
 
         var graph = Graph<CardPlaceholder>(vertices.size())
         var deck = origDeck
@@ -17,7 +18,7 @@ object CardStructureFactory {
 
         // Set vertices
         vertices.forEach { i ->
-            val drawOutcome = deck.drawCard()
+            val drawOutcome = deck.drawCard(generator)
             deck = drawOutcome.second
             graph = graph.setVertex(i, drawOutcome.first) // TODO optimize
         }
@@ -31,7 +32,7 @@ object CardStructureFactory {
     }
 
 
-    fun makeFirstAgeCardStructure() : CardStructure {
+    fun makeFirstAgeCardStructure(generator : Random) : CardStructure {
         /*
                 18  19
               15  16  17
@@ -53,11 +54,11 @@ object CardStructureFactory {
                 0, 1, 2, 3, 4, 5, 11, 12, 13, 14, 18, 19
         )
 
-        return makeCardStructure(DeckFactory.createFirstAgeDeck(), vertices, edges, FaceDownCard(CardGroup.FIRST_AGE))
+        return makeCardStructure(DeckFactory.createFirstAgeDeck(generator), vertices, edges, FaceDownCard(CardGroup.FIRST_AGE), generator)
 
     }
 
-    fun makeSecondCardStructure() : CardStructure {
+    fun makeSecondCardStructure(generator : Random) : CardStructure {
         /*
         14  15  16  17  18  19
           09  10  11  12  13
@@ -79,10 +80,10 @@ object CardStructureFactory {
                 0, 1, 5, 6, 7, 8, 14, 15, 16, 17, 18, 19
         )
 
-        return makeCardStructure(DeckFactory.createSecondAgeDeck(), vertices, edges, FaceDownCard(CardGroup.SECOND_AGE))
+        return makeCardStructure(DeckFactory.createSecondAgeDeck(generator), vertices, edges, FaceDownCard(CardGroup.SECOND_AGE), generator)
     }
 
-    fun makeThirdAgeCardStructure() : CardStructure {
+    fun makeThirdAgeCardStructure(generator : Random) : CardStructure {
         /*
                 18  19
               15  16  17
@@ -108,6 +109,6 @@ object CardStructureFactory {
                 0, 1, 5, 6, 7, 8, 11, 12, 13, 14, 18, 19
         )
 
-        return makeCardStructure(DeckFactory.createThirdAgeDeck(), vertices, edges, FaceDownCard(CardGroup.THIRD_AGE))
+        return makeCardStructure(DeckFactory.createThirdAgeDeck(generator), vertices, edges, FaceDownCard(CardGroup.THIRD_AGE), generator)
     }
 }

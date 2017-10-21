@@ -4,12 +4,14 @@ import com.aigamelabs.swduel.Card
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.enums.CardColor
 import com.aigamelabs.swduel.enums.PlayerTurn
+import java.util.Random
+
 
 class BurnForMoney(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
-    override fun process(gameState: GameState) : GameState {
+    override fun process(gameState: GameState, generator : Random) : GameState {
 
         // Remove card from appropriate deck
-        val newCardStructure = gameState.cardStructure!!.pickUpCard(card)
+        val newCardStructure = gameState.cardStructure!!.pickUpCard(card, generator)
 
         //Add coins to player
         val playerCity = gameState.getPlayerCity(playerTurn)

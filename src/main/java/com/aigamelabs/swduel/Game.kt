@@ -1,9 +1,10 @@
 package com.aigamelabs.swduel
 
 import com.aigamelabs.swduel.enums.PlayerTurn
+import java.util.*
 
 class Game(private val players : HashMap<PlayerTurn,Player>) {
-    fun mainLoop(startingGameState : GameState) {
+    fun mainLoop(startingGameState : GameState, generator : Random) {
         var gameState = startingGameState
         while (!gameState.decisionQueue.isEmpty) {
 
@@ -23,11 +24,11 @@ class Game(private val players : HashMap<PlayerTurn,Player>) {
             }
 
             // Process action
-            gameState = action.process(gameState)
+            gameState = action.process(gameState, generator)
 
             // If the cards structure is empty, switch to next age
             if (gameState.cardStructure!!.isEmpty()) {
-                gameState = gameState.switchToNextAge()
+                gameState = gameState.switchToNextAge(generator)
             }
         }
     }

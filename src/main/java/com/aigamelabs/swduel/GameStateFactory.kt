@@ -10,22 +10,23 @@ import io.vavr.collection.HashMap
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
 import java.util.Collections
+import java.util.Random
 
 object GameStateFactory {
 
-    fun createNewGameState() : GameState {
-        return createNewGameState("P1", "P2")
+    fun createNewGameState(generator : Random) : GameState {
+        return createNewGameState("P1", "P2", generator)
     }
 
-    fun createNewGameState(p1Name : String, p2Name : String) : GameState {
+    fun createNewGameState(p1Name : String, p2Name : String, generator : Random) : GameState {
 
         // Initialise the 2 Science token decks
-        val scienceTokensDraw = DeckFactory.createScienceTokenDeck().drawCards(5)
+        val scienceTokensDraw = DeckFactory.createScienceTokenDeck().drawCards(5, generator)
         val activeScienceDeck = Deck("Active Science Tokens", scienceTokensDraw.first)
         val unusedScienceDeck = scienceTokensDraw.second.update("Unused Science Tokens")
 
         // Initialize wonder decks
-        val drawOutcome = DeckFactory.createWondersDeck().drawCards(4)
+        val drawOutcome = DeckFactory.createWondersDeck(generator).drawCards(4, generator)
         val wondersForPickDeck = Deck("Wonders for pick", drawOutcome.first)
         val unusedWondersDeck = drawOutcome.second
 

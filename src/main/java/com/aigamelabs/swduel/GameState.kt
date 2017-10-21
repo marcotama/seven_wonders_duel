@@ -6,6 +6,7 @@ import io.vavr.collection.HashSet
 import io.vavr.collection.HashMap
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
+import java.util.Random
 
 data class GameState (
         val activeScienceDeck : Deck,
@@ -57,11 +58,11 @@ data class GameState (
                 .getOrElseThrow { Exception("Player city not found") }
     }
 
-    fun switchToNextAge() : GameState {
+    fun switchToNextAge(generator: Random) : GameState {
         when (gamePhase) {
             GamePhase.WONDERS_SELECTION -> {
                 // Setup cards structure
-                val newCardStructure = CardStructureFactory.makeFirstAgeCardStructure()
+                val newCardStructure = CardStructureFactory.makeFirstAgeCardStructure(generator)
                 // Add main turn decision
                 val decision = DecisionFactory.makeTurnDecision(defaultPlayer, this, true)
 
@@ -70,7 +71,7 @@ data class GameState (
             }
             GamePhase.FIRST_AGE -> {
                 // Setup cards structure
-                val newCardStructure = CardStructureFactory.makeFirstAgeCardStructure()
+                val newCardStructure = CardStructureFactory.makeSecondCardStructure(generator)
                 // Create decision for starting player
                 val choosingPlayer = militaryBoard.getDisadvantagedPlayer() ?: defaultPlayer
                 val actions = PlayerTurn.values().map { p -> ChooseNextPlayer(choosingPlayer, p) }
@@ -81,7 +82,7 @@ data class GameState (
             }
             GamePhase.SECOND_AGE -> {
                 // Setup cards structure
-                val newCardStructure = CardStructureFactory.makeThirdAgeCardStructure()
+                val newCardStructure = CardStructureFactory.makeThirdAgeCardStructure(generator)
                 // Create decision for starting player
                 val choosingPlayer = militaryBoard.getDisadvantagedPlayer() ?: defaultPlayer
                 val actions = PlayerTurn.values().map { p -> ChooseNextPlayer(choosingPlayer, p) }

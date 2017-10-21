@@ -5,9 +5,10 @@ import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.enums.Enhancement
 import com.aigamelabs.swduel.enums.GamePhase
 import com.aigamelabs.swduel.enums.PlayerTurn
+import java.util.Random
 
 class ChooseUnusedScienceToken(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
-    override fun process(gameState: GameState) : GameState {
+    override fun process(gameState: GameState, generator : Random) : GameState {
         val playerCity =  gameState.getPlayerCity(playerTurn)
         val newScienceTokens = playerCity.scienceTokens.add(card)
         val newPlayerCity = playerCity.update(scienceTokens_ = newScienceTokens)
