@@ -34,6 +34,8 @@ class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
             newMilitaryBoard = gameState.militaryBoard
         }
 
+        // TODO check if the card was GREEN and another card has the same symbol: if so, add ChooseProgressToken decision
+
         val newGameState = gameState.update(cardStructure_ = newCardStructure, playerCities_ = newPlayerCities,
                 militaryBoard_ = newMilitaryBoard)
 

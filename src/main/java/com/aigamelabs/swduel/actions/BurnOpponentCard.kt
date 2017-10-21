@@ -2,8 +2,6 @@ package com.aigamelabs.swduel.actions
 
 import com.aigamelabs.swduel.Card
 import com.aigamelabs.swduel.GameState
-import com.aigamelabs.swduel.GameStateFactory
-import com.aigamelabs.swduel.enums.GameDeck
 import com.aigamelabs.swduel.enums.PlayerTurn
 
 class BurnOpponentCard(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {

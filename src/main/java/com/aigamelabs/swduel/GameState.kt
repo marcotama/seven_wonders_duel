@@ -1,9 +1,11 @@
 package com.aigamelabs.swduel
 
+import com.aigamelabs.swduel.actions.ChooseNextPlayer
 import com.aigamelabs.swduel.enums.*
 import io.vavr.collection.HashSet
 import io.vavr.collection.HashMap
 import io.vavr.collection.Queue
+import io.vavr.collection.Vector
 
 data class GameState (
         val activeScienceDeck : Deck,
@@ -16,7 +18,8 @@ data class GameState (
         val playerCities : HashMap<PlayerTurn,PlayerCity>,
         val decisionQueue: Queue<Decision>,
         private val progressTokens : HashSet<ProgressToken>,
-        private val gamePhase: GamePhase
+        private val gamePhase: GamePhase,
+        private val defaultPlayer : PlayerTurn
 ) {
 
     fun update(
@@ -30,7 +33,8 @@ data class GameState (
             militaryBoard_ : MilitaryBoard? = null,
             playerCities_ : HashMap<PlayerTurn,PlayerCity>? = null,
             decisionQueue_ : Queue<Decision>? = null,
-            gamePhase_: GamePhase? = null
+            gamePhase_: GamePhase? = null,
+            defaultPlayer_: PlayerTurn? = null
     ) : GameState {
         return GameState(
                 activeScienceDeck_ ?: activeScienceDeck,
@@ -43,7 +47,8 @@ data class GameState (
                 playerCities_ ?: playerCities,
                 decisionQueue_ ?: decisionQueue,
                 progressTokens_ ?: progressTokens,
-                gamePhase_ ?: gamePhase
+                gamePhase_ ?: gamePhase,
+                defaultPlayer_ ?: defaultPlayer
         )
     }
 
@@ -58,7 +63,7 @@ data class GameState (
                 // Setup cards structure
                 val newCardStructure = CardStructureFactory.makeFirstAgeCardStructure()
                 // Add main turn decision
-                val decision = DecisionFactory.makeTurnDecision(PlayerTurn.PLAYER_1, this, true)
+                val decision = DecisionFactory.makeTurnDecision(defaultPlayer, this, true)
 
                 return update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.FIRST_AGE,
                         decisionQueue_ = decisionQueue.enqueue(decision))
@@ -67,8 +72,9 @@ data class GameState (
                 // Setup cards structure
                 val newCardStructure = CardStructureFactory.makeFirstAgeCardStructure()
                 // Create decision for starting player
-                val choosingPlayer = militaryBoard.getDisadvantagedPlayer() ?: PlayerTurn.PLAYER_1
-                val decision = DecisionFactory.makeTurnDecision(choosingPlayer, this, true)
+                val choosingPlayer = militaryBoard.getDisadvantagedPlayer() ?: defaultPlayer
+                val actions = PlayerTurn.values().map { p -> ChooseNextPlayer(choosingPlayer, p) }
+                val decision = Decision(choosingPlayer, Vector.ofAll(actions), false)
 
                 return update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.SECOND_AGE,
                         decisionQueue_ = decisionQueue.enqueue(decision))
@@ -77,8 +83,9 @@ data class GameState (
                 // Setup cards structure
                 val newCardStructure = CardStructureFactory.makeThirdAgeCardStructure()
                 // Create decision for starting player
-                val choosingPlayer = militaryBoard.getDisadvantagedPlayer() ?: PlayerTurn.PLAYER_1
-                val decision = DecisionFactory.makeTurnDecision(choosingPlayer, this, true)
+                val choosingPlayer = militaryBoard.getDisadvantagedPlayer() ?: defaultPlayer
+                val actions = PlayerTurn.values().map { p -> ChooseNextPlayer(choosingPlayer, p) }
+                val decision = Decision(choosingPlayer, Vector.ofAll(actions), false)
 
                 return update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.THIRD_AGE,
                         decisionQueue_ = decisionQueue.enqueue(decision))

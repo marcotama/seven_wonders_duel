@@ -51,6 +51,6 @@ object GameStateFactory {
 
         return GameState(activeScienceDeck, unusedScienceDeck, wondersForPickDeck, unusedWondersDeck,
                 burnedDeck, null, MilitaryBoard(), playerCities, Queue.of(decision), progressTokens,
-                GamePhase.WONDERS_SELECTION)
+                GamePhase.WONDERS_SELECTION, PlayerTurn.PLAYER_1)
     }
 }
