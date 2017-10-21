@@ -2,6 +2,7 @@ package com.aigamelabs.swduel.actions
 
 import com.aigamelabs.swduel.Card
 import com.aigamelabs.swduel.Decision
+import com.aigamelabs.swduel.DecisionFactory
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.enums.PlayerTurn
 import io.vavr.collection.Vector
@@ -18,11 +19,10 @@ class BurnForWonder(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn
         val wondersToBuild = playerCity.unbuiltWonders
         val affordableWonders = wondersToBuild.filter { w -> playerCity.canBuild(w, opponentCity) != null }
         val chooseWonderToBuildActions = affordableWonders.map { c -> ChooseWonderToBuild(playerTurn, c) }
-        val decisionQueue = gameState.decisionQueue
-                .insert(0, Decision(playerTurn, Vector.ofAll(chooseWonderToBuildActions), false))
+        val newDecisionQueue = gameState.decisionQueue
+                .enqueue(Decision(playerTurn, Vector.ofAll(chooseWonderToBuildActions), false))
+                .enqueue(DecisionFactory.makeTurnDecision(playerTurn.opponent(), gameState, true))
 
-        // TODO add next main turn
-
-        return gameState.update(cardStructure_ = newCardStructure, decisionQueue_ = decisionQueue)
+        return gameState.update(cardStructure_ = newCardStructure, decisionQueue_ = newDecisionQueue)
     }
 }

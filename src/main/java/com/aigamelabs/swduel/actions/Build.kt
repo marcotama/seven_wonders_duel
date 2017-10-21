@@ -1,10 +1,10 @@
 package com.aigamelabs.swduel.actions
 
-import com.aigamelabs.swduel.Card
-import com.aigamelabs.swduel.GameState
-import com.aigamelabs.swduel.MilitaryBoard
+import com.aigamelabs.swduel.*
 import com.aigamelabs.swduel.enums.CardColor
 import com.aigamelabs.swduel.enums.PlayerTurn
+import io.vavr.collection.Queue
+import io.vavr.collection.Vector
 import java.util.Random
 
 class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
@@ -27,19 +27,29 @@ class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
             val opponentPenalty = additionOutcome.first
             if (opponentPenalty > 0) {
                 val opponentCity = gameState.getPlayerCity(playerTurn.opponent())
-                val newPlayer2City = opponentCity.update(coins_ = opponentCity.coins - opponentPenalty)
-                newPlayerCities = gameState.playerCities.put(playerTurn.opponent(), newPlayer2City)
+                val newOpponentCity = opponentCity.update(coins_ = opponentCity.coins - opponentPenalty)
+                newPlayerCities = gameState.playerCities.put(playerTurn.opponent(), newOpponentCity)
             }
         } else {
             // Unchanged
             newMilitaryBoard = gameState.militaryBoard
         }
 
-        // TODO check if the card was GREEN and another card has the same symbol: if so, add ChooseProgressToken decision
-        // TODO add next main turn
+        var newDecisionQueue = gameState.decisionQueue
+        if (card.color == CardColor.GREEN) {
+            if (playerCity.buildings.filter { c -> c.scienceSymbol == card.scienceSymbol}.size() == 2) {
+                val actions : Vector<Action> = gameState.activeScienceDeck.cards
+                        .map { c -> ChooseProgressToken(playerTurn, c) }
+                val decision = Decision(playerTurn, actions, false)
+                newDecisionQueue = newDecisionQueue.enqueue(decision)
+            }
+        }
+
+        newDecisionQueue = newDecisionQueue
+                .enqueue(DecisionFactory.makeTurnDecision(playerTurn.opponent(), gameState, true))
 
         val newGameState = gameState.update(cardStructure_ = newCardStructure, playerCities_ = newPlayerCities,
-                militaryBoard_ = newMilitaryBoard)
+                militaryBoard_ = newMilitaryBoard, decisionQueue_ = newDecisionQueue)
 
         return when {
             card.color == CardColor.GREEN -> newGameState.checkScienceSupremacy(playerTurn)

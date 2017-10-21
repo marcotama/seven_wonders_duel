@@ -1,6 +1,7 @@
 package com.aigamelabs.swduel.actions
 
 import com.aigamelabs.swduel.Card
+import com.aigamelabs.swduel.DecisionFactory
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.enums.CardColor
 import com.aigamelabs.swduel.enums.PlayerTurn
@@ -23,9 +24,11 @@ class BurnForMoney(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn)
         //Add card to discard deck
         val newBurnedDeck = gameState.burnedDeck.add(card)
 
-        // TODO add next main turn
+        val newDecisionQueue = gameState.decisionQueue
+                .enqueue(DecisionFactory.makeTurnDecision(playerTurn.opponent(), gameState, true))
+
 
         return gameState.update(cardStructure_ = newCardStructure, playerCities_ = updatedPlayerCities,
-                burnedDeck_ = newBurnedDeck)
+                burnedDeck_ = newBurnedDeck, decisionQueue_ = newDecisionQueue)
     }
 }
