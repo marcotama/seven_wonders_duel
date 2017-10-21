@@ -1,11 +1,14 @@
 package com.aigamelabs.swduel
 
+import com.aigamelabs.swduel.actions.Action
+import com.aigamelabs.swduel.actions.ChooseStartingWonder
 import com.aigamelabs.swduel.enums.GamePhase
 import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.swduel.enums.ProgressToken
 import io.vavr.collection.HashSet
 import io.vavr.collection.HashMap
 import io.vavr.collection.Queue
+import io.vavr.collection.Vector
 import java.util.Collections
 
 object GameStateFactory {
@@ -21,10 +24,18 @@ object GameStateFactory {
         val activeScienceDeck = Deck("Active Science Tokens", scienceTokensDraw.first)
         val unusedScienceDeck = scienceTokensDraw.second.update("Unused Science Tokens")
 
-        // Initialize other decks
-        val wondersForPickDeck = Deck("Wonders for pick")
-        val unusedWondersDeck = DeckFactory.createWondersDeck()
+        // Initialize wonder decks
+        val drawOutcome = DeckFactory.createWondersDeck().drawCards(4)
+        val wondersForPickDeck = Deck("Wonders for pick", drawOutcome.first)
+        val unusedWondersDeck = drawOutcome.second
+
+        // Initialize burned cards deck
         val burnedDeck = Deck("Burned")
+
+        // Create decision
+        val actions : Vector<Action> = wondersForPickDeck.cards
+                .map { card -> ChooseStartingWonder(PlayerTurn.PLAYER_1, card) }
+        val decision = Decision(PlayerTurn.PLAYER_1, actions, false)
 
 
         // Setup progress tokens
@@ -42,13 +53,8 @@ object GameStateFactory {
                 PlayerTurn.PLAYER_2, player2City
         )
 
-        val gameState = GameState(activeScienceDeck, unusedScienceDeck, wondersForPickDeck, unusedWondersDeck,
-                burnedDeck, null, progressTokens, MilitaryBoard(), playerCities, Queue.empty(),
+        return GameState(activeScienceDeck, unusedScienceDeck, wondersForPickDeck, unusedWondersDeck,
+                burnedDeck, null, MilitaryBoard(), playerCities, Queue.of(decision), progressTokens,
                 GamePhase.WONDERS_SELECTION)
-
-        val newDecisionQueue = gameState.decisionQueue
-                .enqueue(DecisionFactory.makeTurnDecision(PlayerTurn.PLAYER_1, gameState, true))
-
-        return gameState.update(decisionQueue_ = newDecisionQueue)
     }
 }

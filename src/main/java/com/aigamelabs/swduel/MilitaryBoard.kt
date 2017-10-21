@@ -96,4 +96,14 @@ data class MilitaryBoard(
     fun isMilitarySupremacy() : Boolean {
         return Math.abs(conflictPawnPosition) >= 9
     }
+
+    fun getDisadvantagedPlayer() : PlayerTurn? {
+        return if (conflictPawnPosition > 0) {
+            PlayerTurn.PLAYER_2
+        } else if (conflictPawnPosition < 0)
+            PlayerTurn.PLAYER_1
+        else {
+            null
+        }
+    }
 }

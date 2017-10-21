@@ -2,7 +2,6 @@ package com.aigamelabs.swduel.actions
 
 import com.aigamelabs.swduel.Card
 import com.aigamelabs.swduel.GameState
-import com.aigamelabs.swduel.enums.CardColor
 import com.aigamelabs.swduel.enums.Enhancement
 import com.aigamelabs.swduel.enums.GamePhase
 import com.aigamelabs.swduel.enums.PlayerTurn

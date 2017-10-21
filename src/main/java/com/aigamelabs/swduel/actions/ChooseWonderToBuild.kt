@@ -6,12 +6,12 @@ import io.vavr.collection.HashMap
 import io.vavr.collection.Vector
 
 
-class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
+class ChooseWonderToBuild(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
 
     override fun process(gameState: GameState): GameState {
 
         val playerCity = gameState.getPlayerCity(playerTurn)
-        val cost = playerCity.canBuild(card)!!
+        val cost = playerCity.canBuild(card) ?: throw Exception("Wonder not affordable")
         val playerCoins = playerCity.coins
 
         val newUnbuiltWonders = playerCity.unbuiltWonders.remove(card)
@@ -23,7 +23,7 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(play
 
         val hasExtraTurn = gameState.getPlayerCity(playerTurn).hasProgressToken(Enhancement.THEOLOGY)
         val newGameState = if (hasExtraTurn)
-            gameState.update(decisionQueue_ = gameState.decisionQueue.insert(0, addExtraTurn(gameState)),playerCities_ = newPlayerCities)
+            gameState.update(decisionQueue_ = gameState.decisionQueue.insert(0, addExtraTurn(gameState)), playerCities_ = newPlayerCities)
         else
             gameState.update(playerCities_ = newPlayerCities)
 
@@ -40,12 +40,11 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(play
             Wonders.THE_HANGING_GARDENS -> {
                 val newPlayerCities = addCoinToCity(gameState)
 
-                //Add an extra turn if it hasn't got one already from the science token
-                return if(!hasExtraTurn) {
+                // Add an extra turn if it hasn't got one already from the science token
+                return if (!hasExtraTurn) {
                     gameState.update(decisionQueue_ = gameState.decisionQueue.insert(0, addExtraTurn(gameState)),
                             playerCities_ = newPlayerCities)
-                }
-                else{
+                } else {
                     gameState.update(playerCities_ = newPlayerCities)
                 }
 
@@ -63,15 +62,15 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(play
             }
             Wonders.CIRCUS_MAXIMUS -> {
                 val updatedMilitaryGameState = addMilitaryProgress(1, gameState)
-                val newDecisionQueue  = updatedMilitaryGameState.decisionQueue
-                        .insert(0,addBuildingToBurnActions(updatedMilitaryGameState, CardColor.GRAY))
+                val newDecisionQueue = updatedMilitaryGameState.decisionQueue
+                        .insert(0, addBuildingToBurnActions(updatedMilitaryGameState, CardColor.GRAY))
                 return updatedMilitaryGameState.update(decisionQueue_ = newDecisionQueue)
 
             }
             Wonders.THE_STATUE_OF_ZEUS -> {
                 val updatedMilitaryGameState = addMilitaryProgress(1, gameState)
-                val newDecisionQueue  = updatedMilitaryGameState.decisionQueue
-                        .insert(0,addBuildingToBurnActions(updatedMilitaryGameState, CardColor.BROWN))
+                val newDecisionQueue = updatedMilitaryGameState.decisionQueue
+                        .insert(0, addBuildingToBurnActions(updatedMilitaryGameState, CardColor.BROWN))
                 return updatedMilitaryGameState.update(decisionQueue_ = newDecisionQueue)
             }
             Wonders.THE_TEMPLE_OF_ARTEMIS -> {
@@ -79,8 +78,8 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(play
                 val updatedPlayerCities = removeCoinsFromCity(newPlayerCities, 3)
 
                 return if (!hasExtraTurn)
-                gameState.update(decisionQueue_ = gameState.decisionQueue.
-                        insert(0, addExtraTurn(gameState)),playerCities_ = updatedPlayerCities)
+                    gameState.update(decisionQueue_ = gameState.decisionQueue.
+                            insert(0, addExtraTurn(gameState)), playerCities_ = updatedPlayerCities)
                 else
                     gameState.update(playerCities_ = updatedPlayerCities)
             }
@@ -89,7 +88,7 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(play
 
                 return if (!hasExtraTurn)
                     gameState.update(decisionQueue_ = gameState.decisionQueue.
-                        insert(0, addExtraTurn(gameState)), playerCities_ = newPlayerCities)
+                            insert(0, addExtraTurn(gameState)), playerCities_ = newPlayerCities)
                 else
                     gameState.update(playerCities_ = newPlayerCities)
             }
@@ -105,10 +104,10 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(play
             }
             Wonders.PIRAEUS -> {
                 return if (!hasExtraTurn)
-                 gameState.update(decisionQueue_ = gameState.decisionQueue.
-                        insert(0, addExtraTurn(gameState)))
+                    gameState.update(decisionQueue_ = gameState.decisionQueue.
+                            insert(0, addExtraTurn(gameState)))
                 else
-                         gameState
+                    gameState
             }
             else -> {
                 throw Exception()
@@ -129,8 +128,9 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(play
         return Decision(playerTurn, Vector.ofAll(actions), false)
     }
 
-    private fun removeCoinsFromCity(playerCities: HashMap<PlayerTurn, PlayerCity>, coinsToBeRemoved: Int): HashMap<PlayerTurn, PlayerCity> {
-        val opponentCity = playerCities.get(playerTurn.opponent()).getOrElseThrow { -> Exception("No oopponent city") }
+    private fun removeCoinsFromCity(playerCities: HashMap<PlayerTurn, PlayerCity>, coinsToBeRemoved: Int)
+            : HashMap<PlayerTurn, PlayerCity> {
+        val opponentCity = playerCities.get(playerTurn.opponent()).getOrElseThrow { Exception("No opponent city") }
         val newOpponentCoins = opponentCity.coins - coinsToBeRemoved
         val updatedOpponentCity = opponentCity.update(coins_ = newOpponentCoins)
         return playerCities.put(
@@ -140,7 +140,6 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(play
     }
 
     private fun addCoinToCity(gameState: GameState): HashMap<PlayerTurn, PlayerCity> {
-
         val playerCity = gameState.getPlayerCity(playerTurn)
         val newPlayerCoins = playerCity.coins + card.coinsProduced
         val newPlayerCity = playerCity.update(coins_ = newPlayerCoins)
@@ -155,8 +154,8 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(play
 
         // Move military tokens
         val militaryOutcome = gameState.militaryBoard.addMilitaryPointsTo(strength, playerTurn)
-        //deal with any burning any coins
 
+        // Deal with any burning any coins
         return if (militaryOutcome.first == 0) {
             gameState.update(militaryBoard_ = militaryOutcome.second)
         } else {
@@ -165,13 +164,10 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(play
         }
     }
 
-    private fun addBuildingToBurnActions (gameState: GameState, colourToBurn: CardColor): Decision {
+    private fun addBuildingToBurnActions(gameState: GameState, colourToBurn: CardColor): Decision {
 
-        val playerCity = gameState.playerCities.get(playerTurn.opponent())
-                .getOrElseThrow { -> Exception("The players opponent does not have a city") }
-
+        val playerCity = gameState.getPlayerCity(playerTurn.opponent())
         val colouredCards = playerCity.buildings.filter { c -> c.color == colourToBurn }
-
         val actions = colouredCards.map { c -> BurnOpponentCard(playerTurn, c) }
 
         return Decision(playerTurn, Vector.ofAll(actions), false)

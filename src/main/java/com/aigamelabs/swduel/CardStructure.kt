@@ -2,7 +2,7 @@ package com.aigamelabs.swduel
 
 import io.vavr.collection.Vector
 
-class CardStructure(var graph: Graph<CardPlaceholder>, var faceDownPool: Deck) {
+class CardStructure(private var graph: Graph<CardPlaceholder>, private var faceDownPool: Deck) {
     fun pickUpCard(card: Card) : CardStructure{
         val i = graph.vertices.indexOf(card)
         if (i == -1) {
@@ -28,5 +28,9 @@ class CardStructure(var graph: Graph<CardPlaceholder>, var faceDownPool: Deck) {
         val availableCards = graph.verticesWithNoIncomingEdges()
                 .map { cp -> cp as Card }
         return availableCards as Vector<Card>
+    }
+
+    fun isEmpty() : Boolean{
+        return graph.vertices.filter { c -> c != null }.isEmpty
     }
 }

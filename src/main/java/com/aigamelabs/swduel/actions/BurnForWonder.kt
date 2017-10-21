@@ -9,7 +9,8 @@ import io.vavr.collection.Vector
 class BurnForWonder(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
     override fun process(gameState: GameState) : GameState {
 
-        // TODO remove card from graph/deck
+        // Remove card from appropriate deck
+        val newCardStructure = gameState.cardStructure!!.pickUpCard(card)
 
         val playerCity = gameState.getPlayerCity(playerTurn)
         val wondersToBuild = playerCity.unbuiltWonders
@@ -18,6 +19,6 @@ class BurnForWonder(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn
         val decisionQueue = gameState.decisionQueue
                 .insert(0, Decision(playerTurn, Vector.ofAll(chooseWonderToBuildActions), false))
 
-        return gameState.update(decisionQueue_ = decisionQueue)
+        return gameState.update(cardStructure_ = newCardStructure, decisionQueue_ = decisionQueue)
     }
 }

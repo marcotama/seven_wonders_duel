@@ -10,9 +10,7 @@ class Game(private val players : HashMap<PlayerTurn,Player>) {
             // Dequeue decision and enqueue the next one
             val dequeueOutcome = gameState.decisionQueue.dequeue()
             val thisDecision = dequeueOutcome._1
-            val nextDecision = DecisionFactory.makeTurnDecision(thisDecision.player.opponent(), gameState, true)
-            val newDecisionsQueue = dequeueOutcome._2.enqueue(nextDecision)
-
+            val newDecisionsQueue = dequeueOutcome._2
             gameState = gameState.update(decisionQueue_ = newDecisionsQueue)
 
             // Query player for action
@@ -27,8 +25,10 @@ class Game(private val players : HashMap<PlayerTurn,Player>) {
             // Process action
             gameState = action.process(gameState)
 
-            // TODO check if the cardStructure is empty: if so, add a ChooseNextPlayer decision
-            // ChooseNextPlayer.process() should take care of switching the age and calling gameState.initGamePhase()
+            // If the cards structure is empty, switch to next age
+            if (gameState.cardStructure!!.isEmpty()) {
+                gameState = gameState.switchToNextAge()
+            }
         }
     }
 }

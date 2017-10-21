@@ -4,23 +4,21 @@ import com.aigamelabs.swduel.Card
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.MilitaryBoard
 import com.aigamelabs.swduel.enums.CardColor
-import com.aigamelabs.swduel.enums.Enhancement
-import com.aigamelabs.swduel.enums.GamePhase
 import com.aigamelabs.swduel.enums.PlayerTurn
 
 class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
     override fun process(gameState: GameState) : GameState {
 
-        // Draw card from appropriate deck
+        // Remove card from appropriate deck
         val newCardStructure = gameState.cardStructure!!.pickUpCard(card)
 
         // Add card to appropriate player city
         val playerCity = gameState.getPlayerCity(playerTurn)
-        val newPlayer1City = playerCity.update(buildings_ = playerCity.buildings.add(card))
-        var newPlayerCities = gameState.playerCities.put(playerTurn, newPlayer1City)
+        val newPlayerCity = playerCity.update(buildings_ = playerCity.buildings.add(card))
+        var newPlayerCities = gameState.playerCities.put(playerTurn, newPlayerCity)
 
         // Handle military cards
-        val newMilitaryBoard : MilitaryBoard
+        val newMilitaryBoard: MilitaryBoard
         if (card.color == CardColor.RED) {
             val additionOutcome = gameState.militaryBoard.addMilitaryPointsTo(card.militaryPoints, playerTurn)
             newMilitaryBoard = additionOutcome.second
@@ -31,29 +29,18 @@ class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
                 val newPlayer2City = opponentCity.update(coins_ = opponentCity.coins - opponentPenalty)
                 newPlayerCities = gameState.playerCities.put(playerTurn.opponent(), newPlayer2City)
             }
-        }
-        else {
+        } else {
             // Unchanged
             newMilitaryBoard = gameState.militaryBoard
         }
 
-        // Count science symbols
+        val newGameState = gameState.update(cardStructure_ = newCardStructure, playerCities_ = newPlayerCities,
+                militaryBoard_ = newMilitaryBoard)
 
-        val distinctScienceSymbols = if (card.color == CardColor.GREEN)
-            if (!newPlayer1City.scienceTokens.filter{ c-> c.enhancement == Enhancement.LAW}.isEmpty)
-                playerCity.buildings.map { c -> c.scienceSymbol }.distinct().size() + 1
-            else
-                playerCity.buildings.map { c -> c.scienceSymbol }.distinct().size()
-        else 0
-
-
-        val newGamePhase = when {
-            newMilitaryBoard.isMilitarySupremacy() -> GamePhase.MILITARY_SUPREMACY
-            distinctScienceSymbols >= 6 -> GamePhase.SCIENCE_SUPREMACY
-            else -> gameState.gamePhase
+        return when {
+            card.color == CardColor.GREEN -> newGameState.checkScienceSupremacy(playerTurn)
+            card.color == CardColor.RED -> newGameState.checkMilitarySupremacy()
+            else -> newGameState
         }
-
-        return gameState.update(cardStructure_ = newCardStructure, playerCities_ = newPlayerCities,
-                militaryBoard_ = newMilitaryBoard, gamePhase_ = newGamePhase)
     }
 }

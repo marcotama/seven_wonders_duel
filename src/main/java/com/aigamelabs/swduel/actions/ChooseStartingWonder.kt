@@ -60,8 +60,8 @@ class ChooseStartingWonder(playerTurn: PlayerTurn, val card : Card) : Action(pla
                 newPlayerCities = newGameState.playerCities.put(PlayerTurn.PLAYER_1, newPlayer2City)
                 // Update game phase
                 newWondersForPickDeck = Deck("Wonders for pick")
-                return newGameState.update(wondersForPickDeck_ = newWondersForPickDeck, playerCities_ = newPlayerCities,
-                        gamePhase_ = GamePhase.FIRST_AGE)
+                return newGameState.update(wondersForPickDeck_ = newWondersForPickDeck, playerCities_ = newPlayerCities)
+                        .switchToNextAge()
             }
             else {
                 throw Exception("This should not happen")
