@@ -12,8 +12,7 @@ class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
     override fun process(gameState: GameState) : GameState {
 
         // Draw card from appropriate deck
-        val newCardStructure = gameState.getActiveCardStructure().pickUpCard(card)
-        val newCardStructures = gameState.cardStructures.put(gameState.gamePhase, newCardStructure)
+        val newCardStructure = gameState.cardStructure!!.pickUpCard(card)
 
         // Add card to appropriate player city
         val playerCity = gameState.getPlayerCity(playerTurn)
@@ -54,7 +53,7 @@ class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
             else -> gameState.gamePhase
         }
 
-        return gameState.update(cardStructures_ = newCardStructures, playerCities_ = newPlayerCities,
+        return gameState.update(cardStructure_ = newCardStructure, playerCities_ = newPlayerCities,
                 militaryBoard_ = newMilitaryBoard, gamePhase_ = newGamePhase)
     }
 }

@@ -35,7 +35,7 @@ data class Deck(val name: String, val cards: Vector<Card>) {
         }
     }
 
-    fun drawCards(n : Int = 1) : Pair<Vector<Card>, Deck>? {
+    fun drawCards(n : Int = 1) : Pair<Vector<Card>, Deck> {
         return if (cards.size() >= n) {
             val indices = (0..n).toMutableList()
             Collections.shuffle(indices)
@@ -44,7 +44,7 @@ data class Deck(val name: String, val cards: Vector<Card>) {
             Pair(Vector.ofAll(drawnCards), newDeck)
         }
         else {
-            null
+            throw Exception("The deck is empty")
         }
     }
 
@@ -54,5 +54,9 @@ data class Deck(val name: String, val cards: Vector<Card>) {
 
     fun addAll(deck : Deck) : Deck {
         return Deck(name, cards.appendAll(deck.cards))
+    }
+
+    fun size() : Int {
+        return cards.size()
     }
 }

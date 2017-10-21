@@ -15,14 +15,14 @@ class BurnForWonder(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn
         val playerCity = gameState.playerCities.get(playerTurn)
                 .getOrElseThrow { -> Exception("The player does not have a city") }
 
-        val wondersToBuild = playerCity.wondersDeck
+        val wondersToBuild = playerCity.unbuiltWonders
 
-        val affordableWonders = wondersToBuild.cards.filter { w -> playerCity.canBuild(w) != null }
+        val affordableWonders = wondersToBuild.filter { w -> playerCity.canBuild(w) != null }
 
-        val chooseWondertoBuildActions = affordableWonders.map { c -> ChooseWonderToBuild(playerTurn, c) }
+        val chooseWonderToBuildActions = affordableWonders.map { c -> ChooseWonderToBuild(playerTurn, c) }
 
         val decisionQueue = gameState.decisionQueue
-                .insert(0, Decision(playerTurn, Vector.ofAll(chooseWondertoBuildActions), false))
+                .insert(0, Decision(playerTurn, Vector.ofAll(chooseWonderToBuildActions), false))
 
         return gameState.update(decisionQueue_ = decisionQueue)
     }

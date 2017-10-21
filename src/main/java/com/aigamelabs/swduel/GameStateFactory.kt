@@ -17,19 +17,16 @@ object GameStateFactory {
 
     fun createNewGameState(p1Name : String, p2Name : String) : GameState {
 
-        // Initialize 2 groups of 4 wonders each
-        val draw4outcome1 = DeckFactory.createWondersDeck().drawCards(4)!!
-        val draw4outcome2 = draw4outcome1.second.drawCards(4)!!
-
         // Initialise the 2 Science token decks
-        val scienceTokensDraw = DeckFactory.createScienceTokenDeck().drawCards(5)!!
+        val scienceTokensDraw = DeckFactory.createScienceTokenDeck().drawCards(5)
         val activeScienceDeck = Deck("Active Science Tokens", scienceTokensDraw.first)
         val unusedScienceDeck = scienceTokensDraw.second.update("Unused Science Tokens")
 
         // Initialize decks
+        // TODO remove hash set, make them normal properties
         val decks : HashMap<GameDeck, Deck> = HashMap.of(
-                GameDeck.WONDERS_FOR_PICK, Deck("Wonders for pick", draw4outcome1.first),
-                GameDeck.UNUSED_WONDERS, Deck("Wonders of P2", draw4outcome2.first),
+                GameDeck.WONDERS_FOR_PICK, Deck("Wonders for pick"),
+                GameDeck.UNUSED_WONDERS, DeckFactory.createWondersDeck(),
                 GameDeck.BURNED, Deck("Burned"),
                 GameDeck.ACTIVE_SCIENCE_TOKENS, activeScienceDeck,
                 GameDeck.UNUSED_SCIENCE_TOKENS, unusedScienceDeck
@@ -50,8 +47,8 @@ object GameStateFactory {
                 PlayerTurn.PLAYER_2, player2City
         )
 
-        val gameState = GameState(GameDeck.FIRST_AGE, decks, null,
-                progressTokens, MilitaryBoard(), playerCities, Queue.empty(), GamePhase.FIRST_AGE)
+        val gameState = GameState(decks, null,
+                progressTokens, MilitaryBoard(), playerCities, Queue.empty(), GamePhase.WONDERS_SELECTION)
 
         val newDecisionQueue = gameState.decisionQueue
                 .enqueue(DecisionFactory.makeTurnDecision(PlayerTurn.PLAYER_1, gameState, true))
