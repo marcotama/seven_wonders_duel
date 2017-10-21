@@ -13,24 +13,15 @@ class BurnForMoney(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn)
         //TODO remove from the graph
 
         //Add coins to player
-        val playerCity = gameState.playerCities.get(playerTurn)
-                .getOrElseThrow { -> Exception("The player does not have a city") }
-
+        val playerCity = gameState.getPlayerCity(playerTurn)
         val numberOfCoinsToAdd = playerCity.buildings.filter { c -> c.color == CardColor.GOLD }.length() + 2
-
         val updatedPlayerCity = playerCity.update(coins_ = numberOfCoinsToAdd)
-
         val updatedPlayerCities = gameState.playerCities.put(playerTurn, updatedPlayerCity)
 
 
         //Add card to discard deck
+        val newBurnedDeck = gameState.burnedDeck.add(card)
 
-        val newDiscardDeck = gameState.decks.get(GameDeck.BURNED)
-                .getOrElseThrow { -> Exception("The players opponent does not have a city")}.add(card)
-
-        val newGameDecks = gameState.decks.put(GameDeck.BURNED, newDiscardDeck)
-
-
-        return gameState.update(playerCities_ = updatedPlayerCities, decks_ = newGameDecks ) // TODO
+        return gameState.update(playerCities_ = updatedPlayerCities, burnedDeck_ = newBurnedDeck)  // TODO
     }
 }

@@ -1,6 +1,5 @@
 package com.aigamelabs.swduel
 
-import com.aigamelabs.swduel.enums.GameDeck
 import com.aigamelabs.swduel.enums.GamePhase
 import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.swduel.enums.ProgressToken
@@ -22,15 +21,11 @@ object GameStateFactory {
         val activeScienceDeck = Deck("Active Science Tokens", scienceTokensDraw.first)
         val unusedScienceDeck = scienceTokensDraw.second.update("Unused Science Tokens")
 
-        // Initialize decks
-        // TODO remove hash set, make them normal properties
-        val decks : HashMap<GameDeck, Deck> = HashMap.of(
-                GameDeck.WONDERS_FOR_PICK, Deck("Wonders for pick"),
-                GameDeck.UNUSED_WONDERS, DeckFactory.createWondersDeck(),
-                GameDeck.BURNED, Deck("Burned"),
-                GameDeck.ACTIVE_SCIENCE_TOKENS, activeScienceDeck,
-                GameDeck.UNUSED_SCIENCE_TOKENS, unusedScienceDeck
-        )
+        // Initialize other decks
+        val wondersForPickDeck = Deck("Wonders for pick")
+        val unusedWondersDeck = DeckFactory.createWondersDeck()
+        val burnedDeck = Deck("Burned")
+
 
         // Setup progress tokens
         val allTokens = ProgressToken.values().toMutableList()
@@ -47,8 +42,9 @@ object GameStateFactory {
                 PlayerTurn.PLAYER_2, player2City
         )
 
-        val gameState = GameState(decks, null,
-                progressTokens, MilitaryBoard(), playerCities, Queue.empty(), GamePhase.WONDERS_SELECTION)
+        val gameState = GameState(activeScienceDeck, unusedScienceDeck, wondersForPickDeck, unusedWondersDeck,
+                burnedDeck, null, progressTokens, MilitaryBoard(), playerCities, Queue.empty(),
+                GamePhase.WONDERS_SELECTION)
 
         val newDecisionQueue = gameState.decisionQueue
                 .enqueue(DecisionFactory.makeTurnDecision(PlayerTurn.PLAYER_1, gameState, true))

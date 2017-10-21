@@ -1,6 +1,5 @@
 package com.aigamelabs.swduel
 
-import com.aigamelabs.swduel.enums.GameDeck
 import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.swduel.enums.ProgressToken
 import io.vavr.collection.HashSet
@@ -12,7 +11,11 @@ import com.aigamelabs.swduel.actions.ChooseStartingWonder
 import com.aigamelabs.swduel.enums.GamePhase
 
 data class GameState (
-        val decks : HashMap<GameDeck, Deck>,
+        val activeScienceDeck : Deck,
+        val unusedScienceDeck : Deck,
+        val wondersForPickDeck : Deck,
+        val unusedWondersDeck : Deck,
+        val burnedDeck : Deck,
         val cardStructure : CardStructure?,
         val progressTokens : HashSet<ProgressToken>,
         val militaryBoard: MilitaryBoard,
@@ -22,7 +25,11 @@ data class GameState (
 ) {
 
     fun update(
-            decks_ : HashMap<GameDeck, Deck>? = null,
+            activeScienceDeck_ : Deck? = null,
+            unusedScienceDeck_ : Deck? = null,
+            wondersForPickDeck_ : Deck? = null,
+            unusedWondersDeck_ : Deck? = null,
+            burnedDeck_ : Deck? = null,
             cardStructure_ : CardStructure? = null,
             progressTokens_ : HashSet<ProgressToken>? = null,
             militaryBoard_ : MilitaryBoard? = null,
@@ -31,7 +38,11 @@ data class GameState (
             gamePhase_: GamePhase? = null
     ) : GameState {
         return GameState(
-                decks_ ?: decks,
+                activeScienceDeck_ ?: activeScienceDeck,
+                unusedScienceDeck_ ?: unusedScienceDeck,
+                wondersForPickDeck_ ?: wondersForPickDeck,
+                unusedWondersDeck_ ?: unusedWondersDeck,
+                burnedDeck_ ?: burnedDeck,
                 cardStructure_ ?: cardStructure,
                 progressTokens_ ?: progressTokens,
                 militaryBoard_ ?: militaryBoard,
@@ -43,10 +54,6 @@ data class GameState (
 
     fun getPlayerCity(playerTurn : PlayerTurn) : PlayerCity {
         return playerCities.get(playerTurn).getOrElseThrow { Exception("Player city not found") }
-    }
-
-    fun getDeck(gameDeck: GameDeck) : Deck {
-        return decks.get(gameDeck).getOrElseThrow { Exception("Deck not found") }
     }
 
     fun enqueueDecision (decision: Decision) : GameState {
@@ -66,18 +73,16 @@ data class GameState (
         when (gamePhase) {
             GamePhase.WONDERS_SELECTION -> {
                 // Draw 4 wonders
-                val drawOutcome = getDeck(GameDeck.UNUSED_WONDERS).drawCards(4)
+                val drawOutcome = unusedWondersDeck.drawCards(4)
                 val newUnusedWondersDeck = drawOutcome.second
                 val newWondersForPickDeck = Deck("Wonders for pick", drawOutcome.first)
-                val newDecks = decks
-                        .put(GameDeck.UNUSED_WONDERS, newUnusedWondersDeck)
-                        .put(GameDeck.WONDERS_FOR_PICK, newWondersForPickDeck)
                 // Create decision
                 val actions : Vector<Action> = newWondersForPickDeck.cards
                         .map { card -> ChooseStartingWonder(PlayerTurn.PLAYER_1, card) }
                 val decision = Decision(PlayerTurn.PLAYER_1, actions, false)
 
-                return update(decks_ = newDecks, decisionQueue_ = decisionQueue.enqueue(decision))
+                return update(unusedWondersDeck_ = newUnusedWondersDeck, wondersForPickDeck_ = newWondersForPickDeck,
+                        decisionQueue_ = decisionQueue.enqueue(decision))
             }
             GamePhase.FIRST_AGE -> {
                 val newCardStructure = CardStructureFactory.makeFirstAgeCardStructure()

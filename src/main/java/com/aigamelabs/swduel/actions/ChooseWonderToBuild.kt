@@ -10,9 +10,7 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(play
 
     override fun process(gameState: GameState): GameState {
 
-        val playerCity = gameState.playerCities.get(playerTurn)
-                .getOrElseThrow { -> Exception("The player  does not have a city") }
-
+        val playerCity = gameState.getPlayerCity(playerTurn)
         val cost = playerCity.canBuild(card)!!
         val playerCoins = playerCity.coins
 
@@ -119,18 +117,14 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(play
     }
 
     private fun buildBurned(gameState: GameState): Decision {
-        val actions = gameState.decks.get(GameDeck.BURNED)
-                .getOrElseThrow { -> Exception("No unused sicence deck") }
-                .cards
+        val actions = gameState.burnedDeck.cards
                 .map { c -> BuildBurned(playerTurn, c) }
         return Decision(playerTurn, Vector.ofAll(actions), false)
 
     }
 
     private fun addScienceTokenSelectionAction(gameState: GameState): Decision {
-        val actions = gameState.decks.get(GameDeck.UNUSED_SCIENCE_TOKENS)
-                .getOrElseThrow { -> Exception("No unused sicence deck") }
-                .cards
+        val actions = gameState.unusedScienceDeck.cards
                 .map { c -> ChooseUnusedScienceToken(playerTurn, c) }
         return Decision(playerTurn, Vector.ofAll(actions), false)
     }
@@ -147,8 +141,7 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card : Card) : Action(play
 
     private fun addCoinToCity(gameState: GameState): HashMap<PlayerTurn, PlayerCity> {
 
-        val playerCity = gameState.playerCities.get(playerTurn)
-                .getOrElseThrow { -> Exception("The player  does not have a city") }
+        val playerCity = gameState.getPlayerCity(playerTurn)
         val newPlayerCoins = playerCity.coins + card.coinsProduced
         val newPlayerCity = playerCity.update(coins_ = newPlayerCoins)
         return gameState.playerCities.put(playerTurn, newPlayerCity)

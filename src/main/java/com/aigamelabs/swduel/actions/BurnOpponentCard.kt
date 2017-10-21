@@ -9,19 +9,14 @@ import com.aigamelabs.swduel.enums.PlayerTurn
 class BurnOpponentCard(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
     override fun process(gameState: GameState) : GameState {
 
-        //remove card from opponents city
-        val opponentCity = gameState.playerCities.get(playerTurn.opponent())
-                .getOrElseThrow { -> Exception("The players opponent does not have a city") }
+        // Remove card from opponents city
+        val opponentCity = gameState.getPlayerCity(playerTurn.opponent())
         val updatedOpponentCity = opponentCity.update(buildings_ = opponentCity.buildings.remove(card))
-
         val updatedPlayerCities = gameState.playerCities.put(playerTurn.opponent(), updatedOpponentCity)
 
         // Add burned card to discard deck
-        val newDiscardDeck = gameState.decks.get(GameDeck.BURNED)
-                .getOrElseThrow { -> Exception("The players opponent does not have a city")}.add(card)
+        val newBurnedDeck = gameState.burnedDeck.add(card)
 
-        val newGameDecks = gameState.decks.put(GameDeck.BURNED, newDiscardDeck)
-
-        return gameState.update(playerCities_ = updatedPlayerCities, decks_ = newGameDecks)
+        return gameState.update(playerCities_ = updatedPlayerCities, burnedDeck_ = newBurnedDeck)
     }
 }
