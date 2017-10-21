@@ -8,7 +8,7 @@ import com.aigamelabs.swduel.enums.PlayerTurn
 import java.util.Random
 
 class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
-    override fun process(gameState: GameState, generator : Random) : GameState {
+    override fun process(gameState: GameState, generator : Random?) : GameState {
 
         // Remove card from appropriate deck
         val newCardStructure = gameState.cardStructure!!.pickUpCard(card, generator)

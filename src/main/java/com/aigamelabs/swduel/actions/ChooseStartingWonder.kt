@@ -6,7 +6,7 @@ import io.vavr.collection.Vector
 import java.util.Random
 
 class ChooseStartingWonder(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
-    override fun process(gameState: GameState, generator : Random) : GameState {
+    override fun process(gameState: GameState, generator : Random?) : GameState {
         // Remove wonder from for-pick deck
         var newWondersForPickDeck = gameState.wondersForPickDeck.removeCard(card)
         // Give wonder to the player

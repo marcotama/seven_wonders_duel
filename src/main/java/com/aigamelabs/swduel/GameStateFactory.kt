@@ -14,11 +14,11 @@ import java.util.Random
 
 object GameStateFactory {
 
-    fun createNewGameState(generator : Random) : GameState {
+    fun createNewGameState(generator : Random?) : GameState {
         return createNewGameState("P1", "P2", generator)
     }
 
-    fun createNewGameState(p1Name : String, p2Name : String, generator : Random) : GameState {
+    fun createNewGameState(p1Name : String, p2Name : String, generator : Random?) : GameState {
 
         // Initialise the 2 Science token decks
         val scienceTokensDraw = DeckFactory.createScienceTokenDeck().drawCards(5, generator)

@@ -16,7 +16,7 @@ import java.util.Random
 
 class ChooseWonderToBuild(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
 
-    override fun process(gameState: GameState, generator : Random): GameState {
+    override fun process(gameState: GameState, generator : Random?): GameState {
 
         val playerCity = gameState.getPlayerCity(playerTurn)
         val opponentCity = gameState.getPlayerCity(playerTurn.opponent())

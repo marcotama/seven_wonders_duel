@@ -4,7 +4,7 @@ import com.aigamelabs.swduel.enums.PlayerTurn
 import java.util.*
 
 class Game(private val players : HashMap<PlayerTurn,Player>) {
-    fun mainLoop(startingGameState : GameState, generator : Random) {
+    fun mainLoop(startingGameState : GameState, generator : Random?) {
         var gameState = startingGameState
         while (!gameState.decisionQueue.isEmpty) {
 

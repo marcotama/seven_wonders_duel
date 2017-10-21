@@ -8,7 +8,7 @@ object CardStructureFactory {
 
 
     private fun makeCardStructure(origDeck : Deck, vertices : Stream<Int>, edges : Stream<Pair<Int,Int>>,
-                                  faceDownCard: FaceDownCard, generator : Random) : CardStructure {
+                                  faceDownCard: FaceDownCard, generator : Random?) : CardStructure {
 
         var graph = Graph<CardPlaceholder>(vertices.size())
         var deck = origDeck
@@ -32,7 +32,7 @@ object CardStructureFactory {
     }
 
 
-    fun makeFirstAgeCardStructure(generator : Random) : CardStructure {
+    fun makeFirstAgeCardStructure(generator : Random?) : CardStructure {
         /*
                 18  19
               15  16  17
@@ -58,7 +58,7 @@ object CardStructureFactory {
 
     }
 
-    fun makeSecondCardStructure(generator : Random) : CardStructure {
+    fun makeSecondCardStructure(generator : Random?) : CardStructure {
         /*
         14  15  16  17  18  19
           09  10  11  12  13
@@ -83,7 +83,7 @@ object CardStructureFactory {
         return makeCardStructure(DeckFactory.createSecondAgeDeck(generator), vertices, edges, FaceDownCard(CardGroup.SECOND_AGE), generator)
     }
 
-    fun makeThirdAgeCardStructure(generator : Random) : CardStructure {
+    fun makeThirdAgeCardStructure(generator : Random?) : CardStructure {
         /*
                 18  19
               15  16  17

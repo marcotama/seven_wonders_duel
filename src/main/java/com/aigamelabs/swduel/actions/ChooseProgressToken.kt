@@ -8,7 +8,7 @@ import com.aigamelabs.swduel.enums.GamePhase
 import java.util.Random
 
 class ChooseProgressToken(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
-    override fun process(gameState: GameState, generator : Random) : GameState {
+    override fun process(gameState: GameState, generator : Random?) : GameState {
         val playerCity =  gameState.getPlayerCity(playerTurn)
         val newScienceTokens = playerCity.scienceTokens.add(card)
         val newPlayerCity = playerCity.update(scienceTokens_ = newScienceTokens)

@@ -58,7 +58,7 @@ data class GameState (
                 .getOrElseThrow { Exception("Player city not found") }
     }
 
-    fun switchToNextAge(generator: Random) : GameState {
+    fun switchToNextAge(generator: Random?) : GameState {
         when (gamePhase) {
             GamePhase.WONDERS_SELECTION -> {
                 // Setup cards structure

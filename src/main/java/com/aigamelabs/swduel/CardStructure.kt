@@ -4,7 +4,7 @@ import io.vavr.collection.Vector
 import java.util.Random
 
 class CardStructure(private var graph: Graph<CardPlaceholder>, private var faceDownPool: Deck) {
-    fun pickUpCard(card: Card, generator : Random) : CardStructure{
+    fun pickUpCard(card: Card, generator : Random?) : CardStructure{
         val i = graph.vertices.indexOf(card)
         if (i == -1) {
             throw Exception("Element not found in graph")

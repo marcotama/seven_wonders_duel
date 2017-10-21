@@ -4,7 +4,7 @@ import java.util.Random
 
 object DeckFactory {
 
-    fun createFirstAgeDeck(generator: Random) : Deck {
+    fun createFirstAgeDeck(generator: Random?) : Deck {
         var firstAgeDeck = Deck("First Age", CardFactory.createFromFirstAge())
         val drawOutcome = firstAgeDeck.drawCards(3, generator)
         firstAgeDeck = drawOutcome.second
@@ -13,7 +13,7 @@ object DeckFactory {
     }
 
 
-    fun createSecondAgeDeck(generator: Random) : Deck {
+    fun createSecondAgeDeck(generator: Random?) : Deck {
         var secondAgeDeck = Deck("Second Age", CardFactory.createFromSecondAge())
         val drawOutcome = secondAgeDeck.drawCards(3, generator)
         secondAgeDeck = drawOutcome.second
@@ -22,7 +22,7 @@ object DeckFactory {
     }
 
 
-    fun createThirdAgeDeck(generator: Random) : Deck {
+    fun createThirdAgeDeck(generator: Random?) : Deck {
         var thirdAgeDeck = Deck("Third Age", CardFactory.createFromThirdAge())
         val draw1Outcome = thirdAgeDeck.drawCards(3, generator)
         thirdAgeDeck = draw1Outcome.second
@@ -35,7 +35,7 @@ object DeckFactory {
     }
 
 
-    fun createWondersDeck(generator: Random) : Deck {
+    fun createWondersDeck(generator: Random?) : Deck {
         var wondersDeck = Deck("Wonders", CardFactory.createFromWonders())
         val drawOutcome = wondersDeck.drawCards(4, generator)
         wondersDeck = drawOutcome.second
