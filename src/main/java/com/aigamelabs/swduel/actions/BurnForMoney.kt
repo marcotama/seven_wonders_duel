@@ -23,6 +23,8 @@ class BurnForMoney(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn)
         //Add card to discard deck
         val newBurnedDeck = gameState.burnedDeck.add(card)
 
+        // TODO add next main turn
+
         return gameState.update(cardStructure_ = newCardStructure, playerCities_ = updatedPlayerCities,
                 burnedDeck_ = newBurnedDeck)
     }

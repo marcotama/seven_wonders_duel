@@ -21,6 +21,8 @@ class BurnForWonder(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn
         val decisionQueue = gameState.decisionQueue
                 .insert(0, Decision(playerTurn, Vector.ofAll(chooseWonderToBuildActions), false))
 
+        // TODO add next main turn
+
         return gameState.update(cardStructure_ = newCardStructure, decisionQueue_ = decisionQueue)
     }
 }
