@@ -23,7 +23,7 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
      * @param j the destination of the edge
      * @return an index that can be used to access the adjacency matrix.
      */
-    private fun toIndex(i: Int, j: Int) : Int {
+    fun toIndex(i: Int, j: Int) : Int {
         return i * numVertices + j
     }
 
@@ -33,7 +33,7 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
      * @param k the adjacency matrix index
      * @return two vertex indices representing an edge
      */
-    private fun toCoords(k: Int) : Pair<Int, Int> {
+    fun toCoords(k: Int) : Pair<Int, Int> {
         return Pair(k / numVertices, k % numVertices)
     }
 
@@ -149,7 +149,7 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
     /**
      * Finds the index i of all vertices that are connected to the given vertex j via an edge (i, j).
      *
-     * @param j the edge of interest
+     * @param i the edge of interest
      * @return a list of vertices connected to the given one by an incoming edge
      */
     fun getIncomingEdges(i : Int) : Vector<Int> {
@@ -161,13 +161,24 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
     /**
      * Finds the index j of all vertices that are connected to the given vertex i via an edge (i, j).
      *
-     * @param i the edge of interest
+     * @param j the edge of interest
      * @return a list of vertices connected to the given one by an outgoing edge
      */
     fun getOutgoingEdges(j : Int) : Vector<Int> {
         return Stream.ofAll(0 until numVertices)
                 .filter { i -> adjMatrix[toIndex(i, j)] }
                 .toVector()
+    }
+
+    override fun toString() : String {
+        return "Vertices: " +
+                vertices.zipWithIndex()
+                        .fold("", { acc, pair -> acc + "\n" + pair._1 + ": " + pair._2} ) +
+        "\n\nEdges:" +
+                (0 until numVertices * numVertices)
+                        .filter { k -> adjMatrix[k]}
+                        .map { k -> toCoords(k) }
+                        .fold("", { acc, pair -> acc + "\n" + pair.first + " -> " + pair.second} )
     }
 
 }
