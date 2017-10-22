@@ -18,5 +18,14 @@ class PlayerTurnTest : Spek({
             }
         }
 
+        on("PLAYER_2.opponent()") {
+            val player = PlayerTurn.PLAYER_2
+            val opponent = player.opponent()
+
+            it("should return PLAYER_1") {
+                assertEquals(opponent, PlayerTurn.PLAYER_1)
+            }
+        }
+
     }
 })

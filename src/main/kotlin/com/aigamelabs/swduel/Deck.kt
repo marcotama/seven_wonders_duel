@@ -23,7 +23,7 @@ data class Deck(val name: String, val cards: Vector<Card>) {
         return update(cards_ = cards.remove(card))
     }
 
-    fun drawCard(generator : Random?) : Pair<Card, Deck> {
+    fun drawCard(generator : Random? = null) : Pair<Card, Deck> {
         return if (cards.size() > 0) {
             val cardIdx = generator?.nextInt(cards.size() + 1)
                     ?: ThreadLocalRandom.current().nextInt(0, cards.size() + 1)
@@ -36,7 +36,7 @@ data class Deck(val name: String, val cards: Vector<Card>) {
         }
     }
 
-    fun drawCards(n : Int = 1, generator : Random?) : Pair<Vector<Card>, Deck> {
+    fun drawCards(n : Int = 1, generator : Random? = null) : Pair<Vector<Card>, Deck> {
         return if (cards.size() >= n) {
             val indices = (0..n).toMutableList()
 
@@ -46,7 +46,7 @@ data class Deck(val name: String, val cards: Vector<Card>) {
                 Collections.shuffle(indices, generator)
 
             val drawnCards = indices.subList(0, n).map { i -> cards[indices[i]] }
-            val newDeck = update(cards_ = cards.filter { card -> drawnCards.contains(card) } )
+            val newDeck = update(cards_ = cards.filter { card -> !drawnCards.contains(card) } )
             Pair(Vector.ofAll(drawnCards), newDeck)
         }
         else {
