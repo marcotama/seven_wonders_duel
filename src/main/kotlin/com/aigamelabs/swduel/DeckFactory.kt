@@ -31,7 +31,7 @@ object DeckFactory {
         val draw2Outcome = guildsDeck.drawCards(4, generator)
         guildsDeck = draw2Outcome.second
 
-        return thirdAgeDeck.addAll(guildsDeck)
+        return thirdAgeDeck.merge(guildsDeck)
     }
 
 

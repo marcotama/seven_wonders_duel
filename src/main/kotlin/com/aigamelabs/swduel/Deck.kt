@@ -58,8 +58,12 @@ data class Deck(val name: String, val cards: Vector<Card>) {
         return Deck(name, cards.append(first))
     }
 
-    fun addAll(deck : Deck) : Deck {
-        return Deck(name, cards.appendAll(deck.cards))
+    fun addAll(newCards : Vector<Card>) : Deck {
+        return Deck(name, cards.appendAll(newCards))
+    }
+
+    fun merge(deck : Deck) : Deck {
+        return addAll(deck.cards)
     }
 
     fun size() : Int {

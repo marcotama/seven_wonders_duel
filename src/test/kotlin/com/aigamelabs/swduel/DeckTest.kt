@@ -1,5 +1,9 @@
 package com.aigamelabs.swduel
 
+import com.aigamelabs.swduel.enums.CardColor
+import com.aigamelabs.swduel.enums.CardGroup
+import com.aigamelabs.swduel.enums.Resource
+import io.vavr.collection.Vector
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
@@ -58,6 +62,50 @@ class DeckTest : Spek ({
             it("should return a new deck with the cards removed") {
                 assertTrue(deck.cards.containsAll(drawnCards))
                 drawnCards.forEach { c -> assertFalse(newDeck.cards.contains(c)) }
+            }
+        }
+
+        on("adding a card") {
+            val card = Card(cardGroup = CardGroup.SECOND_AGE, name = "Sawmill", color = CardColor.BROWN, coinCost = 2, resourcesProduced = hashMapOf(Resource.WOOD to 2))
+            val newDeck = deck.add(card)
+
+            it("should return a new deck with the card added") {
+                assertFalse(deck.cards.contains(card))
+                assertTrue(newDeck.cards.contains(card))
+            }
+        }
+
+        on("adding multiple cards") {
+            val newCards = Vector.of(
+                    Card(cardGroup = CardGroup.SECOND_AGE, name = "Sawmill", color = CardColor.BROWN, coinCost = 2, resourcesProduced = hashMapOf(Resource.WOOD to 2)),
+                    Card(cardGroup = CardGroup.SECOND_AGE, name = "Brickyard", color = CardColor.BROWN, coinCost = 2, resourcesProduced = hashMapOf(Resource.CLAY to 2)),
+                    Card(cardGroup = CardGroup.SECOND_AGE, name = "Shelf quarry", color = CardColor.BROWN, coinCost = 2, resourcesProduced = hashMapOf(Resource.STONE to 2))
+            )
+            val newDeck = deck.addAll(newCards)
+
+            it("should return a new deck with the cards added") {
+                newCards.forEach { c -> assertFalse(deck.cards.contains(c)) }
+                assertTrue(newDeck.cards.containsAll(newCards))
+            }
+        }
+
+        on("merging two decks") {
+            val secondAgeCards = CardFactory.createFromSecondAge()
+            val otherDeck = Deck("", secondAgeCards)
+            val newDeck = deck.merge(otherDeck)
+
+            it("should return a new deck with the cards added") {
+                secondAgeCards.forEach { c -> assertFalse(deck.cards.contains(c)) }
+                assertTrue(otherDeck.cards.containsAll(secondAgeCards))
+                assertTrue(newDeck.cards.containsAll(firstAgeCards))
+                assertTrue(newDeck.cards.containsAll(secondAgeCards))
+            }
+        }
+
+        on("a querying for the size of a deck") {
+
+            it("should return the number of cards in the deck") {
+                assertEquals(deck.size(), 23)
             }
         }
     }
