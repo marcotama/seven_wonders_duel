@@ -59,9 +59,12 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card: Card) : Action(playe
 
             }
             Wonders.THE_MAUSOLEUM -> {
-                val newDecisionQueue = gameState.decisionQueue.
-                        insert(0, buildBurned(gameState))
-                return gameState.update(decisionQueue_ = newDecisionQueue)
+                return if (gameState.burnedDeck.size() > 0) {
+                    val newDecisionQueue = gameState.decisionQueue.insert(0, buildBurned(gameState))
+                    gameState.update(decisionQueue_ = newDecisionQueue)
+                } else {
+                    gameState
+                }
             }
             Wonders.THE_COLOSSUS -> {
                 return addMilitaryProgress(2, gameState)
@@ -128,7 +131,6 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card: Card) : Action(playe
         val actions = gameState.burnedDeck.cards
                 .map { c -> BuildBurned(playerTurn, c) }
         return Decision(playerTurn, Vector.ofAll(actions), false)
-
     }
 
     private fun addScienceTokenSelectionAction(gameState: GameState): Decision {
