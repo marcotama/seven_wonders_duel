@@ -100,7 +100,7 @@ data class Card(
     constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>,
                 victoryPoints: Int, victoryPointsFormula: Formula,
                 coinsProduced: Int, coinsProducedFormula: Formula) :
-            this(cardGroup = cardGroup, name = name, color = CardColor.GOLD,
+            this(cardGroup = cardGroup, name = name, color = CardColor.PURPLE,
                     resourceCost = HashMap.ofAll(resourceCost),
                     victoryPoints = victoryPoints, victoryPointsFormula = victoryPointsFormula,
                     coinsProduced = coinsProduced, coinsProducedFormula = coinsProducedFormula,
