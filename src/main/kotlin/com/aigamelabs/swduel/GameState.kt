@@ -104,7 +104,7 @@ data class GameState (
     fun checkScienceSupremacy(playerTurn: PlayerTurn) : GameState {
         // Count science symbols
         val playerCity = getPlayerCity(playerTurn)
-        val hasLawToken = !playerCity.scienceTokens.filter { c -> c.enhancement == Enhancement.LAW }.isEmpty
+        val hasLawToken = !playerCity.progressTokens.filter { c -> c.enhancement == Enhancement.LAW }.isEmpty
         val symbolsFromGreenCards = playerCity.buildings.map { c -> c.scienceSymbol }.distinct().size()
         val distinctScienceSymbols = symbolsFromGreenCards + if (hasLawToken) 1 else 0
 
@@ -136,12 +136,12 @@ data class GameState (
                 .filter { c -> c.victoryPointsFormula == Formula.ABSOLUTE }
                 .map { c -> c.victoryPoints }
                 .fold(0, { a, b -> a + b } )
-        val totalFromProgressTokens = playerCity.scienceTokens
+        val totalFromProgressTokens = playerCity.progressTokens
                 .filter { c -> c.victoryPointsFormula == Formula.ABSOLUTE }
                 .map { c -> c.victoryPoints }
                 .fold(0, { a, b -> a + b } )
         val totalFromMathToken = if (playerCity.hasProgressToken(Enhancement.MATHEMATICS))
-            3 * playerCity.scienceTokens.size() else 0
+            3 * playerCity.progressTokens.size() else 0
 
         return totalFromBuildings + totalFromWonders + totalFromProgressTokens + totalFromMathToken
     }
