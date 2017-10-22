@@ -1,12 +1,4 @@
-TODO LIST
-TODO When a building is added to the burned deck, remove it resource cost, that way we wont have any issues with The Mausoleum Wonder!
-TODO Factor the Build Action and BuildBurned Action together??
-
-TODO When someone is going to build from burned pile if the pile is empty just do nothing!
-
-
-TODO Write function in the GameState Class that is able to build a Vector of all actions (before it is made into a decision). This method is needed for wonders.
-
-TODO Factor the buildBurned and addScienceTokenSelectionAction methods in ChooseWonderToBuild class.
-
-TODO handle switch of age
+TODO Add tests for PlayerCity class
+TODO Add tests for CardStructure class
+TODO Add tests for MilitaryBoard class
+TODO Add tests for GameState class
