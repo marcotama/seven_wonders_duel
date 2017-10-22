@@ -3,7 +3,6 @@ package com.aigamelabs.swduel.actions
 import com.aigamelabs.swduel.*
 import com.aigamelabs.swduel.enums.CardColor
 import com.aigamelabs.swduel.enums.PlayerTurn
-import io.vavr.collection.Queue
 import io.vavr.collection.Vector
 import java.util.Random
 
@@ -15,7 +14,12 @@ class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
 
         // Add card to appropriate player city
         val playerCity = gameState.getPlayerCity(playerTurn)
-        val newPlayerCity = playerCity.update(buildings_ = playerCity.buildings.add(card))
+        val opponentCity = gameState.getPlayerCity(playerTurn.opponent())
+        val coins = if (card.coinsProduced > 0)
+            card.coinsProduced * gameState.getMultiplier(card.coinsProducedFormula, card.referenceCity, playerCity, opponentCity)
+        else
+            0
+        val newPlayerCity = playerCity.update(buildings_ = playerCity.buildings.add(card), coins_ = playerCity.coins + coins)
         var newPlayerCities = gameState.playerCities.put(playerTurn, newPlayerCity)
 
         // Handle military cards
@@ -26,7 +30,6 @@ class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
             // Apply penalty to opponent city, if any
             val opponentPenalty = additionOutcome.first
             if (opponentPenalty > 0) {
-                val opponentCity = gameState.getPlayerCity(playerTurn.opponent())
                 val newOpponentCity = opponentCity.update(coins_ = opponentCity.coins - opponentPenalty)
                 newPlayerCities = gameState.playerCities.put(playerTurn.opponent(), newOpponentCity)
             }
