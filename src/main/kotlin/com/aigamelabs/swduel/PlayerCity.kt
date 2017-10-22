@@ -11,7 +11,7 @@ data class PlayerCity(
         val coins : Int,
         val buildings : HashSet<Card>,
         val wonders : HashSet<Card>,
-        val scienceTokens: HashSet<Card>,
+        val progressTokens: HashSet<Card>,
         val unbuiltWonders: HashSet<Card>
 ) {
 
@@ -30,7 +30,7 @@ data class PlayerCity(
                 coins_ ?: coins,
                 buildings_ ?: buildings,
                 wonders_ ?: wonders,
-                scienceTokens_ ?: scienceTokens,
+                scienceTokens_ ?: progressTokens,
                 unbuiltWonders_ ?: unbuiltWonders
         )
     }
@@ -79,7 +79,7 @@ data class PlayerCity(
     }
 
     fun hasProgressToken(enhancement: Enhancement) : Boolean {
-        return !scienceTokens.filter { t -> t.enhancement == enhancement}.isEmpty
+        return !progressTokens.filter { t -> t.enhancement == enhancement}.isEmpty
     }
 
     /**

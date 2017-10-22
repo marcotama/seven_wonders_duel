@@ -135,7 +135,7 @@ class ChooseWonderToBuild(playerTurn: PlayerTurn, val card: Card) : Action(playe
 
     private fun addScienceTokenSelectionAction(gameState: GameState): Decision {
         val actions = gameState.unusedScienceDeck.cards
-                .map { c -> ChooseUnusedScienceToken(playerTurn, c) }
+                .map { c -> ChooseUnusedProgressToken(playerTurn, c) }
         return Decision(playerTurn, Vector.ofAll(actions), false)
     }
 
