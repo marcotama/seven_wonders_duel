@@ -38,7 +38,7 @@ data class Deck(val name: String, val cards: Vector<Card>) {
 
     fun drawCards(n : Int = 1, generator : Random? = null) : Pair<Vector<Card>, Deck> {
         return if (cards.size() >= n) {
-            val indices = (0..n).toMutableList()
+            val indices = (0 until n).toMutableList()
 
             if (generator == null)
                 Collections.shuffle(indices)

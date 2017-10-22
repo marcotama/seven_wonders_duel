@@ -3,7 +3,7 @@ package com.aigamelabs.swduel
 import io.vavr.collection.Vector
 import java.util.Random
 
-class CardStructure(private var graph: Graph<CardPlaceholder>, private var faceDownPool: Deck) {
+class CardStructure(var graph: Graph<CardPlaceholder>, var faceDownPool: Deck) {
     fun pickUpCard(card: Card, generator : Random?) : CardStructure{
         val i = graph.vertices.indexOf(card)
         if (i == -1) {

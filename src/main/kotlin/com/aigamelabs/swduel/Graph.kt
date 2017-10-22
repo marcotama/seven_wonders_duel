@@ -29,7 +29,7 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
 
     /**
      * Converts an adjacency matrix index to a pair of indices (i, j) representing an edge.
-     * 
+     *
      * @param k the adjacency matrix index
      * @return two vertex indices representing an edge
      */
@@ -129,7 +129,7 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
      * @return `true` if the node has incoming edges, `false` otherwise
      */
     private fun hasIncomingEdges(i: Int) : Boolean {
-        return Stream.ofAll(0..vertices.size())
+        return Stream.ofAll(0 until numVertices)
                 .map { j -> adjMatrix[toIndex(i, j)] }
                 .fold(false, { a, b -> a || b } )
     }
@@ -140,9 +140,21 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
      * @return a list of the nodes that do not have incoming edges
      */
     fun verticesWithNoIncomingEdges() : Vector<T> {
-        return Stream.ofAll(0..vertices.size())
+        return Stream.ofAll(0 until numVertices)
                 .filter { i -> !hasIncomingEdges(i) }
                 .map { i -> vertices[i]!! }
+                .toVector()
+    }
+
+    /**
+     * Finds the index i of all vertices that are connected to the given vertex j via an edge (i, j).
+     *
+     * @param j the edge of interest
+     * @return a list of vertices connected to the given one by an incoming edge
+     */
+    fun getIncomingEdges(i : Int) : Vector<Int> {
+        return Stream.ofAll(0 until numVertices)
+                .filter { j -> adjMatrix[toIndex(i, j)] }
                 .toVector()
     }
 
@@ -152,9 +164,9 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
      * @param i the edge of interest
      * @return a list of vertices connected to the given one by an outgoing edge
      */
-    fun getOutgoingEdges(i : Int) : Vector<Int> {
-        return Stream.ofAll(0..vertices.size())
-                .filter { j -> adjMatrix[toIndex(i, j)] }
+    fun getOutgoingEdges(j : Int) : Vector<Int> {
+        return Stream.ofAll(0 until numVertices)
+                .filter { i -> adjMatrix[toIndex(i, j)] }
                 .toVector()
     }
 

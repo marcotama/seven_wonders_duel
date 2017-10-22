@@ -23,7 +23,7 @@ object CardStructureFactory {
             graph = graph.setVertex(i, drawOutcome.first) // TODO optimize
         }
 
-        (0..origDeck.cards.size()).toSet().minus(vertices).forEach { i ->
+        (0 until origDeck.cards.size()).toSet().minus(vertices).forEach { i ->
             graph = graph.setVertex(i, faceDownCard)
         }
 

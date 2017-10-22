@@ -27,5 +27,10 @@ class PlayerTurnTest : Spek({
             }
         }
 
+        on("a query for all values") {
+            it("should return PLAYER_1 and PLAYER_2") {
+                assertArrayEquals(PlayerTurn.values(), arrayOf(PlayerTurn.PLAYER_1, PlayerTurn.PLAYER_2))
+            }
+        }
     }
 })
