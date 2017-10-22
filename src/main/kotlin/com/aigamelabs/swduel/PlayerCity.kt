@@ -174,4 +174,12 @@ data class PlayerCity(
             }
         }
     }
+
+    fun getBuildingsByColor(color: CardColor) : HashSet<Card> {
+        return buildings.filter { c -> c.color == color }
+    }
+
+    fun countBuildingsByColor(color: CardColor) : Int {
+        return buildings.filter { c -> c.color == color }.size()
+    }
 }
