@@ -19,7 +19,7 @@ data class GameState (
         val playerCities : HashMap<PlayerTurn,PlayerCity>,
         val decisionQueue: Queue<Decision>,
         private val progressTokens : HashSet<ProgressToken>,
-        private val gamePhase: GamePhase,
+        val gamePhase: GamePhase,
         private val defaultPlayer : PlayerTurn
 ) {
 
@@ -93,7 +93,6 @@ data class GameState (
             }
 
             GamePhase.THIRD_AGE -> {
-                // TODO calculate victory points
                 return update(gamePhase_ = GamePhase.CIVILIAN_VICTORY)
             }
             else -> {
@@ -123,6 +122,67 @@ data class GameState (
         }
         else {
             this
+        }
+    }
+
+    fun calculateVictoryPoints(player : PlayerTurn) : Int {
+        val playerCity = getPlayerCity(player)
+        val opponentCity = getPlayerCity(player.opponent())
+        val totalFromBuildings = playerCity.buildings
+                .filter { it.victoryPointsFormula == Formula.ABSOLUTE }
+                .map { it.victoryPoints * getMultiplier(it.victoryPointsFormula, it.referenceCity, playerCity, opponentCity) }
+                .fold(0, { a, b -> a + b } )
+        val totalFromWonders = playerCity.wonders
+                .filter { c -> c.victoryPointsFormula == Formula.ABSOLUTE }
+                .map { c -> c.victoryPoints }
+                .fold(0, { a, b -> a + b } )
+        val totalFromProgressTokens = playerCity.scienceTokens
+                .filter { c -> c.victoryPointsFormula == Formula.ABSOLUTE }
+                .map { c -> c.victoryPoints }
+                .fold(0, { a, b -> a + b } )
+        val totalFromMathToken = if (playerCity.hasProgressToken(Enhancement.MATHEMATICS))
+            3 * playerCity.scienceTokens.size() else 0
+
+        return totalFromBuildings + totalFromWonders + totalFromProgressTokens + totalFromMathToken
+    }
+
+    fun getMultiplier(formula: Formula, cityForFormula: CityForFormula, playerCity: PlayerCity, opponentCity: PlayerCity) : Int {
+
+        // From highest city
+        val fhc = { c : CardColor -> Math.max(playerCity.countBuildingsByColor(c), opponentCity.countBuildingsByColor(c)) }
+        // From player city
+        val fpc = { c : CardColor -> playerCity.countBuildingsByColor(c) }
+
+        return when (cityForFormula) {
+            CityForFormula.NOT_APPLICABLE -> when (formula) {
+                Formula.ABSOLUTE -> { 1 }
+                else -> { throw Exception("Formula for victory points is not ABSOLUTE but reference city is NOT_APPLICABLE")}
+            }
+            CityForFormula.CITY_WITH_MOST_UNITS  -> when (formula) {
+                Formula.PER_BROWN_AND_GRAY_CARD -> { fhc(CardColor.BROWN) + fhc(CardColor.GRAY) }
+                Formula.PER_BROWN_CARD -> { fhc(CardColor.BROWN) }
+                Formula.PER_GRAY_CARD -> { fhc(CardColor.GRAY) }
+                Formula.PER_GREEN_CARD -> { fhc(CardColor.GREEN) }
+                Formula.PER_BLUE_CARD -> { fhc(CardColor.BLUE) }
+                Formula.PER_GOLD_CARD -> { fhc(CardColor.GOLD) }
+                Formula.PER_RED_CARD -> { fhc(CardColor.RED) }
+                Formula.PER_THREE_COINS -> { Math.max(playerCity.coins, opponentCity.coins) / 3 }
+                Formula.PER_WONDER -> { Math.max(playerCity.wonders.size(), opponentCity.wonders.size()) }
+                Formula.ABSOLUTE -> { throw Exception("Formula for victory points is ABSOLUTE but reference city is not NOT_APPLICABLE")}
+
+            }
+            CityForFormula.YOUR_CITY-> when (formula) {
+                Formula.PER_BROWN_AND_GRAY_CARD -> { fhc(CardColor.BROWN) + fhc(CardColor.GRAY) }
+                Formula.PER_BROWN_CARD -> { fpc(CardColor.BROWN) }
+                Formula.PER_GRAY_CARD -> { fpc(CardColor.GRAY) }
+                Formula.PER_GREEN_CARD -> { fpc(CardColor.GREEN) }
+                Formula.PER_BLUE_CARD -> { fpc(CardColor.BLUE) }
+                Formula.PER_GOLD_CARD -> { fpc(CardColor.GOLD) }
+                Formula.PER_RED_CARD -> { fpc(CardColor.RED) }
+                Formula.PER_THREE_COINS -> { playerCity.coins / 3 }
+                Formula.PER_WONDER -> { playerCity.wonders.size() }
+                Formula.ABSOLUTE -> { throw Exception("Formula for victory points is ABSOLUTE but reference city is not NOT_APPLICABLE")}
+            }
         }
     }
 }
