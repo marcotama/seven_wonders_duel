@@ -133,6 +133,6 @@ class UctWorker(internal var manager: UctParallelizationManager) : Runnable {
     }
 
     companion object {
-        private val rnd = RandomWithTracker(Random().nextLong())
+        private val rnd = Random()
     }
 }
