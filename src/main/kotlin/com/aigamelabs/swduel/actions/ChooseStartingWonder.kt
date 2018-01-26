@@ -3,10 +3,8 @@ package com.aigamelabs.swduel.actions
 import com.aigamelabs.swduel.*
 import com.aigamelabs.swduel.enums.PlayerTurn
 import io.vavr.collection.Vector
-import java.util.Random
-
 class ChooseStartingWonder(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
-    override fun process(gameState: GameState, generator : Random?) : GameState {
+    override fun process(gameState: GameState, generator : RandomWithTracker?) : GameState {
         // Remove wonder from for-pick deck
         var newWondersForPickDeck = gameState.wondersForPickDeck.removeCard(card)
         // Give wonder to the player

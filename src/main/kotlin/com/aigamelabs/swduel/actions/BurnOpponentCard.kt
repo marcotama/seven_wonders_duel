@@ -2,11 +2,11 @@ package com.aigamelabs.swduel.actions
 
 import com.aigamelabs.swduel.Card
 import com.aigamelabs.swduel.GameState
+import com.aigamelabs.swduel.RandomWithTracker
 import com.aigamelabs.swduel.enums.PlayerTurn
-import java.util.Random
 
 class BurnOpponentCard(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
-    override fun process(gameState: GameState, generator : Random?) : GameState {
+    override fun process(gameState: GameState, generator : RandomWithTracker?) : GameState {
 
         // Remove card from opponents city
         val opponentCity = gameState.getPlayerCity(playerTurn.opponent())

@@ -1,22 +1,17 @@
 package com.aigamelabs.swduel.actions
 
-import com.aigamelabs.swduel.Card
-import com.aigamelabs.swduel.GameState
-import com.aigamelabs.swduel.Decision
-import com.aigamelabs.swduel.PlayerCity
-import com.aigamelabs.swduel.DecisionFactory
+import com.aigamelabs.swduel.*
 import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.swduel.enums.Enhancement
 import com.aigamelabs.swduel.enums.Wonders
 import com.aigamelabs.swduel.enums.CardColor
 import io.vavr.collection.HashMap
 import io.vavr.collection.Vector
-import java.util.Random
 
 
 class ChooseWonderToBuild(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
 
-    override fun process(gameState: GameState, generator : Random?): GameState {
+    override fun process(gameState: GameState, generator : RandomWithTracker?): GameState {
 
         val playerCity = gameState.getPlayerCity(playerTurn)
         val opponentCity = gameState.getPlayerCity(playerTurn.opponent())

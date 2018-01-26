@@ -3,13 +3,12 @@ package com.aigamelabs.swduel
 import com.aigamelabs.swduel.enums.CardGroup
 import io.vavr.collection.HashSet
 import io.vavr.collection.Vector
-import java.util.Random
 
 object CardStructureFactory {
 
 
     private fun makeCardStructure(origDeck : Deck, faceUpCardsIdx: HashSet<Int>, connections: HashSet<Pair<Int,Int>>,
-                                  faceDownCard: FaceDownCard, generator : Random?) : CardStructure {
+                                  faceDownCard: FaceDownCard, generator : RandomWithTracker?) : CardStructure {
 
         val graph = Graph<CardPlaceholder>(origDeck.size())
         val numVertices = origDeck.size()
@@ -31,7 +30,7 @@ object CardStructureFactory {
     }
 
 
-    fun makeFirstAgeCardStructure(generator : Random?) : CardStructure {
+    fun makeFirstAgeCardStructure(generator : RandomWithTracker?) : CardStructure {
         /*
                 18  19
               15  16  17
@@ -57,7 +56,7 @@ object CardStructureFactory {
 
     }
 
-    fun makeSecondCardStructure(generator : Random?) : CardStructure {
+    fun makeSecondCardStructure(generator : RandomWithTracker?) : CardStructure {
         /*
         14  15  16  17  18  19
           09  10  11  12  13
@@ -82,7 +81,7 @@ object CardStructureFactory {
         return makeCardStructure(DeckFactory.createSecondAgeDeck(generator), vertices, edges, FaceDownCard(CardGroup.SECOND_AGE), generator)
     }
 
-    fun makeThirdAgeCardStructure(generator : Random?) : CardStructure {
+    fun makeThirdAgeCardStructure(generator : RandomWithTracker?) : CardStructure {
         /*
                 18  19
               15  16  17

@@ -1,12 +1,12 @@
 package com.aigamelabs.swduel
 
+import com.aigamelabs.swduel.actions.Action
 import com.aigamelabs.swduel.actions.ChooseNextPlayer
 import com.aigamelabs.swduel.enums.*
 import io.vavr.collection.HashSet
 import io.vavr.collection.HashMap
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
-import java.util.Random
 
 data class GameState (
         val activeScienceDeck : Deck,
@@ -58,7 +58,7 @@ data class GameState (
                 .getOrElseThrow { Exception("Player city not found") }
     }
 
-    fun switchToNextAge(generator: Random?) : GameState {
+    fun switchToNextAge(generator: RandomWithTracker?) : GameState {
         when (gamePhase) {
             GamePhase.WONDERS_SELECTION -> {
                 // Setup cards structure
@@ -183,6 +183,37 @@ data class GameState (
                 Formula.PER_WONDER -> { playerCity.wonders.size() }
                 Formula.ABSOLUTE -> { throw Exception("Formula for victory points is ABSOLUTE but reference city is not NOT_APPLICABLE")}
             }
+        }
+    }
+
+    /**
+     * Deques a decision and returns the updated game state (without the decision in the queue) and the extracted
+     * decision.
+     */
+    fun dequeAction() : Pair<GameState, Decision> {
+        val dequeueOutcome = decisionQueue.dequeue()
+        val thisDecision = dequeueOutcome._1
+        val newDecisionsQueue = dequeueOutcome._2
+        val returnGameState = update(decisionQueue_ = newDecisionsQueue)
+        return Pair(returnGameState, thisDecision)
+    }
+
+    companion object {
+        /**
+         * Advances the game by one step by applying the given action to the next decision in the queue. Does not detect
+         * cheating.
+         */
+        fun applyAction(gameState: GameState, action: Action, generator: RandomWithTracker? = null): GameState {
+
+            // Process action
+            var newGameState = action.process(gameState, generator)
+
+            // If the cards structure is empty, switch to next age
+            if (newGameState.cardStructure!!.isEmpty()) {
+                newGameState = newGameState.switchToNextAge(generator)
+            }
+
+            return newGameState
         }
     }
 }

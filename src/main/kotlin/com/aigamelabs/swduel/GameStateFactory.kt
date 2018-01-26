@@ -9,16 +9,14 @@ import io.vavr.collection.HashSet
 import io.vavr.collection.HashMap
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
-import java.util.Collections
-import java.util.Random
 
 object GameStateFactory {
 
-    fun createNewGameState(generator : Random?) : GameState {
+    fun createNewGameState(generator : RandomWithTracker?) : GameState {
         return createNewGameState("P1", "P2", generator)
     }
 
-    fun createNewGameState(p1Name : String, p2Name : String, generator : Random?) : GameState {
+    fun createNewGameState(p1Name : String, p2Name : String, generator : RandomWithTracker?) : GameState {
 
         // Initialise the 2 Science token decks
         val scienceTokensDraw = DeckFactory.createScienceTokenDeck().drawCards(5, generator)
@@ -41,7 +39,7 @@ object GameStateFactory {
 
         // Setup progress tokens
         val allTokens = ProgressToken.values().toMutableList()
-        Collections.shuffle(allTokens)
+        allTokens.shuffle()
         val progressTokens = HashSet.ofAll(allTokens.subList(0, 5))
 
         // Set cities
