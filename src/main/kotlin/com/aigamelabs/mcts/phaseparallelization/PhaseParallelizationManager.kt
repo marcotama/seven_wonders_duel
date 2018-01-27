@@ -1,13 +1,12 @@
-package com.aigamelabs.swduel.players.mcts.phaseparallelization
+package com.aigamelabs.mcts.phaseparallelization
 
-import com.aigamelabs.swduel.Decision
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.actions.Action
-import com.aigamelabs.swduel.players.mcts.Manager
-import com.aigamelabs.swduel.players.mcts.NodeType
-import com.aigamelabs.swduel.players.mcts.TreeNode
-import com.aigamelabs.swduel.players.mcts.actionselection.ActionSelector
-import com.aigamelabs.swduel.players.mcts.nodeevaluation.NodeEvaluator
+import com.aigamelabs.mcts.Manager
+import com.aigamelabs.mcts.NodeType
+import com.aigamelabs.mcts.TreeNode
+import com.aigamelabs.mcts.actionselection.ActionSelector
+import com.aigamelabs.mcts.nodeevaluation.NodeEvaluator
 import io.vavr.collection.Vector
 
 import java.util.LinkedList
@@ -15,13 +14,10 @@ import java.util.concurrent.*
 
 
 class PhaseParallelizationManager(
-        rootNode: TreeNode,
-        rootGameState: GameState,
-        playerNumber: Boolean,
         actionSelector: ActionSelector,
         playerNodeEvaluator: NodeEvaluator,
         opponentNodeEvaluator: NodeEvaluator
-) : Manager(rootNode, rootGameState, playerNumber, actionSelector, playerNodeEvaluator, opponentNodeEvaluator) {
+) : Manager(actionSelector, playerNodeEvaluator, opponentNodeEvaluator) {
 
     /** Workers  */
     private var workers: LinkedList<Runnable>
@@ -107,7 +103,8 @@ class PhaseParallelizationManager(
      * @return Action with the highest number of visits
      */
     override fun run(gameState: GameState, options: Vector<Action>): Action {
-        setup(options)
+        rootGameState = gameState
+        rootNode = createRoot(options)
 
         running = true
         try {
@@ -119,22 +116,23 @@ class PhaseParallelizationManager(
 
         // Logging
         if (exportTree)
-            rootNode.export("./logs/tree.json")
+            rootNode!!.export("./logs/tree.json")
         if (verbose)
-            System.out.println("UCT run " + rootNode.games + " times.")
+            System.out.println("UCT run " + rootNode!!.games + " times.")
 
         // Choose best action based on MCTS scores
-        val selected = actionSelector.chooseBestNode(rootNode.children!!.values.toTypedArray())
+        val selected = actionSelector.chooseBestNode(rootNode!!.children!!.values.toTypedArray())
 
         // Return selected
-        return if (selected >= rootNode.children!!.size)
-            rootNode.children!![arrayOf(0)]!!.selectedAction!! // Default: first action in the list
+        return if (selected >= rootNode!!.children!!.size)
+            rootNode!!.children!![arrayOf(0)]!!.selectedAction!! // Default: first action in the list
         else
-            rootNode.children!![arrayOf(selected)]!!.selectedAction!!
+            rootNode!!.children!![arrayOf(selected)]!!.selectedAction!!
     }
 
-    fun setup(options: Vector<Action>) {
-        val rootNode = TreeNode(null, NodeType.PLAYER_NODE, null, rootGameState, this)
+    private fun createRoot(options: Vector<Action>) : TreeNode {
+        val rootNode = TreeNode(null, NodeType.PLAYER_NODE, null, rootGameState!!, this)
         rootNode.createChildren(options.toJavaList())
+        return rootNode
     }
 }

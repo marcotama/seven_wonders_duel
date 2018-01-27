@@ -1,7 +1,7 @@
 package com.aigamelabs.swduel
 
-import com.aigamelabs.swduel.actions.Action
 import com.aigamelabs.swduel.enums.PlayerTurn
+import com.aigamelabs.swduel.actions.Action
 import io.vavr.collection.Vector
 
 /**

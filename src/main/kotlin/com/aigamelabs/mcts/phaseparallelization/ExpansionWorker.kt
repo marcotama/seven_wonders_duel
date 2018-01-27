@@ -1,7 +1,7 @@
-package com.aigamelabs.swduel.players.mcts.phaseparallelization
+package com.aigamelabs.mcts.phaseparallelization
 
 import com.aigamelabs.swduel.actions.Action
-import com.aigamelabs.swduel.players.mcts.TreeNode
+import com.aigamelabs.mcts.TreeNode
 import io.vavr.collection.Vector
 
 /**

@@ -1,10 +1,9 @@
-package com.aigamelabs.swduel.players.mcts.phaseparallelization
+package com.aigamelabs.mcts.phaseparallelization
 
-import com.aigamelabs.swduel.GameState
-import com.aigamelabs.swduel.RandomWithTracker
-import com.aigamelabs.swduel.players.mcts.NodeType
-import com.aigamelabs.swduel.players.mcts.TreeNode
-import com.aigamelabs.swduel.players.mcts.Util
+import com.aigamelabs.utils.RandomWithTracker
+import com.aigamelabs.mcts.NodeType
+import com.aigamelabs.mcts.TreeNode
+import com.aigamelabs.mcts.Util
 import java.util.*
 
 /**
@@ -34,14 +33,14 @@ class SelectionWorker(internal var manager: PhaseParallelizationManager) : Runna
      */
     private fun select(): TreeNode {
 
-        var currentNode = manager.rootNode
+        var currentNode = manager.rootNode!!
 
         // Descend the root node
         while (currentNode.hasChildren()) {
             if (currentNode.nodeType == NodeType.STOCHASTIC_NODE) {
                 val parent = currentNode.parent!!
                 // Re-apply parent action to parent game state to sample another game state for the child
-                val newGameState = GameState.applyAction(parent.gameState, parent.selectedAction!!, generator)
+                val newGameState = parent.gameState.applyAction(parent.selectedAction!!, generator)
                 // The random integers generated during the action application are the unique identifier for the child
                 val childId = generator.popAll()
                 // If a child with that id does not exist, create it

@@ -1,5 +1,7 @@
 package com.aigamelabs.swduel
 
+import com.aigamelabs.utils.RandomWithTracker
+import com.aigamelabs.utils.Graph
 import io.vavr.collection.Vector
 
 class CardStructure(var graph: Graph<CardPlaceholder>, var faceDownPool: Deck) {

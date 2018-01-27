@@ -1,10 +1,8 @@
 package com.aigamelabs.swduel
 
-import com.aigamelabs.swduel.actions.Action
+import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.enums.GameOutcome
-import com.aigamelabs.swduel.enums.GamePhase
 import com.aigamelabs.swduel.enums.PlayerTurn
-import io.vavr.collection.HashSet
 import java.util.*
 
 /**
@@ -23,7 +21,7 @@ import java.util.*
  *    The `process` method also takes care of adding new decisions to the queue, if any.
  *  - Repeat
  */
-class Game(private val players : HashMap<PlayerTurn,Player>? = null) {
+class Game(private val players : HashMap<PlayerTurn, Player>? = null) {
     fun mainLoop(startingGameState : GameState, generator : RandomWithTracker?) {
 
         // Play the game
@@ -33,7 +31,7 @@ class Game(private val players : HashMap<PlayerTurn,Player>? = null) {
         }
 
         // Determine winner
-        val gameOutcome = calculateWinner(gameState)
+        val gameOutcome = gameState.calculateWinner()
         val outcome = gameOutcome.first
         val p1VictoryPoints = gameOutcome.second
         val p2VictoryPoints = gameOutcome.third
@@ -71,27 +69,6 @@ class Game(private val players : HashMap<PlayerTurn,Player>? = null) {
         }
 
         return gameState_
-    }
-
-
-    companion object {
-        /**
-         * Calculates the winner and the victory points
-         */
-        fun calculateWinner(gameState: GameState): Triple<GameOutcome, Int, Int> {
-            val endGamePhases = HashSet.of(GamePhase.MILITARY_SUPREMACY, GamePhase.SCIENCE_SUPREMACY, GamePhase.CIVILIAN_VICTORY)
-            return if (endGamePhases.contains(gameState.gamePhase)) {
-                val p1VictoryPoints = gameState.calculateVictoryPoints(PlayerTurn.PLAYER_1)
-                val p2VictoryPoints = gameState.calculateVictoryPoints(PlayerTurn.PLAYER_2)
-                when {
-                    p1VictoryPoints > p2VictoryPoints -> Triple(GameOutcome.PLAYER_1_VICTORY, p1VictoryPoints, p2VictoryPoints)
-                    p2VictoryPoints > p1VictoryPoints -> Triple(GameOutcome.PLAYER_2_VICTORY, p1VictoryPoints, p2VictoryPoints)
-                    else -> Triple(GameOutcome.TIE, p1VictoryPoints, p2VictoryPoints)
-                }
-            } else {
-                throw Exception("Something went wrong: we left the game loop but the game phase is not final:\n${gameState.gamePhase}")
-            }
-        }
     }
 
 }

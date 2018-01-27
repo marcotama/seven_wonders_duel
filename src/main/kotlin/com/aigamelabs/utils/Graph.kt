@@ -1,4 +1,4 @@
-package com.aigamelabs.swduel
+package com.aigamelabs.utils
 
 import io.vavr.collection.Stream
 import io.vavr.collection.Vector

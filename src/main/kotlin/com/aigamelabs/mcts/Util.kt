@@ -1,4 +1,4 @@
-package com.aigamelabs.swduel.players.mcts
+package com.aigamelabs.mcts
 
 import java.util.Random
 import java.util.Arrays

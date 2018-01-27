@@ -1,10 +1,10 @@
-package com.aigamelabs.swduel.players.mcts.uctparallelization
+package com.aigamelabs.mcts.uctparallelization
 
 import com.aigamelabs.swduel.GameState
-import com.aigamelabs.swduel.RandomWithTracker
-import com.aigamelabs.swduel.players.mcts.NodeType
-import com.aigamelabs.swduel.players.mcts.TreeNode
-import com.aigamelabs.swduel.players.mcts.Util
+import com.aigamelabs.utils.RandomWithTracker
+import com.aigamelabs.mcts.NodeType
+import com.aigamelabs.mcts.TreeNode
+import com.aigamelabs.mcts.Util
 import java.util.*
 
 import java.util.stream.IntStream
@@ -50,8 +50,8 @@ class UctWorker(internal var manager: UctParallelizationManager) : Runnable {
      */
     private fun uct() {
 
-        var currentNode = manager.rootNode
-        var gameState = manager.rootGameState
+        var currentNode = manager.rootNode!!
+        var gameState = manager.rootGameState!!
 
         // Descend from the root node to a leaf, and expand the leaf if appropriate
         while ((currentNode.hasChildren() || currentNode.games >= manager.uctNodeCreateThreshold)
@@ -60,7 +60,7 @@ class UctWorker(internal var manager: UctParallelizationManager) : Runnable {
             if (currentNode.nodeType == NodeType.STOCHASTIC_NODE) {
                 val parent = currentNode.parent!!
                 // Re-apply parent action to parent game state to sample another game state for the child
-                val newGameState = GameState.applyAction(parent.gameState, parent.selectedAction!!, generator)
+                val newGameState = parent.gameState.applyAction(parent.selectedAction!!, generator)
                 // The random integers generated during the action application are the unique identifier for the child
                 val childId = generator.popAll()
                 // If a child with that id does not exist, create it
@@ -127,7 +127,7 @@ class UctWorker(internal var manager: UctParallelizationManager) : Runnable {
                 val decision = dequeueOutcome.second
                 val options = decision.options
                 val choice = rnd.nextInt(options.size())
-                gameState = GameState.applyAction(gameState, options[choice])
+                gameState = gameState.applyAction(options[choice])
             }
         return gameState
     }

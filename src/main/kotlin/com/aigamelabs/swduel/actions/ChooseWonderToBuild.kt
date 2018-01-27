@@ -1,5 +1,7 @@
 package com.aigamelabs.swduel.actions
 
+import com.aigamelabs.swduel.Decision
+import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.*
 import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.swduel.enums.Enhancement

@@ -1,4 +1,4 @@
-package com.aigamelabs.swduel.players.mcts
+package com.aigamelabs.mcts
 
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.actions.Action
@@ -18,7 +18,7 @@ import java.util.stream.IntStream
 class TreeNode(val parent: TreeNode?, val nodeType: NodeType, val selectedAction: Action?, val gameState: GameState, val manager: Manager) {
 
     /** Children nodes  */
-    var children: HashMap<Array<Int>,TreeNode>? = null
+    var children: HashMap<Array<Int>, TreeNode>? = null
 
     /** Depth of the node  */
     val depth: Int = if (parent == null) 0 else parent.depth + 1
@@ -105,7 +105,7 @@ class TreeNode(val parent: TreeNode?, val nodeType: NodeType, val selectedAction
             IntStream.range(0, actions.size)
                     .forEach {
                         val action = actions[it]
-                        val newGameState =  GameState.applyAction(gameState, action)
+                        val newGameState =  gameState.applyAction(action)
                         children!![arrayOf(it)] = TreeNode(this, childrenType, action, newGameState, manager)
                     }
         }

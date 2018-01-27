@@ -1,7 +1,7 @@
-package com.aigamelabs.swduel.players.mcts.phaseparallelization
+package com.aigamelabs.mcts.phaseparallelization
 
 import com.aigamelabs.swduel.GameState
-import com.aigamelabs.swduel.players.mcts.TreeNode
+import com.aigamelabs.mcts.TreeNode
 import java.util.*
 
 import java.util.stream.IntStream
@@ -40,7 +40,7 @@ class PlayoutWorker(internal var manager: PhaseParallelizationManager) : Runnabl
                     val decision = dequeueOutcome.second
                     val options = decision.options
                     val choice = rnd.nextInt(options.size())
-                    gameState = GameState.applyAction(gameState, options[choice])
+                    gameState = gameState.applyAction(options[choice])
                 }
         return gameState
     }

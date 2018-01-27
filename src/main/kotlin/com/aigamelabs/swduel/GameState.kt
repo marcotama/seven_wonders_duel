@@ -1,6 +1,9 @@
 package com.aigamelabs.swduel
 
 import com.aigamelabs.swduel.actions.Action
+import com.aigamelabs.utils.RandomWithTracker
+import com.aigamelabs.swduel.enums.GameOutcome
+import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.swduel.actions.ChooseNextPlayer
 import com.aigamelabs.swduel.enums.*
 import io.vavr.collection.HashSet
@@ -8,7 +11,7 @@ import io.vavr.collection.HashMap
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
 
-data class GameState (
+data class GameState(
         val activeScienceDeck : Deck,
         val unusedScienceDeck : Deck,
         val wondersForPickDeck : Deck,
@@ -19,7 +22,7 @@ data class GameState (
         val playerCities : HashMap<PlayerTurn,PlayerCity>,
         val decisionQueue: Queue<Decision>,
         private val progressTokens : HashSet<ProgressToken>,
-        val gamePhase: GamePhase,
+        private val gamePhase: GamePhase,
         private val defaultPlayer : PlayerTurn
 ) {
 
@@ -125,7 +128,7 @@ data class GameState (
         }
     }
 
-    fun calculateVictoryPoints(player : PlayerTurn) : Int {
+    private fun calculateVictoryPoints(player : PlayerTurn) : Int {
         val playerCity = getPlayerCity(player)
         val opponentCity = getPlayerCity(player.opponent())
         val totalFromBuildings = playerCity.buildings
@@ -198,22 +201,38 @@ data class GameState (
         return Pair(returnGameState, thisDecision)
     }
 
-    companion object {
-        /**
-         * Advances the game by one step by applying the given action to the next decision in the queue. Does not detect
-         * cheating.
-         */
-        fun applyAction(gameState: GameState, action: Action, generator: RandomWithTracker? = null): GameState {
-
-            // Process action
-            var newGameState = action.process(gameState, generator)
-
-            // If the cards structure is empty, switch to next age
-            if (newGameState.cardStructure!!.isEmpty()) {
-                newGameState = newGameState.switchToNextAge(generator)
+    /**
+     * Calculates the winner and the victory points
+     */
+    fun calculateWinner(): Triple<GameOutcome, Int, Int> {
+        val endGamePhases = HashSet.of(GamePhase.MILITARY_SUPREMACY, GamePhase.SCIENCE_SUPREMACY, GamePhase.CIVILIAN_VICTORY)
+        return if (endGamePhases.contains(gamePhase)) {
+            val p1VictoryPoints = calculateVictoryPoints(PlayerTurn.PLAYER_1)
+            val p2VictoryPoints = calculateVictoryPoints(PlayerTurn.PLAYER_2)
+            when {
+                p1VictoryPoints > p2VictoryPoints -> Triple(GameOutcome.PLAYER_1_VICTORY, p1VictoryPoints, p2VictoryPoints)
+                p2VictoryPoints > p1VictoryPoints -> Triple(GameOutcome.PLAYER_2_VICTORY, p1VictoryPoints, p2VictoryPoints)
+                else -> Triple(GameOutcome.TIE, p1VictoryPoints, p2VictoryPoints)
             }
-
-            return newGameState
+        } else {
+            throw Exception("The game has not finished yet; current phase: $gamePhase")
         }
+    }
+
+    /**
+     * Advances the game by one step by applying the given action to the next decision in the queue. Does not detect
+     * cheating.
+     */
+    fun applyAction(action: Action, generator: RandomWithTracker? = null): GameState {
+
+        // Process action
+        var newGameState = action.process(this, generator)
+
+        // If the cards structure is empty, switch to next age
+        if (newGameState.cardStructure!!.isEmpty()) {
+            newGameState = newGameState.switchToNextAge(generator)
+        }
+
+        return newGameState
     }
 }

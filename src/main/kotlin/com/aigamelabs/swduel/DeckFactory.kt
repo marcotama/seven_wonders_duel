@@ -1,5 +1,7 @@
 package com.aigamelabs.swduel
 
+import com.aigamelabs.utils.RandomWithTracker
+
 object DeckFactory {
 
     fun createFirstAgeDeck(generator: RandomWithTracker? = null) : Deck {

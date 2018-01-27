@@ -1,19 +1,19 @@
-package com.aigamelabs.swduel.players.mcts
+package com.aigamelabs.mcts
 
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.actions.Action
-import com.aigamelabs.swduel.players.mcts.actionselection.ActionSelector
-import com.aigamelabs.swduel.players.mcts.nodeevaluation.NodeEvaluator
+import com.aigamelabs.mcts.actionselection.ActionSelector
+import com.aigamelabs.mcts.nodeevaluation.NodeEvaluator
 import io.vavr.collection.Vector
 
 abstract class Manager(
-        val rootNode: TreeNode,
-        val rootGameState: GameState,
-        val playerNumber: Boolean,
         val actionSelector: ActionSelector,
         val playerNodeEvaluator: NodeEvaluator,
         val opponentNodeEvaluator: NodeEvaluator
 ) {
+
+    var rootNode: TreeNode? = null
+    var rootGameState: GameState? = null
 
     /** Number of games to be played on a node before it is expanded  */
     val uctNodeCreateThreshold = 10
