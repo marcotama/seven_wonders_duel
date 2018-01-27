@@ -21,7 +21,7 @@ import java.util.*
  *    The `process` method also takes care of adding new decisions to the queue, if any.
  *  - Repeat
  */
-class Game(private val players : HashMap<PlayerTurn, Player>? = null) {
+class Game(private val players : Map<PlayerTurn, Player>) {
     fun mainLoop(startingGameState : GameState, generator : RandomWithTracker?) {
 
         // Play the game
@@ -52,7 +52,7 @@ class Game(private val players : HashMap<PlayerTurn, Player>? = null) {
         var (gameState_, thisDecision) = gameState.dequeAction()
 
         // Query player for action
-        val action = players!![thisDecision.player]!!.decide(gameState_, thisDecision.options)
+        val action = players[thisDecision.player]!!.decide(gameState_, thisDecision.options)
 
         // Check for cheating
         if (!thisDecision.options.contains(action)) {

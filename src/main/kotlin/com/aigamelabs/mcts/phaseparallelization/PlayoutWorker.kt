@@ -2,9 +2,8 @@ package com.aigamelabs.mcts.phaseparallelization
 
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.mcts.TreeNode
+import com.aigamelabs.swduel.enums.GamePhase
 import java.util.*
-
-import java.util.stream.IntStream
 
 /**
  * Executes UCT on the given node.
@@ -33,15 +32,15 @@ class PlayoutWorker(internal var manager: PhaseParallelizationManager) : Runnabl
         var gameState = node.gameState
 
         // Apply random actions to the playout
-        IntStream.range(0, manager.playoutDepth)
-                .forEach {
-                    val dequeueOutcome = gameState.dequeAction()
-                    gameState = dequeueOutcome.first
-                    val decision = dequeueOutcome.second
-                    val options = decision.options
-                    val choice = rnd.nextInt(options.size())
-                    gameState = gameState.applyAction(options[choice])
-                }
+        val activeGamePhases = setOf(GamePhase.FIRST_AGE, GamePhase.SECOND_AGE, GamePhase.THIRD_AGE, GamePhase.WONDERS_SELECTION)
+        while (activeGamePhases.contains(gameState.gamePhase)) {
+            val dequeueOutcome = gameState.dequeAction()
+            gameState = dequeueOutcome.first
+            val decision = dequeueOutcome.second
+            val options = decision.options
+            val choice = rnd.nextInt(options.size())
+            gameState = gameState.applyAction(options[choice])
+        }
         return gameState
     }
 

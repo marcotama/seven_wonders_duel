@@ -13,7 +13,7 @@ import io.vavr.collection.Vector
 
 object GameStateFactory {
 
-    fun createNewGameState(generator : RandomWithTracker?) : GameState {
+    fun createNewGameState(generator : RandomWithTracker? = null) : GameState {
         return createNewGameState("P1", "P2", generator)
     }
 

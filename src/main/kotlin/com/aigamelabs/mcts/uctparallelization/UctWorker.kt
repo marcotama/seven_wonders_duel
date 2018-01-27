@@ -5,6 +5,7 @@ import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.mcts.NodeType
 import com.aigamelabs.mcts.TreeNode
 import com.aigamelabs.mcts.Util
+import com.aigamelabs.swduel.enums.GamePhase
 import java.util.*
 
 import java.util.stream.IntStream
@@ -120,8 +121,8 @@ class UctWorker(internal var manager: UctParallelizationManager) : Runnable {
         var gameState = node.gameState
 
         // Apply random actions to the playout
-        IntStream.range(0, manager.playoutDepth)
-            .forEach {
+        val activeGamePhases = setOf(GamePhase.FIRST_AGE, GamePhase.SECOND_AGE, GamePhase.THIRD_AGE, GamePhase.WONDERS_SELECTION)
+        while (activeGamePhases.contains(gameState.gamePhase)) {
                 val dequeueOutcome = gameState.dequeAction()
                 gameState = dequeueOutcome.first
                 val decision = dequeueOutcome.second

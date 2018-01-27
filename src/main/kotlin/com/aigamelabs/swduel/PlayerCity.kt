@@ -5,6 +5,7 @@ import io.vavr.collection.Vector
 import io.vavr.collection.HashMap
 import io.vavr.collection.HashSet
 import io.vavr.collection.Stream
+import javax.json.stream.JsonGenerator
 
 data class PlayerCity(
         val name : String,
@@ -181,5 +182,25 @@ data class PlayerCity(
 
     fun countBuildingsByColor(color: CardColor) : Int {
         return buildings.filter { c -> c.color == color }.size()
+    }
+
+    /**
+     * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
+     */
+    fun toJson(generator: JsonGenerator) {
+        generator.write("name", name)
+        generator.write("coins", coins)
+        generator.writeStartArray("buildings")
+        buildings.forEach { generator.write(it.toString()) }
+        generator.writeEnd()
+        generator.writeStartArray("wonders")
+        wonders.forEach { generator.write(it.toString()) }
+        generator.writeEnd()
+        generator.writeStartArray("progressTokens")
+        progressTokens.forEach { generator.write(it.toString()) }
+        generator.writeEnd()
+        generator.writeStartArray("unbuiltWonders")
+        unbuiltWonders.forEach { generator.write(it.toString()) }
+        generator.writeEnd()
     }
 }

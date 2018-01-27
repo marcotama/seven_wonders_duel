@@ -25,14 +25,12 @@ abstract class MctsBasedBot(
         gameData: GameData,
         actionSelector: ActionSelector,
         playerNodeEvaluator: NodeEvaluator,
-        opponentNodeEvaluator: NodeEvaluator
+        opponentNodeEvaluator: NodeEvaluator,
+        private val logFileName: String? = null
 ) : Player(name, gameData) {
 
-    /** Generator for JSON output  */
+    /** JSON generator */
     private var generator: JsonGenerator? = null
-
-    /** Flag indicating whether the JSON log currently has a round object and a corresponding frames array open  */
-    private var isGameOpenInLog = false
 
     /** Flag indicating whether the JSON generator is open  */
     private var isJsonGeneratorOpen = false
@@ -43,10 +41,13 @@ abstract class MctsBasedBot(
     internal var manager = UctParallelizationManager(actionSelector, playerNodeEvaluator, opponentNodeEvaluator)
 
     /**
-     * Opens the JSON log. It does not open the round; this should be handled externally.
+     * Opens the JSON log and leaves the generator inside the games array. It does not open the first game object.
      * @param jsonName Name of the output file.
      */
-    private fun openLog(jsonName: String) {
+    private fun openLog(jsonName: String?) {
+        if (jsonName == null)
+            return
+
         val file = File(jsonName)
 
         try {
@@ -58,144 +59,85 @@ abstract class MctsBasedBot(
         }
 
         // Open root object
-        generator!!.writeStartObject()
+        generator?.writeStartObject()
 
-        generator!!.write("player_1_controller", gameData.player1Controller)
-        generator!!.write("player_2_controller", gameData.player2Controller)
+        generator?.write("player_1_controller", gameData.player1Controller)
+        generator?.write("player_2_controller", gameData.player2Controller)
 
-        // Open rounds array
-        generator!!.writeStartArray("games")
+        // Open games array
+        generator?.writeStartArray("games")
 
         isJsonGeneratorOpen = true
     }
 
-    private fun logMctsDecision() {
+    private fun logDecision() {
         if (!isJsonGeneratorOpen)
             return
 
-        if (!isGameOpenInLog)
-            logGameStart()
+        // Open game object
+        generator?.writeStartObject()
 
-        /*
-        //		Double[] childrenValues = lastRoot.getChildrenValues(Manager.AVERAGE_SCORE);
-        val childrenValues = manager.rootNode!!.children!!.values
-                .map( { AverageScore().getValue(it) } )
-                .toDoubleArray()
-        generator!!.writeStartObject()
-        */
+        val scorer = AverageScore()
+        generator?.writeStartObject("children_values")
+        manager.rootNode!!.children!!.entries
+                .forEach {
+                    val actionName = it.key.toString()
+                    val value = scorer.getValue(it.value)
+                    if (java.lang.Double.isInfinite(value))
+                        if (value > 0)
+                            generator?.write(actionName, "+Infinity")
+                        else
+                            generator?.write(actionName, "-Infinity")
+                    else if (java.lang.Double.isNaN(value))
+                        generator?.write(actionName, "NaN")
+                    else
+                        generator?.write(actionName, value)
+                }
+        generator?.writeEnd()
 
-        /*
-        generator!!.writeStartObject("values")
-        IntStream.range(0, myActions.size()).forEach { i ->
-            val actionName = myActions.get(i).name()
-            if (java.lang.Double.isInfinite(childrenValues[i]))
-                if (childrenValues[i] > 0)
-                    generator!!.write(actionName, "+Infinity")
-                else
-                    generator!!.write(actionName, "-Infinity")
-            else if (java.lang.Double.isNaN(childrenValues[i]))
-                generator!!.write(actionName, "NaN")
-            else
-                generator!!.write(actionName, childrenValues[i])
-        }
-        generator!!.writeEnd()
-        */
 
-        /*
-        generator!!.write("selection", lastAction!!.name())
-        generator!!.write("player_hp", frameData.getMyCharacter(playerNumber).getHp())
-        generator!!.write("opponent_hp", frameData.getOpponentCharacter(playerNumber).getHp())
-        */
 
-        generator!!.writeEnd()
+        generator!!.write("selection", lastAction?.toString())
+
+        // Close game object
+        generator?.writeEnd()
     }
 
     /**
-     * Closes the JSON log. It assumes that the round has already been closed.
+     * Closes the JSON log assuming the generator is inside the game array. It assumes that the game has already been
+     * closed.
      */
     private fun closeLog() {
         if (!isJsonGeneratorOpen)
             return
 
-        if (isGameOpenInLog) {
-            println("Unexpected emergency closure of round object in JSON.")
-            logGameEnd()
-        }
-
-        // Close rounds array
-        generator!!.writeEnd()
+        // Close games array
+        generator?.writeEnd()
 
         // Close root object
-        generator!!.writeEnd()
+        generator?.writeEnd()
 
-        // Close the resources
-        generator!!.flush()
-        generator!!.close()
+        // Release resources
+        generator?.flush()
+        generator?.close()
 
         isJsonGeneratorOpen = false
 
     }
 
-    /**
-     * Writes round outcome to the log, closes the round and starts the next one.
-     */
-    private fun logGameEnd() {
-
-        if (!isGameOpenInLog)
-            return
-
-        /*
-        val cd1 = frameData.getP1()
-        val cd2 = frameData.getP2()
-        */
-
-        // Close frames array
-        generator!!.writeEnd()
-
-        // Write outcome information
-        /*
-        val myCharacter = frameData.getMyCharacter(playerNumber)
-        if (myCharacter == null) {
-            generator!!.write("final_player_hp", java.lang.Float.NaN.toDouble())
-        } else {
-            generator!!.write("final_player_hp", myCharacter!!.getHp())
-        }
-        val opponentCharacter = frameData.getOpponentCharacter(playerNumber)
-        if (opponentCharacter == null) {
-            generator!!.write("final_opponent_hp", java.lang.Float.NaN.toDouble())
-        } else {
-            generator!!.write("final_opponent_hp", opponentCharacter!!.getHp())
-        }
-        generator!!.write("winner", if (cd1.getHp() > cd2.getHp()) "P1" else if (cd1.getHp() < cd2.getHp()) "P2" else "DRAW")
-        */
-
-        // Close round object
-        generator!!.writeEnd()
-
-        isGameOpenInLog = false
+    override fun init() {
+        openLog(logFileName)
     }
 
-    private fun logGameStart() {
-        if (isGameOpenInLog)
-            return
+    override fun finalize(gameState: GameState) {
 
-        // Open round object
-        generator!!.writeStartObject()
-
-        // Open frames array
-        generator!!.writeStartArray("frames")
-
-        isGameOpenInLog = true
-    }
-
-    private fun clear() {
-        logGameEnd()
+        // Open new game object
+        generator!!.writeStartArray("games")
     }
 
     override fun close() {
         manager.shutdown()
-        clear()
-        if (LOGGING) closeLog()
+        closeLog()
     }
 
     /**
@@ -203,11 +145,7 @@ abstract class MctsBasedBot(
 	 */
     override fun decide(gameState: GameState, options: Vector<Action>): Action {
         lastAction = manager.run(gameState, options)
+        logDecision()
         return lastAction!!
-    }
-
-    companion object {
-        /** If true, the values of all children of root, after MCTS, are logged  */
-        private const val LOGGING = true
     }
 }

@@ -14,6 +14,7 @@ class RandomPlayer(name: String, gameData: GameData) : Player(name, gameData) {
         return options[generator.nextInt(options.size())]
     }
 
+    override fun init() {}
     override fun finalize(gameState: GameState) {}
     override fun close() {}
 }

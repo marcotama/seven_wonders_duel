@@ -10,6 +10,7 @@ import io.vavr.collection.HashSet
 import io.vavr.collection.HashMap
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
+import javax.json.stream.JsonGenerator
 
 data class GameState(
         val activeScienceDeck : Deck,
@@ -22,7 +23,7 @@ data class GameState(
         val playerCities : HashMap<PlayerTurn,PlayerCity>,
         val decisionQueue: Queue<Decision>,
         private val progressTokens : HashSet<ProgressToken>,
-        private val gamePhase: GamePhase,
+        val gamePhase: GamePhase,
         private val defaultPlayer : PlayerTurn
 ) {
 
@@ -235,4 +236,51 @@ data class GameState(
 
         return newGameState
     }
+
+    /**
+     * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
+     */
+    fun toJson(generator: JsonGenerator) {
+        generator.writeStartObject("active_science_tokens")
+        activeScienceDeck.toJson(generator)
+        generator.writeEnd()
+        generator.writeStartObject("unused_science_tokens")
+        unusedScienceDeck.toJson(generator)
+        generator.writeEnd()
+        generator.writeStartObject("wonders_for_pick")
+        wondersForPickDeck.toJson(generator)
+        generator.writeEnd()
+        generator.writeStartObject("unused_wonders")
+        unusedWondersDeck.toJson(generator)
+        generator.writeEnd()
+        generator.writeStartObject("burned_cards")
+        burnedDeck.toJson(generator)
+        generator.writeEnd()
+        generator.writeStartObject("card_structure")
+        cardStructure?.toJson(generator)
+        generator.writeEnd()
+        generator.writeStartArray("progress_tokens")
+        progressTokens.forEach { generator.write(it.toString()) }
+        generator.writeEnd()
+        generator.writeStartObject("military_board")
+        militaryBoard.toJson(generator)
+        generator.writeEnd()
+        generator.writeStartObject("player_cities")
+        playerCities.forEach {
+            generator.writeStartObject(it._1.toString())
+            it._2.toJson(generator)
+            generator.writeEnd()
+        }
+        generator.writeEnd()
+        generator.writeStartArray("decision_queue")
+        decisionQueue.forEach { it.toJson(generator) }
+        generator.writeEnd()
+        generator.writeStartObject("game_phase")
+        generator.write(gamePhase.toString())
+        generator.writeEnd()
+        generator.writeStartObject("default_player")
+        generator.write(defaultPlayer.toString())
+        generator.writeEnd()
+    }
+
 }

@@ -4,6 +4,7 @@ import com.aigamelabs.swduel.enums.Formula
 import com.aigamelabs.swduel.enums.*
 import io.vavr.collection.HashMap
 import io.vavr.collection.HashSet
+import javax.json.stream.JsonGenerator
 
 data class Card(
         override val cardGroup: CardGroup,
@@ -26,8 +27,8 @@ data class Card(
         val bonuses: Set<Bonus> = emptySet(),
         val wonders: Wonders = Wonders.NONE,
         val enhancement: Enhancement = Enhancement.NONE
-) : CardPlaceholder (cardGroup){
-    
+) : CardPlaceholder (cardGroup) {
+
     // Constructor for (red) military cards
     constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>, coinCost: Int,
                 linkingSymbol: LinkingSymbol, linksTo: LinkingSymbol, militaryPoints: Int) :
@@ -134,4 +135,38 @@ data class Card(
                     victoryPoints = victoryPoints,
                     enhancement = enhancement
             )
+
+    /**
+     * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
+     */
+    fun toJson (generator: JsonGenerator) {
+        generator.write("group", cardGroup.toString())
+        generator.write("color", color.toString())
+        generator.write("coin_cost", coinCost.toString())
+        generator.write("linking_symbol", linkingSymbol.toString())
+        generator.write("links_to", linksTo.toString())
+        generator.write("resource_alternative_production", resourceAlternativeProduction.toString())
+        generator.write("coin_cost", coinCost.toString())
+        generator.write("victoryPoints", victoryPoints.toString())
+        generator.write("victoryPointsFormula", victoryPointsFormula.toString())
+        generator.write("coinsProduced", coinsProduced.toString())
+        generator.write("coinsProducedFormula", coinsProducedFormula.toString())
+        generator.write("referenceCity", referenceCity.toString())
+        generator.write("scienceSymbol", scienceSymbol.toString())
+        generator.write("militaryPoints", militaryPoints.toString())
+        generator.write("wonders", wonders.toString())
+        generator.write("enhancement", enhancement.toString())
+        generator.writeStartObject("resource_cost")
+        resourceCost.forEach { generator.write(it._1.toString(), it._2) }
+        generator.writeEnd()
+        generator.writeStartArray("trading_bonuses")
+        tradingBonuses.forEach { generator.write(it.toString()) }
+        generator.writeEnd()
+        generator.writeStartObject("resource_production")
+        resourceProduction.forEach { generator.write(it._1.toString(), it._2) }
+        generator.writeEnd()
+        generator.writeStartArray("bonuses")
+        bonuses.forEach { generator.write(it.toString()) }
+        generator.writeEnd()
+    }
 }

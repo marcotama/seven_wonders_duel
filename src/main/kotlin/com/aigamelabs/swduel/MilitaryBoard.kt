@@ -1,6 +1,7 @@
 package com.aigamelabs.swduel
 
 import com.aigamelabs.swduel.enums.PlayerTurn
+import javax.json.stream.JsonGenerator
 
 /**
  * Represents the military situation.
@@ -19,6 +20,17 @@ data class MilitaryBoard(
     Also, stores four booleans, one for each military token.
      */
     constructor() : this(0, true, true, true, true)
+
+    /**
+     * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
+     */
+    fun toJson(generator: JsonGenerator) {
+        generator.write("conflict_pawn_position", conflictPawnPosition)
+        generator.write("token1_player1", token1P1Present)
+        generator.write("token2_player1", token2P1Present)
+        generator.write("token1_player2", token1P2Present)
+        generator.write("token2_player2", token2P2Present)
+    }
 
     /**
      * Creates a new instance, with every field updated as specified. Null values are ignored.

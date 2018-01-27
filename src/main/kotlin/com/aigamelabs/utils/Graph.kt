@@ -2,6 +2,7 @@ package com.aigamelabs.utils
 
 import io.vavr.collection.Stream
 import io.vavr.collection.Vector
+import javax.json.stream.JsonGenerator
 
 /**
  * Implements a graph using an adjacency matrix.
@@ -179,6 +180,21 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
                         .filter { k -> adjMatrix[k]}
                         .map { k -> toCoords(k) }
                         .fold("", { acc, pair -> acc + "\n" + pair.first + " -> " + pair.second} )
+    }
+
+    /**
+     * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
+     */
+    fun toJson(generator: JsonGenerator) {
+        generator.writeStartArray("vertices")
+        vertices.forEach { it.toString() }
+        generator.writeEnd()
+        generator.writeStartArray("edges")
+        (0 until numVertices * numVertices)
+                .filter { adjMatrix[it] }
+                .map { toCoords(it) }
+                .forEach { generator.write(vertices[it.first].toString() + " -> " + vertices[it.second].toString()) }
+        generator.writeEnd()
     }
 
 }

@@ -7,6 +7,7 @@ abstract class Player(
         var name: String,
         val gameData: GameData
 ) {
+    abstract fun init()
     abstract fun decide(gameState: GameState, options: Vector<Action>) : Action
     abstract fun finalize(gameState: GameState)
     abstract fun close()

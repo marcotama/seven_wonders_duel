@@ -3,6 +3,7 @@ package com.aigamelabs.swduel
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.utils.Graph
 import io.vavr.collection.Vector
+import javax.json.stream.JsonGenerator
 
 class CardStructure(var graph: Graph<CardPlaceholder>, var faceDownPool: Deck) {
     fun pickUpCard(card: Card, generator : RandomWithTracker?) : CardStructure{
@@ -34,5 +35,17 @@ class CardStructure(var graph: Graph<CardPlaceholder>, var faceDownPool: Deck) {
 
     fun isEmpty() : Boolean{
         return graph.vertices.filter { c -> c != null }.isEmpty
+    }
+
+    /**
+     * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
+     */
+    fun toJson(generator: JsonGenerator) {
+        generator.writeStartObject("face_down_pool")
+        faceDownPool.toJson(generator)
+        generator.writeEnd()
+        generator.writeStartObject("graph")
+        graph.toJson(generator)
+        generator.writeEnd()
     }
 }

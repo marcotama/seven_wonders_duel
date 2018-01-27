@@ -18,20 +18,11 @@ abstract class Manager(
     /** Number of games to be played on a node before it is expanded  */
     val uctNodeCreateThreshold = 10
 
-    /** Depth for playouts (playing till the end of the fight would take too long)  */
-    val playoutDepth = 2
-
-
-    // --- Settings computed after construction ---
-
     /** Depth of the search tree  */
-    var maxUctTreeDepth: Int = 0
-
-    /** How many frames to run the simulation for (regardless of action queues)  */
-    var simulationLimit: Int = 0
+    var maxUctTreeDepth: Int = 20
 
     /** UCT execution time budget (in frames)  */
-    var uctBudgetInNanoseconds: Long = 0
+    var uctBudgetInNanoseconds: Long = 10_000_000_000
 
 
     // --- Settings ---

@@ -3,6 +3,7 @@ package com.aigamelabs.swduel
 import com.aigamelabs.utils.RandomWithTracker
 import io.vavr.collection.Vector
 import java.util.concurrent.ThreadLocalRandom
+import javax.json.stream.JsonGenerator
 
 data class Deck(val name: String, val cards: Vector<Card>) {
 
@@ -67,5 +68,15 @@ data class Deck(val name: String, val cards: Vector<Card>) {
 
     fun size() : Int {
         return cards.size()
+    }
+
+    /**
+     * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
+     */
+    fun toJson(generator: JsonGenerator) {
+        generator.write("name", name)
+        generator.writeStartArray("entries")
+        cards.forEach { generator.write(it.name) }
+        generator.writeEnd()
     }
 }
