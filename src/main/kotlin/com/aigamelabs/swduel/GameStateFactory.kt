@@ -25,7 +25,7 @@ object GameStateFactory {
         val unusedScienceDeck = scienceTokensDraw.second.update("Unused Science Tokens")
 
         // Initialize wonder decks
-        val drawOutcome = DeckFactory.createWondersDeck(generator).drawCards(4, generator)
+        val drawOutcome = DeckFactory.createWondersDeck().drawCards(4, generator)
         val wondersForPickDeck = Deck("Wonders for pick", drawOutcome.first)
         val unusedWondersDeck = drawOutcome.second
 
@@ -35,7 +35,7 @@ object GameStateFactory {
         // Create decision
         val actions : Vector<Action> = wondersForPickDeck.cards
                 .map { card -> ChooseStartingWonder(PlayerTurn.PLAYER_1, card) }
-        val decision = Decision(PlayerTurn.PLAYER_1, actions, false)
+        val decision = Decision(PlayerTurn.PLAYER_1, actions, "GameStateFactory.createNewGameState")
 
 
         // Setup progress tokens

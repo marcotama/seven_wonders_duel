@@ -9,7 +9,8 @@ import io.vavr.collection.Vector
 abstract class Manager(
         val actionSelector: ActionSelector,
         val playerNodeEvaluator: NodeEvaluator,
-        val opponentNodeEvaluator: NodeEvaluator
+        val opponentNodeEvaluator: NodeEvaluator,
+        val outPath: String?
 ) {
 
     var rootNode: TreeNode? = null
@@ -22,16 +23,13 @@ abstract class Manager(
     var maxUctTreeDepth: Int = 20
 
     /** UCT execution time budget (in frames)  */
-    var uctBudgetInNanoseconds: Long = 10_000_000_000
+    var uctBudgetInNanoseconds: Long = 1_000_000_000
 
 
     // --- Settings ---
 
     /** Whether to output additional information  */
     protected var verbose = false
-
-    /** Whether to export the final search tree   */
-    protected var exportTree = false
 
     abstract fun run(gameState: GameState, options: Vector<Action>) : Action
     abstract fun shutdown()

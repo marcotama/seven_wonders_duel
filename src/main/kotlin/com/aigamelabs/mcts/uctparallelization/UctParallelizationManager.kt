@@ -16,8 +16,9 @@ import java.util.concurrent.TimeUnit
 class UctParallelizationManager(
         actionSelector: ActionSelector,
         playerNodeEvaluator: NodeEvaluator,
-        opponentNodeEvaluator: NodeEvaluator
-) : Manager(actionSelector, playerNodeEvaluator, opponentNodeEvaluator) {
+        opponentNodeEvaluator: NodeEvaluator,
+        outPath: String?
+) : Manager(actionSelector, playerNodeEvaluator, opponentNodeEvaluator, outPath) {
 
     /** Workers  */
     private var workers: Array<UctWorker>
@@ -59,8 +60,8 @@ class UctParallelizationManager(
         } catch (ignored: InterruptedException) {}
 
         // Logging
-        if (exportTree)
-            rootNode!!.export("./logs/tree.json")
+        if (outPath != null)
+            rootNode!!.export(outPath + "tree.json")
         if (verbose)
             System.out.println("UCT run " + rootNode!!.games + " times.")
 
@@ -69,9 +70,9 @@ class UctParallelizationManager(
 
         // Return selected
         return if (selected >= rootNode!!.children!!.size)
-            rootNode!!.children!![arrayOf(0)]!!.selectedAction!! // Default: first action in the list
+            rootNode!!.children!![listOf(0)]!!.selectedAction!! // Default: first action in the list
         else
-            rootNode!!.children!![arrayOf(selected)]!!.selectedAction!!
+            rootNode!!.children!![listOf(selected)]!!.selectedAction!!
     }
 
     private fun createRoot(options: Vector<Action>) : TreeNode {
@@ -79,6 +80,4 @@ class UctParallelizationManager(
         rootNode.createChildren(options.toJavaList())
         return rootNode
     }
-
-
 }

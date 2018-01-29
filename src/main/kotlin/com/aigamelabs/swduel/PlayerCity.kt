@@ -187,20 +187,25 @@ data class PlayerCity(
     /**
      * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
      */
-    fun toJson(generator: JsonGenerator) {
+    fun toJson(generator: JsonGenerator, name: String?) {
+        if (name == null) generator.writeStartObject()
+        else generator.writeStartObject(name)
+
         generator.write("name", name)
         generator.write("coins", coins)
         generator.writeStartArray("buildings")
-        buildings.forEach { generator.write(it.toString()) }
+        buildings.forEach { generator.write(it.name) }
         generator.writeEnd()
         generator.writeStartArray("wonders")
-        wonders.forEach { generator.write(it.toString()) }
+        wonders.forEach { generator.write(it.name) }
         generator.writeEnd()
         generator.writeStartArray("progressTokens")
-        progressTokens.forEach { generator.write(it.toString()) }
+        progressTokens.forEach { generator.write(it.name) }
         generator.writeEnd()
-        generator.writeStartArray("unbuiltWonders")
-        unbuiltWonders.forEach { generator.write(it.toString()) }
+        generator.writeStartArray("unbuilt_wonders")
+        unbuiltWonders.forEach { generator.write(it.name) }
+        generator.writeEnd()
+
         generator.writeEnd()
     }
 }

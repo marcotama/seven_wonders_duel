@@ -29,8 +29,8 @@ class RandomWithTracker(seed: Long) {
 
     }
 
-    fun popAll(): Array<Int> {
-        val ret = memory.toTypedArray()
+    fun popAll(): List<Int> {
+        val ret = memory.toList()
         memory.clear()
         return ret
     }

@@ -5,47 +5,51 @@ import com.aigamelabs.utils.Graph
 import io.vavr.collection.Vector
 import javax.json.stream.JsonGenerator
 
-class CardStructure(var graph: Graph<CardPlaceholder>, var faceDownPool: Deck) {
+class CardStructure(var graph: Graph<CardPlaceholder>, private var faceDownPool: Deck) {
     fun pickUpCard(card: Card, generator : RandomWithTracker?) : CardStructure{
         val i = graph.vertices.indexOf(card)
         if (i == -1) {
             throw Exception("Element not found in graph")
         }
         else {
-            val newVertices = graph.vertices.toJavaList()
-            // Remove card from the graph
-            newVertices[i] = null
+            // Remove card from the vertices list
+            var newGraph = graph.setVertex(i, null)
             // Turn face-up previously covered cards
             val previouslyCoveredCardsIdx = graph.getOutgoingEdges(i)
-            previouslyCoveredCardsIdx.forEach { j ->
-                val drawOutcome = faceDownPool.drawCard(generator)
-                faceDownPool = drawOutcome.second
-                newVertices[j] = drawOutcome.first
+            var newFaceDownPool = faceDownPool
+            previouslyCoveredCardsIdx.forEach {
+                newGraph = newGraph.removeEdge(i, it)
+                if (newGraph.getIncomingEdges(it).size() == 0 && newGraph.vertices[it] !is Card) {
+                    val drawOutcome = newFaceDownPool.drawCard(generator)
+                    val drawnCard = drawOutcome.first
+                    newFaceDownPool = drawOutcome.second
+                    newGraph = newGraph.setVertex(it, drawnCard)
+                }
             }
-            graph = Graph(Vector.ofAll(newVertices), graph.adjMatrix)
+            return CardStructure(newGraph, newFaceDownPool)
         }
-        return CardStructure(graph, faceDownPool)
     }
 
     fun availableCards() : Vector<Card> {
         val availableCards = graph.verticesWithNoIncomingEdges()
-                .map { cp -> cp as Card }
+                .map { it as Card }
         return availableCards as Vector<Card>
     }
 
     fun isEmpty() : Boolean{
-        return graph.vertices.filter { c -> c != null }.isEmpty
+        return graph.vertices.filter { it != null }.isEmpty
     }
 
     /**
      * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
      */
-    fun toJson(generator: JsonGenerator) {
-        generator.writeStartObject("face_down_pool")
-        faceDownPool.toJson(generator)
-        generator.writeEnd()
-        generator.writeStartObject("graph")
-        graph.toJson(generator)
+    fun toJson(generator: JsonGenerator, name: String?) {
+        if (name == null) generator.writeStartObject()
+        else generator.writeStartObject(name)
+
+        faceDownPool.toJson(generator, "face_down_pool")
+        graph.toJson(generator, "graph")
+
         generator.writeEnd()
     }
 }

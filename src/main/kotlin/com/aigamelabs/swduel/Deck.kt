@@ -20,13 +20,17 @@ data class Deck(val name: String, val cards: Vector<Card>) {
     }
 
     fun removeCard(card : Card) : Deck {
-        return update(cards_ = cards.remove(card))
+        val cardIdx = cards.indexOf(card)
+        if (cardIdx == -1)
+            throw Exception("Card not present")
+        else
+            return update(cards_ = cards.removeAt(cardIdx))
     }
 
     fun drawCard(generator : RandomWithTracker? = null) : Pair<Card, Deck> {
         return if (cards.size() > 0) {
-            val cardIdx = generator?.nextInt(cards.size() + 1)
-                    ?: ThreadLocalRandom.current().nextInt(0, cards.size() + 1)
+            val cardIdx = generator?.nextInt(cards.size())
+                    ?: ThreadLocalRandom.current().nextInt(0, cards.size())
             val drawnCard = cards[cardIdx]
             val newDeck = update(cards_ = cards.removeAt(cardIdx))
             Pair(drawnCard, newDeck)
@@ -71,12 +75,18 @@ data class Deck(val name: String, val cards: Vector<Card>) {
     }
 
     /**
-     * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
+     * Dumps the object content in JSON.
      */
-    fun toJson(generator: JsonGenerator) {
-        generator.write("name", name)
-        generator.writeStartArray("entries")
+    fun toJson(generator: JsonGenerator, name: String?) {
+        if (name == null) generator.writeStartArray()
+        else generator.writeStartArray(name)
+
         cards.forEach { generator.write(it.name) }
+
         generator.writeEnd()
+    }
+
+    override fun toString(): String {
+        return cards.map { it.name }.foldLeft("", { acc, el -> "$acc$el, "} )
     }
 }

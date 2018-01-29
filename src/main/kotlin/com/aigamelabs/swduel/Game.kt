@@ -3,7 +3,6 @@ package com.aigamelabs.swduel
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.enums.GameOutcome
 import com.aigamelabs.swduel.enums.PlayerTurn
-import java.util.*
 
 /**
  * Workflow:
@@ -52,7 +51,16 @@ class Game(private val players : Map<PlayerTurn, Player>) {
         var (gameState_, thisDecision) = gameState.dequeAction()
 
         // Query player for action
+        println("Querying ${thisDecision.player}; options:\n" +
+                thisDecision.options
+                        .map { "  $it\n" }
+                        .fold("", { a, b -> a + b } ) +
+                "Decision prompted by ${thisDecision.addedBy}\n"
+        )
         val action = players[thisDecision.player]!!.decide(gameState_, thisDecision.options)
+
+        println("${thisDecision.player} chose: $action\n\n")
+
 
         // Check for cheating
         if (!thisDecision.options.contains(action)) {
@@ -62,11 +70,6 @@ class Game(private val players : Map<PlayerTurn, Player>) {
 
         // Process action
         gameState_ = action.process(gameState_, generator)
-
-        // If the cards structure is empty, switch to next age
-        if (gameState_.cardStructure!!.isEmpty()) {
-            gameState_ = gameState_.switchToNextAge(generator)
-        }
 
         return gameState_
     }

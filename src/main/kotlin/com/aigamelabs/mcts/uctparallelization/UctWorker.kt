@@ -8,8 +8,6 @@ import com.aigamelabs.mcts.Util
 import com.aigamelabs.swduel.enums.GamePhase
 import java.util.*
 
-import java.util.stream.IntStream
-
 /**
  * Executes UCT on the given node.
  */
@@ -22,6 +20,7 @@ class UctWorker(internal var manager: UctParallelizationManager) : Runnable {
     override fun run() {
         while (System.nanoTime() <= timeout) {
             uct()
+            println(timeout.toString() + " " +System.nanoTime().toString())
         }
     }
 
@@ -90,9 +89,9 @@ class UctWorker(internal var manager: UctParallelizationManager) : Runnable {
                 else {
                     val childrenValues = DoubleArray(currentNode.children!!.size)
                     for (i in 0 until currentNode.children!!.size) {
-                        childrenValues[i] = currentNode.children!![arrayOf(i)]!!.calcUcb()
+                        childrenValues[i] = currentNode.children!![listOf(i)]!!.calcUcb()
                     }
-                    currentNode = currentNode.children!![arrayOf(Util.indexOfMax(childrenValues))]!!
+                    currentNode = currentNode.children!![listOf(Util.indexOfMax(childrenValues))]!!
                 }
             }
         }

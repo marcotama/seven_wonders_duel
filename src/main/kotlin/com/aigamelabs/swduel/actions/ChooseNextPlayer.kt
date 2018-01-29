@@ -7,8 +7,12 @@ import com.aigamelabs.swduel.enums.PlayerTurn
 
 class ChooseNextPlayer(playerTurn: PlayerTurn, private val chosenPlayer: PlayerTurn) : Action(playerTurn) {
     override fun process(gameState: GameState, generator : RandomWithTracker?) : GameState {
-        val decision = DecisionFactory.makeTurnDecision(chosenPlayer, gameState, true)
-        return gameState.update(decisionQueue_ = gameState.decisionQueue.enqueue(decision),
-                defaultPlayer_ = chosenPlayer)
+        val decision = DecisionFactory.makeTurnDecision(chosenPlayer, gameState)
+        val newDecisionQueue = gameState.decisionQueue.enqueue(decision)
+        return gameState.update(decisionQueue_ = newDecisionQueue, nextPlayer_ = chosenPlayer)
+    }
+
+    override fun toString(): String {
+        return "Choose $chosenPlayer as next player"
     }
 }

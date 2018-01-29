@@ -35,12 +35,8 @@ object DeckFactory {
     }
 
 
-    fun createWondersDeck(generator: RandomWithTracker? = null) : Deck {
-        var wondersDeck = Deck("Wonders", CardFactory.createFromWonders())
-        val drawOutcome = wondersDeck.drawCards(4, generator)
-        wondersDeck = drawOutcome.second
-
-        return wondersDeck
+    fun createWondersDeck() : Deck {
+        return Deck("Wonders", CardFactory.createFromWonders())
     }
 
     fun createScienceTokenDeck () : Deck {

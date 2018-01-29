@@ -7,7 +7,7 @@ import com.aigamelabs.swduel.enums.CardColor
 import com.aigamelabs.swduel.enums.PlayerTurn
 import io.vavr.collection.Vector
 
-class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
+class BuildBuilding(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
     override fun process(gameState: GameState, generator : RandomWithTracker?) : GameState {
 
         // Remove card from appropriate deck
@@ -39,26 +39,28 @@ class Build(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
             newMilitaryBoard = gameState.militaryBoard
         }
 
-        var newDecisionQueue = gameState.decisionQueue
-        if (card.color == CardColor.GREEN) {
-            if (playerCity.buildings.filter { c -> c.scienceSymbol == card.scienceSymbol}.size() == 2) {
-                val actions : Vector<Action> = gameState.activeScienceDeck.cards
-                        .map { c -> ChooseProgressToken(playerTurn, c) }
-                val decision = Decision(playerTurn, actions, false)
-                newDecisionQueue = newDecisionQueue.enqueue(decision)
-            }
-        }
-
-        newDecisionQueue = newDecisionQueue
-                .enqueue(DecisionFactory.makeTurnDecision(playerTurn.opponent(), gameState, true))
+        val updatedDecisionQueue =
+                if (card.color == CardColor.GREEN &&
+                        playerCity.buildings.filter { it.scienceSymbol == card.scienceSymbol }.size() == 2) {
+                        val actions: Vector<Action> = gameState.activeScienceDeck.cards
+                                .map { ChooseProgressToken(playerTurn, it) }
+                        val decision = Decision(playerTurn, actions, "BuildBuilding.process")
+                        gameState.decisionQueue.enqueue(decision)
+                    } else
+                        null
 
         val newGameState = gameState.update(cardStructure_ = newCardStructure, playerCities_ = newPlayerCities,
-                militaryBoard_ = newMilitaryBoard, decisionQueue_ = newDecisionQueue)
+                militaryBoard_ = newMilitaryBoard, nextPlayer_ = gameState.nextPlayer.opponent(),
+                decisionQueue_ = updatedDecisionQueue).updateBoard(generator)
 
         return when {
             card.color == CardColor.GREEN -> newGameState.checkScienceSupremacy(playerTurn)
             card.color == CardColor.RED -> newGameState.checkMilitarySupremacy()
             else -> newGameState
         }
+    }
+
+    override fun toString(): String {
+        return "Build ${card.name}"
     }
 }

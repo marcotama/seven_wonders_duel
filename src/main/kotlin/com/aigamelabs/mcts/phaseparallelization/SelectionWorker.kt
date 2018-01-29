@@ -60,9 +60,9 @@ class SelectionWorker(internal var manager: PhaseParallelizationManager) : Runna
                 } else {
                     val childrenValues = DoubleArray(currentNode.children!!.size)
                     for (i in 0 until currentNode.children!!.size) {
-                        childrenValues[i] = currentNode.children!![arrayOf(i)]!!.calcUcb()
+                        childrenValues[i] = currentNode.children!![listOf(i)]!!.calcUcb()
                     }
-                    currentNode = currentNode.children!![arrayOf(Util.indexOfMax(childrenValues))]!!
+                    currentNode = currentNode.children!![listOf(Util.indexOfMax(childrenValues))]!!
                 }// Otherwise choose the child with highest UCB score
             }
         }

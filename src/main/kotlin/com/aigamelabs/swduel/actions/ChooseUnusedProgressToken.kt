@@ -3,8 +3,6 @@ package com.aigamelabs.swduel.actions
 import com.aigamelabs.swduel.Card
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.utils.RandomWithTracker
-import com.aigamelabs.swduel.enums.Enhancement
-import com.aigamelabs.swduel.enums.GamePhase
 import com.aigamelabs.swduel.enums.PlayerTurn
 
 class ChooseUnusedProgressToken(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
@@ -13,14 +11,11 @@ class ChooseUnusedProgressToken(playerTurn: PlayerTurn, val card : Card) : Actio
         val newScienceTokens = playerCity.progressTokens.add(card)
         val newPlayerCity = playerCity.update(scienceTokens_ = newScienceTokens)
         val newPlayerCities = gameState.playerCities.put(playerTurn,newPlayerCity)
-        val distinctScienceSymbols = if (card.enhancement == Enhancement.LAW)
-                playerCity.buildings.map { c -> c.scienceSymbol }.distinct().size() + 1
-            else
-                playerCity.buildings.map { c -> c.scienceSymbol }.distinct().size()
+        return gameState.update(playerCities_ = newPlayerCities)
+                .checkScienceSupremacy(playerTurn)
+    }
 
-        return when {
-            distinctScienceSymbols >= 6 -> gameState.update(playerCities_ = newPlayerCities, gamePhase_ = GamePhase.SCIENCE_SUPREMACY)
-            else -> gameState.update(playerCities_ = newPlayerCities)
-        }
+    override fun toString(): String {
+        return "Choose unused progress token ${card.name}"
     }
 }

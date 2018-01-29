@@ -7,7 +7,7 @@ import javax.json.stream.JsonGenerator
 /**
  * Implements a graph using an adjacency matrix.
  */
-data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
+data class Graph<T>(val vertices: Vector<T?>, private val adjMatrix : Vector<Boolean>) {
     private val numVertices : Int = vertices.size()
 
     /**
@@ -15,28 +15,6 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
      */
     constructor(numVertices: Int) :
             this(Vector.fill(numVertices, {null}), Vector.fill(numVertices * numVertices, {false}))
-
-    /**
-     * Converts a pair of vertex indices (i, j) to an index that can be used to access the adjacency matrix (which is
-     * stored as a vector).
-     *
-     * @param i the origin of the edge
-     * @param j the destination of the edge
-     * @return an index that can be used to access the adjacency matrix.
-     */
-    fun toIndex(i: Int, j: Int) : Int {
-        return i * numVertices + j
-    }
-
-    /**
-     * Converts an adjacency matrix index to a pair of indices (i, j) representing an edge.
-     *
-     * @param k the adjacency matrix index
-     * @return two vertex indices representing an edge
-     */
-    fun toCoords(k: Int) : Pair<Int, Int> {
-        return Pair(k / numVertices, k % numVertices)
-    }
 
     /**
      * Stores the given element as the i-th vertex.
@@ -105,9 +83,10 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
             this
         }
         else {
-            val newAdjMatrix = adjMatrix.toJavaList()
-            newAdjMatrix[k] = false
-            Graph(vertices, Vector.ofAll(newAdjMatrix))
+            Graph(vertices, Vector.ofAll(
+                    (0 until adjMatrix.size())
+                    .map { if (it == k) false else adjMatrix[it] }
+            ))
         }
     }
     
@@ -131,7 +110,7 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
      */
     private fun hasIncomingEdges(i: Int) : Boolean {
         return Stream.ofAll(0 until numVertices)
-                .map { j -> adjMatrix[toIndex(i, j)] }
+                .map { adjMatrix[toIndex(it, i)] }
                 .fold(false, { a, b -> a || b } )
     }
 
@@ -142,59 +121,118 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
      */
     fun verticesWithNoIncomingEdges() : Vector<T> {
         return Stream.ofAll(0 until numVertices)
-                .filter { i -> !hasIncomingEdges(i) }
-                .map { i -> vertices[i]!! }
+                .filter { vertices[it] != null && !hasIncomingEdges(it) }
+                .map { vertices[it]!! }
                 .toVector()
     }
 
     /**
      * Finds the index i of all vertices that are connected to the given vertex j via an edge (i, j).
      *
-     * @param i the edge of interest
+     * @param j the vertex of interest
      * @return a list of vertices connected to the given one by an incoming edge
      */
-    fun getIncomingEdges(i : Int) : Vector<Int> {
+    fun getIncomingEdges(j: Int) : Vector<Int> {
         return Stream.ofAll(0 until numVertices)
-                .filter { j -> adjMatrix[toIndex(i, j)] }
+                .filter { adjMatrix[toIndex(it, j)] }
                 .toVector()
     }
 
     /**
      * Finds the index j of all vertices that are connected to the given vertex i via an edge (i, j).
      *
-     * @param j the edge of interest
+     * @param i the vertex of interest
      * @return a list of vertices connected to the given one by an outgoing edge
      */
-    fun getOutgoingEdges(j : Int) : Vector<Int> {
+    fun getOutgoingEdges(i: Int) : Vector<Int> {
         return Stream.ofAll(0 until numVertices)
-                .filter { i -> adjMatrix[toIndex(i, j)] }
+                .filter { adjMatrix[toIndex(i, it)] }
                 .toVector()
     }
 
     override fun toString() : String {
         return "Vertices: " +
                 vertices.zipWithIndex()
-                        .fold("", { acc, pair -> acc + "\n" + pair._1 + ": " + pair._2} ) +
-        "\n\nEdges:" +
+                        .fold("", { acc, pair -> acc + "\n" + pair._1 + ": " + pair._2} )/* +
+                "\n\nEdges:" +
                 (0 until numVertices * numVertices)
                         .filter { k -> adjMatrix[k]}
-                        .map { k -> toCoords(k) }
-                        .fold("", { acc, pair -> acc + "\n" + pair.first + " -> " + pair.second} )
+                        .map { k -> toCoords(k, numVertices) }
+                        .fold("", { acc, pair -> acc + "\n" + pair.first + " -> " + pair.second} ) +
+                "\n\nAdjacency matrix:" +
+                (0 until numVertices).map { i ->
+                    (0 until numVertices).map { j ->
+                        if (adjMatrix[toIndex(i,j)]) "o" else " "
+                    }.fold("\n", { acc, s -> "$acc$s"} )
+                }.fold("\n", { acc, s -> "$acc$s"})*/
     }
 
     /**
      * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
      */
-    fun toJson(generator: JsonGenerator) {
+    fun toJson(generator: JsonGenerator, name: String?) {
+        if (name == null) generator.writeStartObject()
+        else generator.writeStartObject(name)
+
         generator.writeStartArray("vertices")
         vertices.forEach { it.toString() }
         generator.writeEnd()
         generator.writeStartArray("edges")
         (0 until numVertices * numVertices)
                 .filter { adjMatrix[it] }
-                .map { toCoords(it) }
+                .map { toCoords(it, numVertices) }
                 .forEach { generator.write(vertices[it.first].toString() + " -> " + vertices[it.second].toString()) }
         generator.writeEnd()
+
+        generator.writeEnd()
+    }
+
+
+    /**
+     * Converts a pair of vertex indices (i, j) to an index that can be used to access the adjacency matrix (which is
+     * stored as a vector).
+     *
+     * @param i the origin of the edge
+     * @param j the destination of the edge
+     * @return an index that can be used to access the adjacency matrix.
+     */
+    fun toIndex(i: Int, j: Int) : Int {
+        return i * numVertices + j
+    }
+
+    /**
+     * Converts an adjacency matrix index to a pair of indices (i, j) representing an edge.
+     *
+     * @param k the adjacency matrix index
+     * @return two vertex indices representing an edge
+     */
+    fun toCoords(k: Int) : Pair<Int, Int> {
+        return Pair(k / numVertices, k % numVertices)
+    }
+
+    companion object {
+
+        /**
+         * Converts a pair of vertex indices (i, j) to an index that can be used to access the adjacency matrix (which is
+         * stored as a vector).
+         *
+         * @param i the origin of the edge
+         * @param j the destination of the edge
+         * @return an index that can be used to access the adjacency matrix.
+         */
+        fun toIndex(i: Int, j: Int, numVertices: Int) : Int {
+            return i * numVertices + j
+        }
+
+        /**
+         * Converts an adjacency matrix index to a pair of indices (i, j) representing an edge.
+         *
+         * @param k the adjacency matrix index
+         * @return two vertex indices representing an edge
+         */
+        fun toCoords(k: Int, numVertices: Int) : Pair<Int, Int> {
+            return Pair(k / numVertices, k % numVertices)
+        }
     }
 
 }

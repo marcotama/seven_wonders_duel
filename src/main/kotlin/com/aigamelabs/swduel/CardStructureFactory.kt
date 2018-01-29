@@ -12,12 +12,11 @@ object CardStructureFactory {
     private fun makeCardStructure(origDeck : Deck, faceUpCardsIdx: HashSet<Int>, connections: HashSet<Pair<Int,Int>>,
                                   faceDownCard: FaceDownCard, generator : RandomWithTracker?) : CardStructure {
 
-        val graph = Graph<CardPlaceholder>(origDeck.size())
         val numVertices = origDeck.size()
 
         // Set edges
         val edges : MutableList<Boolean> = (0 until numVertices * numVertices).map { false }.toMutableList()
-        connections.forEach { (i, j) -> edges[graph.toIndex(i, j)] = true }
+        connections.forEach { (i, j) -> edges[Graph.toIndex(i, j, origDeck.size())] = true }
 
         // Set vertices
         val drawOutcome = origDeck.drawCards(faceUpCardsIdx.size(), generator)

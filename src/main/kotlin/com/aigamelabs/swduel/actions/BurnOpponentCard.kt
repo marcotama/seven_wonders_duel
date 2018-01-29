@@ -18,4 +18,8 @@ class BurnOpponentCard(playerTurn: PlayerTurn, val card : Card) : Action(playerT
 
         return gameState.update(playerCities_ = updatedPlayerCities, burnedDeck_ = newBurnedDeck)
     }
+
+    override fun toString(): String {
+        return "Burn opponent card ${card.name}"
+    }
 }

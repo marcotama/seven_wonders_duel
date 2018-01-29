@@ -27,7 +27,7 @@ class Util {
         fun indexOfMax(array: DoubleArray): Int {
             val maxValue = Arrays.stream(array)
                     .boxed()
-                    .filter { d -> !d!!.isNaN() }
+                    .filter { !it.isNaN() }
                     .max(Comparator.naturalOrder<Double>())
                     .orElse(java.lang.Double.NaN)
             val indicesOfMax = IntStream.range(0, array.size)

@@ -24,7 +24,7 @@ data class GameState(
         val decisionQueue: Queue<Decision>,
         private val progressTokens : HashSet<ProgressToken>,
         val gamePhase: GamePhase,
-        private val defaultPlayer : PlayerTurn
+        val nextPlayer: PlayerTurn
 ) {
 
     fun update(
@@ -39,7 +39,7 @@ data class GameState(
             playerCities_ : HashMap<PlayerTurn,PlayerCity>? = null,
             decisionQueue_ : Queue<Decision>? = null,
             gamePhase_: GamePhase? = null,
-            defaultPlayer_: PlayerTurn? = null
+            nextPlayer_: PlayerTurn? = null
     ) : GameState {
         return GameState(
                 activeScienceDeck_ ?: activeScienceDeck,
@@ -53,7 +53,7 @@ data class GameState(
                 decisionQueue_ ?: decisionQueue,
                 progressTokens_ ?: progressTokens,
                 gamePhase_ ?: gamePhase,
-                defaultPlayer_ ?: defaultPlayer
+                nextPlayer_ ?: nextPlayer
         )
     }
 
@@ -62,42 +62,65 @@ data class GameState(
                 .getOrElseThrow { Exception("Player city not found") }
     }
 
-    fun switchToNextAge(generator: RandomWithTracker?) : GameState {
+    fun updateBoard(generator: RandomWithTracker?) : GameState {
         when (gamePhase) {
             GamePhase.WONDERS_SELECTION -> {
-                // Setup cards structure
-                val newCardStructure = CardStructureFactory.makeFirstAgeCardStructure(generator)
-                // Add main turn decision
-                val decision = DecisionFactory.makeTurnDecision(defaultPlayer, this, true)
-
-                return update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.FIRST_AGE,
-                        decisionQueue_ = decisionQueue.enqueue(decision))
+                return if (wondersForPickDeck.size() == 0 && unusedWondersDeck.size() == 4) {
+                    println("Switching to Age I")
+                    // Setup cards structure
+                    val newCardStructure = CardStructureFactory.makeFirstAgeCardStructure(generator)
+                    // Add main turn decision
+                    val newGameState = update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.FIRST_AGE)
+                    val decision = DecisionFactory.makeTurnDecision(PlayerTurn.PLAYER_1, newGameState)
+                    newGameState.update(decisionQueue_ = decisionQueue.enqueue(decision))
+                } else {
+                    // Wonder selection is handled by ChooseStartingWonder
+                    this
+                }
             }
             GamePhase.FIRST_AGE -> {
-                // Setup cards structure
-                val newCardStructure = CardStructureFactory.makeSecondCardStructure(generator)
-                // Create decision for starting player
-                val choosingPlayer = militaryBoard.getDisadvantagedPlayer() ?: defaultPlayer
-                val actions = PlayerTurn.values().map { p -> ChooseNextPlayer(choosingPlayer, p) }
-                val decision = Decision(choosingPlayer, Vector.ofAll(actions), false)
+                return if (cardStructure!!.isEmpty()) {
+                    println("Switching to Age II")
+                    // Setup cards structure
+                    val newCardStructure = CardStructureFactory.makeSecondCardStructure(generator)
+                    // Create decision for starting player
+                    val choosingPlayer = militaryBoard.getDisadvantagedPlayer() ?: nextPlayer.opponent() // Last player of the previous age
+                    val actions = PlayerTurn.values().map { ChooseNextPlayer(choosingPlayer, it) }
+                    val decision = Decision(choosingPlayer, Vector.ofAll(actions), "GameState.updateBoard")
 
-                return update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.SECOND_AGE,
-                        decisionQueue_ = decisionQueue.enqueue(decision))
+                    update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.SECOND_AGE,
+                            decisionQueue_ = decisionQueue.enqueue(decision))
+                } else {
+                    val decision = DecisionFactory.makeTurnDecision(nextPlayer, this)
+                    update(decisionQueue_ = decisionQueue.enqueue(decision))
+                }
             }
             GamePhase.SECOND_AGE -> {
-                // Setup cards structure
-                val newCardStructure = CardStructureFactory.makeThirdAgeCardStructure(generator)
-                // Create decision for starting player
-                val choosingPlayer = militaryBoard.getDisadvantagedPlayer() ?: defaultPlayer
-                val actions = PlayerTurn.values().map { p -> ChooseNextPlayer(choosingPlayer, p) }
-                val decision = Decision(choosingPlayer, Vector.ofAll(actions), false)
+                return if (cardStructure!!.isEmpty()) {
+                    println("Switching to Age III")
+                    // Setup cards structure
+                    val newCardStructure = CardStructureFactory.makeThirdAgeCardStructure(generator)
+                    // Create decision for starting player
+                    val choosingPlayer = militaryBoard.getDisadvantagedPlayer() ?: nextPlayer.opponent() // Last player of the previous age
+                    val actions = PlayerTurn.values().map { p -> ChooseNextPlayer(choosingPlayer, p) }
+                    val decision = Decision(choosingPlayer, Vector.ofAll(actions), "GameState.updateBoard")
 
-                return update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.THIRD_AGE,
-                        decisionQueue_ = decisionQueue.enqueue(decision))
+                    update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.THIRD_AGE,
+                            decisionQueue_ = decisionQueue.enqueue(decision))
+                } else {
+                    val decision = DecisionFactory.makeTurnDecision(nextPlayer, this)
+                    update(decisionQueue_ = decisionQueue.enqueue(decision))
+                }
             }
 
             GamePhase.THIRD_AGE -> {
-                return update(gamePhase_ = GamePhase.CIVILIAN_VICTORY)
+                return if (cardStructure!!.isEmpty()) {
+                    println("Civilian victory")
+                    update(gamePhase_ = GamePhase.CIVILIAN_VICTORY)
+                } else {
+                    val decision = DecisionFactory.makeTurnDecision(nextPlayer, this)
+                    update(decisionQueue_ = decisionQueue.enqueue(decision))
+                }
             }
             else -> {
                 throw Exception("There is no next phase after " + gamePhase.name)
@@ -108,25 +131,23 @@ data class GameState(
     fun checkScienceSupremacy(playerTurn: PlayerTurn) : GameState {
         // Count science symbols
         val playerCity = getPlayerCity(playerTurn)
-        val hasLawToken = !playerCity.progressTokens.filter { c -> c.enhancement == Enhancement.LAW }.isEmpty
-        val symbolsFromGreenCards = playerCity.buildings.map { c -> c.scienceSymbol }.distinct().size()
+        val hasLawToken = !playerCity.progressTokens.filter { it.enhancement == Enhancement.LAW }.isEmpty
+        val symbolsFromGreenCards = playerCity.buildings.map { it.scienceSymbol }.distinct().size()
         val distinctScienceSymbols = symbolsFromGreenCards + if (hasLawToken) 1 else 0
 
         return if (distinctScienceSymbols >= 6) {
+            println("Science supremacy")
             update(gamePhase_ = GamePhase.SCIENCE_SUPREMACY)
         }
-        else {
-            this
-        }
+        else this
     }
 
     fun checkMilitarySupremacy() : GameState {
         return if (militaryBoard.isMilitarySupremacy()) {
+            println("Military supremacy")
             update(gamePhase_ = GamePhase.MILITARY_SUPREMACY)
         }
-        else {
-            this
-        }
+        else this
     }
 
     private fun calculateVictoryPoints(player : PlayerTurn) : Int {
@@ -230,8 +251,8 @@ data class GameState(
         var newGameState = action.process(this, generator)
 
         // If the cards structure is empty, switch to next age
-        if (newGameState.cardStructure!!.isEmpty()) {
-            newGameState = newGameState.switchToNextAge(generator)
+        if (newGameState.cardStructure == null || newGameState.cardStructure!!.isEmpty()) {
+            newGameState = newGameState.updateBoard(generator)
         }
 
         return newGameState
@@ -240,46 +261,35 @@ data class GameState(
     /**
      * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
      */
-    fun toJson(generator: JsonGenerator) {
-        generator.writeStartObject("active_science_tokens")
-        activeScienceDeck.toJson(generator)
-        generator.writeEnd()
-        generator.writeStartObject("unused_science_tokens")
-        unusedScienceDeck.toJson(generator)
-        generator.writeEnd()
-        generator.writeStartObject("wonders_for_pick")
-        wondersForPickDeck.toJson(generator)
-        generator.writeEnd()
-        generator.writeStartObject("unused_wonders")
-        unusedWondersDeck.toJson(generator)
-        generator.writeEnd()
-        generator.writeStartObject("burned_cards")
-        burnedDeck.toJson(generator)
-        generator.writeEnd()
-        generator.writeStartObject("card_structure")
-        cardStructure?.toJson(generator)
-        generator.writeEnd()
+    fun toJson(generator: JsonGenerator, name: String?) {
+        if (name == null) generator.writeStartObject()
+        else generator.writeStartObject(name)
+
+        activeScienceDeck.toJson(generator, "active_science_tokens")
+        unusedScienceDeck.toJson(generator, "unused_science_tokens")
+        wondersForPickDeck.toJson(generator, "wonders_for_pick")
+        unusedWondersDeck.toJson(generator, "unused_wonders")
+        burnedDeck.toJson(generator, "burned_cards")
+
+        cardStructure?.toJson(generator, "card_structure")
+
         generator.writeStartArray("progress_tokens")
         progressTokens.forEach { generator.write(it.toString()) }
         generator.writeEnd()
-        generator.writeStartObject("military_board")
-        militaryBoard.toJson(generator)
-        generator.writeEnd()
+
+        militaryBoard.toJson(generator, "military_board")
+
         generator.writeStartObject("player_cities")
-        playerCities.forEach {
-            generator.writeStartObject(it._1.toString())
-            it._2.toJson(generator)
-            generator.writeEnd()
-        }
+        playerCities.forEach { it._2.toJson(generator, it._1.toString()) }
         generator.writeEnd()
+
         generator.writeStartArray("decision_queue")
-        decisionQueue.forEach { it.toJson(generator) }
+        decisionQueue.forEach { it.toJson(generator, null) }
         generator.writeEnd()
-        generator.writeStartObject("game_phase")
-        generator.write(gamePhase.toString())
-        generator.writeEnd()
-        generator.writeStartObject("default_player")
-        generator.write(defaultPlayer.toString())
+
+        generator.write("game_phase", gamePhase.toString())
+        generator.write("default_player", nextPlayer.toString())
+
         generator.writeEnd()
     }
 

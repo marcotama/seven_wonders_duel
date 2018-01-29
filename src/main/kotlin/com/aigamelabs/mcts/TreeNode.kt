@@ -18,7 +18,7 @@ import java.util.stream.IntStream
 class TreeNode(val parent: TreeNode?, val nodeType: NodeType, val selectedAction: Action?, val gameState: GameState, val manager: Manager) {
 
     /** Children nodes  */
-    var children: HashMap<Array<Int>, TreeNode>? = null
+    var children: HashMap<List<Int>, TreeNode>? = null
 
     /** Depth of the node  */
     val depth: Int = if (parent == null) 0 else parent.depth + 1
@@ -99,6 +99,9 @@ class TreeNode(val parent: TreeNode?, val nodeType: NodeType, val selectedAction
      */
     @Synchronized
     fun createChildren(actions: List<Action>) {
+
+        actions.forEach { println(it) }
+
         if (children == null) {
 
             children = HashMap()
@@ -106,7 +109,7 @@ class TreeNode(val parent: TreeNode?, val nodeType: NodeType, val selectedAction
                     .forEach {
                         val action = actions[it]
                         val newGameState =  gameState.applyAction(action)
-                        children!![arrayOf(it)] = TreeNode(this, childrenType, action, newGameState, manager)
+                        children!![listOf(it)] = TreeNode(this, childrenType, action, newGameState, manager)
                     }
         }
     }
@@ -122,10 +125,11 @@ class TreeNode(val parent: TreeNode?, val nodeType: NodeType, val selectedAction
 
             generator.writeStartObject("attributes")
             generator.write("games", node.games)
-            generator.write("playerScore", node.playerScore)
-            generator.write("opponentScore", node.opponentScore)
-            generator.write("selectedAction", if (node.selectedAction == null) "" else node.selectedAction.javaClass.simpleName)
-            generator.write("nodeType", node.nodeType.toString())
+            generator.write("player_score", node.playerScore)
+            generator.write("opponent_score", node.opponentScore)
+            generator.write("selected_action", if (node.selectedAction == null) "" else node.selectedAction.toString())
+            generator.write("node_type", node.nodeType.toString())
+            node.gameState.toJson(generator, "game_state")
             generator.writeEnd()
 
             generator.writeStartArray("children")

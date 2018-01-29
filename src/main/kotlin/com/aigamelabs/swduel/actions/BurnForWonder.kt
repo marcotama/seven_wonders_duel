@@ -15,12 +15,17 @@ class BurnForWonder(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn
         val playerCity = gameState.getPlayerCity(playerTurn)
         val opponentCity = gameState.getPlayerCity(playerTurn.opponent())
         val wondersToBuild = playerCity.unbuiltWonders
-        val affordableWonders = wondersToBuild.filter { w -> playerCity.canBuild(w, opponentCity) != null }
-        val chooseWonderToBuildActions = affordableWonders.map { c -> ChooseWonderToBuild(playerTurn, c) }
-        val newDecisionQueue = gameState.decisionQueue
-                .enqueue(Decision(playerTurn, Vector.ofAll(chooseWonderToBuildActions), false))
-                .enqueue(DecisionFactory.makeTurnDecision(playerTurn.opponent(), gameState, true))
+        val affordableWonders = wondersToBuild.filter { playerCity.canBuild(it, opponentCity) != null }
+        val chooseWonderToBuildActions = affordableWonders.map { BuildWonder(playerTurn, it) }
 
-        return gameState.update(cardStructure_ = newCardStructure, decisionQueue_ = newDecisionQueue)
+        val newGameState = gameState.update(cardStructure_ = newCardStructure)
+        val newDecisionQueue = gameState.decisionQueue
+                .enqueue(Decision(playerTurn, Vector.ofAll(chooseWonderToBuildActions), "BurnForWonder.process"))
+
+        return newGameState.update(decisionQueue_ = newDecisionQueue)
+    }
+
+    override fun toString(): String {
+        return "Burn ${card.name} to build wonder"
     }
 }

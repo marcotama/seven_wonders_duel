@@ -26,7 +26,7 @@ abstract class MctsBasedBot(
         actionSelector: ActionSelector,
         playerNodeEvaluator: NodeEvaluator,
         opponentNodeEvaluator: NodeEvaluator,
-        private val logFileName: String? = null
+        private val outPath: String? = null
 ) : Player(name, gameData) {
 
     /** JSON generator */
@@ -38,7 +38,7 @@ abstract class MctsBasedBot(
     private var lastAction : Action? = null
 
     /** Uct threads manager  */
-    internal var manager = UctParallelizationManager(actionSelector, playerNodeEvaluator, opponentNodeEvaluator)
+    internal var manager = UctParallelizationManager(actionSelector, playerNodeEvaluator, opponentNodeEvaluator, outPath)
 
     /**
      * Opens the JSON log and leaves the generator inside the games array. It does not open the first game object.
@@ -126,7 +126,7 @@ abstract class MctsBasedBot(
     }
 
     override fun init() {
-        openLog(logFileName)
+        openLog(outPath + "mcts.log")
     }
 
     override fun finalize(gameState: GameState) {

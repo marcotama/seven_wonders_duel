@@ -139,7 +139,10 @@ data class Card(
     /**
      * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
      */
-    fun toJson (generator: JsonGenerator) {
+    fun toJson (generator: JsonGenerator, name: String?) {
+        if (name == null) generator.writeStartObject()
+        else generator.writeStartObject(name)
+
         generator.write("group", cardGroup.toString())
         generator.write("color", color.toString())
         generator.write("coin_cost", coinCost.toString())
@@ -168,5 +171,11 @@ data class Card(
         generator.writeStartArray("bonuses")
         bonuses.forEach { generator.write(it.toString()) }
         generator.writeEnd()
+
+        generator.writeEnd()
+    }
+
+    override fun toString(): String {
+        return name
     }
 }

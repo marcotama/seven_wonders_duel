@@ -12,7 +12,7 @@ class BurnForMoney(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn)
     override fun process(gameState: GameState, generator : RandomWithTracker?) : GameState {
 
         // Remove card from appropriate deck
-        val newCardStructure = gameState.cardStructure!!.pickUpCard(card, generator)
+        val updatedCardStructure = gameState.cardStructure!!.pickUpCard(card, generator)
 
         //Add coins to player
         val playerCity = gameState.getPlayerCity(playerTurn)
@@ -24,11 +24,11 @@ class BurnForMoney(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn)
         //Add card to discard deck
         val newBurnedDeck = gameState.burnedDeck.add(card)
 
-        val newDecisionQueue = gameState.decisionQueue
-                .enqueue(DecisionFactory.makeTurnDecision(playerTurn.opponent(), gameState, true))
+        return gameState.update(cardStructure_ = updatedCardStructure, playerCities_ = updatedPlayerCities,
+                burnedDeck_ = newBurnedDeck).updateBoard(generator)
+    }
 
-
-        return gameState.update(cardStructure_ = newCardStructure, playerCities_ = updatedPlayerCities,
-                burnedDeck_ = newBurnedDeck, decisionQueue_ = newDecisionQueue)
+    override fun toString(): String {
+        return "Burn ${card.name} for coins"
     }
 }
