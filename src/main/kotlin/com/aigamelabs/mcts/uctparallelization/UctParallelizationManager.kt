@@ -63,7 +63,7 @@ class UctParallelizationManager(
         if (outPath != null)
             rootNode!!.export(outPath + "tree.json")
         if (verbose)
-            System.out.println("UCT run " + rootNode!!.games + " times.")
+            println("UCT run " + rootNode!!.games + " times.")
 
         // Choose best action based on MCTS scores
         val selected = actionSelector.chooseBestNode(rootNode!!.children!!.values.toTypedArray())

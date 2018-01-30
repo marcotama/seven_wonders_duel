@@ -100,8 +100,6 @@ class TreeNode(val parent: TreeNode?, val nodeType: NodeType, val selectedAction
     @Synchronized
     fun createChildren(actions: List<Action>) {
 
-        actions.forEach { println(it) }
-
         if (children == null) {
 
             children = HashMap()

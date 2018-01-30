@@ -5,9 +5,10 @@ import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.*
 import com.aigamelabs.swduel.enums.PlayerTurn
 import io.vavr.collection.Vector
+import java.util.logging.Logger
 
 class BurnForWonder(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
-    override fun process(gameState: GameState, generator : RandomWithTracker?) : GameState {
+    override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?) : GameState {
 
         // Remove card from appropriate deck
         val newCardStructure = gameState.cardStructure!!.pickUpCard(card, generator)

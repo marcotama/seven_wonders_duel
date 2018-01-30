@@ -3,6 +3,11 @@ package com.aigamelabs.swduel
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.enums.GameOutcome
 import com.aigamelabs.swduel.enums.PlayerTurn
+import java.nio.file.Paths
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.logging.*
+
 
 /**
  * Workflow:
@@ -20,24 +25,47 @@ import com.aigamelabs.swduel.enums.PlayerTurn
  *    The `process` method also takes care of adding new decisions to the queue, if any.
  *  - Repeat
  */
-class Game(private val players : Map<PlayerTurn, Player>) {
+class Game(private val players : Map<PlayerTurn, Player>, logPath: String) {
+
+    private val logger = Logger.getLogger("SevenWondersDuel")
+    init {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH.mm.ss")
+        val gameId = dateFormat.format(Calendar.getInstance().time)
+
+        val fileHandler = FileHandler(Paths.get(logPath, "game_$gameId.log").toAbsolutePath().toString())
+        fileHandler.formatter = SimpleFormatter()
+        fileHandler.level = Level.INFO
+        logger.addHandler(fileHandler)
+
+        val consoleHandler = ConsoleHandler()
+        consoleHandler.formatter = SimpleFormatter()
+        consoleHandler.level = Level.INFO
+        logger.addHandler(consoleHandler)
+    }
+
     fun mainLoop(startingGameState : GameState, generator : RandomWithTracker?) {
 
-        // Play the game
-        var gameState = startingGameState
-        while (!gameState.decisionQueue.isEmpty) {
-            gameState = iterate(gameState, generator)
-        }
+        try {
+            // Play the game
+            var gameState = startingGameState
+            while (!gameState.decisionQueue.isEmpty) {
+                gameState = iterate(gameState, generator)
+            }
 
-        // Determine winner
-        val gameOutcome = gameState.calculateWinner()
-        val outcome = gameOutcome.first
-        val p1VictoryPoints = gameOutcome.second
-        val p2VictoryPoints = gameOutcome.third
-        when (outcome) {
-            GameOutcome.PLAYER_1_VICTORY -> System.out.println("Player 1 wins with $p1VictoryPoints versus $p2VictoryPoints")
-            GameOutcome.PLAYER_2_VICTORY -> System.out.println("Player 2 wins with $p1VictoryPoints versus $p2VictoryPoints")
-            GameOutcome.TIE -> System.out.println("Players scored the same amount of points: $p1VictoryPoints")
+            // Determine winner
+            val gameOutcome = gameState.calculateWinner()
+            val outcome = gameOutcome.first
+            val p1VictoryPoints = gameOutcome.second
+            val p2VictoryPoints = gameOutcome.third
+            when (outcome) {
+                GameOutcome.PLAYER_1_VICTORY -> logger?.info("Player 1 wins with $p1VictoryPoints versus $p2VictoryPoints")
+                GameOutcome.PLAYER_2_VICTORY -> logger?.info("Player 2 wins with $p1VictoryPoints versus $p2VictoryPoints")
+                GameOutcome.TIE -> logger?.info("Players scored the same amount of points: $p1VictoryPoints")
+            }
+        }
+        catch (e: Exception) {
+            logger?.log(Level.SEVERE, e.message, e)
+            throw e
         }
     }
 
@@ -51,7 +79,7 @@ class Game(private val players : Map<PlayerTurn, Player>) {
         var (gameState_, thisDecision) = gameState.dequeAction()
 
         // Query player for action
-        println("Querying ${thisDecision.player}; options:\n" +
+        logger?.info("Querying ${thisDecision.player}; options:\n" +
                 thisDecision.options
                         .map { "  $it\n" }
                         .fold("", { a, b -> a + b } ) +
@@ -59,7 +87,7 @@ class Game(private val players : Map<PlayerTurn, Player>) {
         )
         val action = players[thisDecision.player]!!.decide(gameState_, thisDecision.options)
 
-        println("${thisDecision.player} chose: $action\n\n")
+        logger?.info("${thisDecision.player} chose: $action\n\n")
 
 
         // Check for cheating
@@ -69,7 +97,7 @@ class Game(private val players : Map<PlayerTurn, Player>) {
         }
 
         // Process action
-        gameState_ = action.process(gameState_, generator)
+        gameState_= action.process(gameState_, generator, logger)
 
         return gameState_
     }

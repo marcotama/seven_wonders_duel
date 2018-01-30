@@ -6,9 +6,10 @@ import com.aigamelabs.swduel.*
 import com.aigamelabs.swduel.enums.CardColor
 import com.aigamelabs.swduel.enums.PlayerTurn
 import io.vavr.collection.Vector
+import java.util.logging.Logger
 
 class BuildBuilding(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
-    override fun process(gameState: GameState, generator : RandomWithTracker?) : GameState {
+    override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?) : GameState {
 
         // Remove card from appropriate deck
         val newCardStructure = gameState.cardStructure!!.pickUpCard(card, generator)
@@ -42,12 +43,12 @@ class BuildBuilding(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn
         val updatedDecisionQueue =
                 if (card.color == CardColor.GREEN &&
                         playerCity.buildings.filter { it.scienceSymbol == card.scienceSymbol }.size() == 2) {
-                        val actions: Vector<Action> = gameState.activeScienceDeck.cards
-                                .map { ChooseProgressToken(playerTurn, it) }
-                        val decision = Decision(playerTurn, actions, "BuildBuilding.process")
-                        gameState.decisionQueue.enqueue(decision)
-                    } else
-                        null
+                    val actions: Vector<Action> = gameState.activeScienceDeck.cards
+                            .map { ChooseProgressToken(playerTurn, it) }
+                    val decision = Decision(playerTurn, actions, "BuildBuilding.process")
+                    gameState.decisionQueue.enqueue(decision)
+                } else
+                    null
 
         val newGameState = gameState.update(cardStructure_ = newCardStructure, playerCities_ = newPlayerCities,
                 militaryBoard_ = newMilitaryBoard, nextPlayer_ = gameState.nextPlayer.opponent(),

@@ -10,6 +10,7 @@ import io.vavr.collection.HashSet
 import io.vavr.collection.HashMap
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
+import java.util.logging.Logger
 import javax.json.stream.JsonGenerator
 
 data class GameState(
@@ -62,11 +63,11 @@ data class GameState(
                 .getOrElseThrow { Exception("Player city not found") }
     }
 
-    fun updateBoard(generator: RandomWithTracker?) : GameState {
+    fun updateBoard(generator: RandomWithTracker?, logger: Logger? = null) : GameState {
         when (gamePhase) {
             GamePhase.WONDERS_SELECTION -> {
                 return if (wondersForPickDeck.size() == 0 && unusedWondersDeck.size() == 4) {
-                    println("Switching to Age I")
+                    logger?.info("Switching to Age I")
                     // Setup cards structure
                     val newCardStructure = CardStructureFactory.makeFirstAgeCardStructure(generator)
                     // Add main turn decision
@@ -80,7 +81,7 @@ data class GameState(
             }
             GamePhase.FIRST_AGE -> {
                 return if (cardStructure!!.isEmpty()) {
-                    println("Switching to Age II")
+                    logger?.info("Switching to Age II")
                     // Setup cards structure
                     val newCardStructure = CardStructureFactory.makeSecondCardStructure(generator)
                     // Create decision for starting player
@@ -97,7 +98,7 @@ data class GameState(
             }
             GamePhase.SECOND_AGE -> {
                 return if (cardStructure!!.isEmpty()) {
-                    println("Switching to Age III")
+                    logger?.info("Switching to Age III")
                     // Setup cards structure
                     val newCardStructure = CardStructureFactory.makeThirdAgeCardStructure(generator)
                     // Create decision for starting player
@@ -115,7 +116,7 @@ data class GameState(
 
             GamePhase.THIRD_AGE -> {
                 return if (cardStructure!!.isEmpty()) {
-                    println("Civilian victory")
+                    logger?.info("Civilian victory")
                     update(gamePhase_ = GamePhase.CIVILIAN_VICTORY)
                 } else {
                     val decision = DecisionFactory.makeTurnDecision(nextPlayer, this)
@@ -123,12 +124,12 @@ data class GameState(
                 }
             }
             else -> {
-                throw Exception("There is no next phase after " + gamePhase.name)
+                return this
             }
         }
     }
 
-    fun checkScienceSupremacy(playerTurn: PlayerTurn) : GameState {
+    fun checkScienceSupremacy(playerTurn: PlayerTurn, logger: Logger? = null) : GameState {
         // Count science symbols
         val playerCity = getPlayerCity(playerTurn)
         val hasLawToken = !playerCity.progressTokens.filter { it.enhancement == Enhancement.LAW }.isEmpty
@@ -136,15 +137,15 @@ data class GameState(
         val distinctScienceSymbols = symbolsFromGreenCards + if (hasLawToken) 1 else 0
 
         return if (distinctScienceSymbols >= 6) {
-            println("Science supremacy")
+            logger?.info("Science supremacy")
             update(gamePhase_ = GamePhase.SCIENCE_SUPREMACY)
         }
         else this
     }
 
-    fun checkMilitarySupremacy() : GameState {
+    fun checkMilitarySupremacy(logger: Logger? = null) : GameState {
         return if (militaryBoard.isMilitarySupremacy()) {
-            println("Military supremacy")
+            logger?.info("Military supremacy")
             update(gamePhase_ = GamePhase.MILITARY_SUPREMACY)
         }
         else this

@@ -5,8 +5,10 @@ import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.*
 import com.aigamelabs.swduel.enums.PlayerTurn
 import io.vavr.collection.Vector
+import java.util.logging.Logger
+
 class ChooseStartingWonder(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
-    override fun process(gameState: GameState, generator : RandomWithTracker?) : GameState {
+    override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?) : GameState {
         // Remove wonder from for-pick deck
         var newWondersForPickDeck = gameState.wondersForPickDeck.removeCard(card)
         // Give wonder to the player

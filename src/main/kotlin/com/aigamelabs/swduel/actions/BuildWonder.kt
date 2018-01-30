@@ -9,11 +9,12 @@ import com.aigamelabs.swduel.enums.Wonders
 import com.aigamelabs.swduel.enums.CardColor
 import io.vavr.collection.HashSet
 import io.vavr.collection.Vector
+import java.util.logging.Logger
 
 
 class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
 
-    override fun process(gameState: GameState, generator : RandomWithTracker?): GameState {
+    override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?): GameState {
 
         // Gather data
         val playerCity = gameState.getPlayerCity(playerTurn)
@@ -42,7 +43,7 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
         else
             gameState.update(playerCities_ = newPlayerCities, nextPlayer_ = playerTurn.opponent())
 
-        return processWonders(newGameState).updateBoard(generator)
+        return processWonders(newGameState).updateBoard(generator, logger)
     }
 
     private fun processWonders(gameState: GameState): GameState {

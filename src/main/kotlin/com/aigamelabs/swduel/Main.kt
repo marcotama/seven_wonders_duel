@@ -13,7 +13,7 @@ class Main {
             val gameData = GameData(args[0], args[1])
             val player1 = Pair(PlayerTurn.PLAYER_1, getPlayer(args[0], gameData, args[2]))
             val player2 = Pair(PlayerTurn.PLAYER_2, getPlayer(args[1], gameData, args[2]))
-            val game = Game(mapOf(player1, player2))
+            val game = Game(mapOf(player1, player2), args[2])
             val generator = RandomWithTracker(Random().nextLong())
             val initGameState = GameStateFactory.createNewGameState()
             game.mainLoop(initGameState, generator)

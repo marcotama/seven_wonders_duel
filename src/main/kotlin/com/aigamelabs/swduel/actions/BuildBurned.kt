@@ -5,9 +5,10 @@ import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.enums.CardColor
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.enums.PlayerTurn
+import java.util.logging.Logger
 
 class BuildBurned(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
-    override fun process(gameState: GameState, generator : RandomWithTracker?) : GameState {
+    override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?) : GameState {
 
         // Add building to city
         val playerCity = gameState.getPlayerCity(playerTurn)
@@ -18,7 +19,7 @@ class BuildBurned(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) 
         val updatedPlayerCities = gameState.playerCities.put(playerTurn, updatedPlayerCity)
 
         val newGameState = gameState.update(playerCities_ = updatedPlayerCities, burnedDeck_ = newBurnedDeck,
-                nextPlayer_ = gameState.nextPlayer.opponent()).updateBoard(generator)
+                nextPlayer_ = gameState.nextPlayer.opponent()).updateBoard(generator, logger)
 
         return when {
             card.color == CardColor.GREEN -> newGameState.checkScienceSupremacy(playerTurn)

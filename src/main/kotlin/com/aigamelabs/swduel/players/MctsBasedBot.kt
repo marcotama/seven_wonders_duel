@@ -37,6 +37,8 @@ abstract class MctsBasedBot(
 
     private var lastAction : Action? = null
 
+    private val exportTree = false
+
     /** Uct threads manager  */
     internal var manager = UctParallelizationManager(actionSelector, playerNodeEvaluator, opponentNodeEvaluator, outPath)
 
@@ -108,6 +110,7 @@ abstract class MctsBasedBot(
      * closed.
      */
     private fun closeLog() {
+
         if (!isJsonGeneratorOpen)
             return
 
@@ -126,6 +129,9 @@ abstract class MctsBasedBot(
     }
 
     override fun init() {
+        if (!exportTree)
+            return
+
         openLog(outPath + "mcts.log")
     }
 
