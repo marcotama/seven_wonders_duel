@@ -5,6 +5,7 @@ import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.enums.GameOutcome
 import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.swduel.actions.ChooseNextPlayer
+import com.aigamelabs.swduel.actions.ChooseProgressToken
 import com.aigamelabs.swduel.enums.*
 import io.vavr.collection.HashSet
 import io.vavr.collection.HashMap
@@ -239,6 +240,59 @@ data class GameState(
             }
         } else {
             throw Exception("The game has not finished yet; current phase: $gamePhase")
+        }
+    }
+
+    fun buildBuilding(playerTurn: PlayerTurn, card: Card, generator: RandomWithTracker?): GameState {
+
+
+        // Add card to appropriate player city
+        val playerCity = getPlayerCity(playerTurn)
+        val opponentCity = getPlayerCity(playerTurn.opponent())
+        val coins = if (card.coinsProduced > 0)
+            card.coinsProduced * getMultiplier(card.coinsProducedFormula, card.coinsProducedReferenceCity, playerCity, opponentCity)
+        else
+            0
+        val newPlayerCity = playerCity.update(buildings_ = playerCity.buildings.add(card), coins_ = playerCity.coins + coins)
+        var newPlayerCities = playerCities.put(playerTurn, newPlayerCity)
+
+        // Handle military cards
+        val newMilitaryBoard: MilitaryBoard
+        if (card.color == CardColor.RED) {
+            val additionOutcome = militaryBoard.addMilitaryPointsTo(card.militaryPoints, playerTurn)
+            newMilitaryBoard = additionOutcome.second
+            // Apply penalty to opponent city, if any
+            val opponentPenalty = additionOutcome.first
+            if (opponentPenalty > 0) {
+                val newOpponentCity = opponentCity.update(coins_ = opponentCity.coins - opponentPenalty)
+                newPlayerCities = playerCities.put(playerTurn.opponent(), newOpponentCity)
+            }
+        } else {
+            // Unchanged
+            newMilitaryBoard = militaryBoard
+        }
+
+        val updatedDecisionQueue =
+                if (card.color == CardColor.GREEN &&
+                        playerCity.buildings.filter { it.scienceSymbol == card.scienceSymbol }.size() == 2) {
+                    val actions: Vector<Action> = activeScienceDeck.cards
+                            .map { ChooseProgressToken(playerTurn, it) }
+                    val decision = Decision(playerTurn, actions, "BuildBuilding.process")
+                    decisionQueue.enqueue(decision)
+                } else
+                    null
+
+        val newGameState = update(
+                playerCities_ = newPlayerCities,
+                militaryBoard_ = newMilitaryBoard,
+                nextPlayer_ = nextPlayer.opponent(),
+                decisionQueue_ = updatedDecisionQueue
+        ).updateBoard(generator)
+
+        return when {
+            card.color == CardColor.GREEN -> newGameState.checkScienceSupremacy(playerTurn)
+            card.color == CardColor.RED -> newGameState.checkMilitarySupremacy()
+            else -> newGameState
         }
     }
 
