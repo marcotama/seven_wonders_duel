@@ -17,6 +17,7 @@ class Main {
             val generator = RandomWithTracker(Random().nextLong())
             val initGameState = GameStateFactory.createNewGameState()
             game.mainLoop(initGameState, generator)
+            System.exit(0)
         }
 
         private fun getPlayer(playerClass: String, gameData: GameData, logsPath: String): Player {

@@ -173,7 +173,7 @@ data class GameState(
         return totalFromBuildings + totalFromWonders + totalFromProgressTokens + totalFromMathToken
     }
 
-    fun getMultiplier(formula: Formula, cityForFormula: CityForFormula, playerCity: PlayerCity, opponentCity: PlayerCity) : Int {
+    private fun getMultiplier(formula: Formula, cityForFormula: CityForFormula, playerCity: PlayerCity, opponentCity: PlayerCity) : Int {
 
         // From highest city
         val fhc = { c : CardColor -> Math.max(playerCity.countBuildingsByColor(c), opponentCity.countBuildingsByColor(c)) }

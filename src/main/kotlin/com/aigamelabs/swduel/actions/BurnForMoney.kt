@@ -1,7 +1,6 @@
 package com.aigamelabs.swduel.actions
 
 import com.aigamelabs.swduel.Card
-import com.aigamelabs.swduel.DecisionFactory
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.enums.CardColor
@@ -26,7 +25,7 @@ class BurnForMoney(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn)
         val newBurnedDeck = gameState.burnedDeck.add(card)
 
         return gameState.update(cardStructure_ = updatedCardStructure, playerCities_ = updatedPlayerCities,
-                burnedDeck_ = newBurnedDeck).updateBoard(generator, logger)
+                burnedDeck_ = newBurnedDeck, nextPlayer_ = playerTurn.opponent()).updateBoard(generator, logger)
     }
 
     override fun toString(): String {
