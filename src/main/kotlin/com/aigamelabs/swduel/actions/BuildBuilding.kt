@@ -17,7 +17,7 @@ class BuildBuilding(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn
         val playerCity = gameState.getPlayerCity(playerTurn)
         val opponentCity = gameState.getPlayerCity(playerTurn.opponent())
         val coins = if (card.coinsProduced > 0)
-            card.coinsProduced * gameState.getMultiplier(card.coinsProducedFormula, card.referenceCity, playerCity, opponentCity)
+            card.coinsProduced * gameState.getMultiplier(card.coinsProducedFormula, card.coinsProducedReferenceCity, playerCity, opponentCity)
         else
             0
         val newPlayerCity = playerCity.update(buildings_ = playerCity.buildings.add(card), coins_ = playerCity.coins + coins)

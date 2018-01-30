@@ -155,7 +155,7 @@ data class GameState(
         val opponentCity = getPlayerCity(player.opponent())
         val totalFromBuildings = playerCity.buildings
                 .filter { it.victoryPointsFormula == Formula.ABSOLUTE }
-                .map { it.victoryPoints * getMultiplier(it.victoryPointsFormula, it.referenceCity, playerCity, opponentCity) }
+                .map { it.victoryPoints * getMultiplier(it.victoryPointsFormula, it.victoryPointsReferenceCity, playerCity, opponentCity) }
                 .fold(0, { a, b -> a + b } )
         val totalFromWonders = playerCity.wonders
                 .filter { c -> c.victoryPointsFormula == Formula.ABSOLUTE }

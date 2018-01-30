@@ -19,9 +19,10 @@ data class Card(
         val resourceAlternativeProduction: ResourcesAlternative = ResourcesAlternative.NONE,
         val victoryPoints: Int = 0,
         val victoryPointsFormula: Formula = Formula.ABSOLUTE,
+        val victoryPointsReferenceCity: CityForFormula = CityForFormula.NOT_APPLICABLE,
         val coinsProduced: Int = 0,
         val coinsProducedFormula: Formula = Formula.ABSOLUTE,
-        val referenceCity: CityForFormula = CityForFormula.NOT_APPLICABLE,
+        val coinsProducedReferenceCity: CityForFormula = CityForFormula.NOT_APPLICABLE,
         val scienceSymbol: ScienceSymbol = ScienceSymbol.NONE,
         val militaryPoints: Int = 0,
         val bonuses: Set<Bonus> = emptySet(),
@@ -83,8 +84,9 @@ data class Card(
                     resourceCost = HashMap.ofAll(resourceCost),
                     linksTo = linksTo,
                     victoryPoints = victoryPoints,
-                    coinsProduced = coinsProduced, coinsProducedFormula = coinsProducedFormula,
-                    referenceCity = CityForFormula.YOUR_CITY
+                    coinsProduced = coinsProduced,
+                    coinsProducedFormula = coinsProducedFormula,
+                    coinsProducedReferenceCity = CityForFormula.YOUR_CITY
             )
 
     // Constructor for (blue) victory points cards
@@ -103,9 +105,12 @@ data class Card(
                 coinsProduced: Int, coinsProducedFormula: Formula) :
             this(cardGroup = cardGroup, name = name, color = CardColor.PURPLE,
                     resourceCost = HashMap.ofAll(resourceCost),
-                    victoryPoints = victoryPoints, victoryPointsFormula = victoryPointsFormula,
-                    coinsProduced = coinsProduced, coinsProducedFormula = coinsProducedFormula,
-                    referenceCity = CityForFormula.CITY_WITH_MOST_UNITS,
+                    victoryPoints = victoryPoints,
+                    victoryPointsFormula = victoryPointsFormula,
+                    victoryPointsReferenceCity = CityForFormula.CITY_WITH_MOST_UNITS,
+                    coinsProduced = coinsProduced,
+                    coinsProducedFormula = coinsProducedFormula,
+                    coinsProducedReferenceCity = CityForFormula.CITY_WITH_MOST_UNITS,
                     militaryPoints = 0,
                     bonuses = emptySet<Bonus>()
             )
@@ -154,7 +159,7 @@ data class Card(
         generator.write("victoryPointsFormula", victoryPointsFormula.toString())
         generator.write("coinsProduced", coinsProduced.toString())
         generator.write("coinsProducedFormula", coinsProducedFormula.toString())
-        generator.write("referenceCity", referenceCity.toString())
+        generator.write("coinsProducedReferenceCity", coinsProducedReferenceCity.toString())
         generator.write("scienceSymbol", scienceSymbol.toString())
         generator.write("militaryPoints", militaryPoints.toString())
         generator.write("wonders", wonders.toString())
