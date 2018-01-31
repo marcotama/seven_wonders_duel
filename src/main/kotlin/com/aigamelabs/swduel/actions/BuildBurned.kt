@@ -8,7 +8,7 @@ import java.util.logging.Logger
 class BuildBurned(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
     override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?) : GameState {
 
-        val newBurnedDeck = gameState.burnedDeck.removeCard(card)
+        val newBurnedDeck = gameState.burnedCards.removeCard(card)
         val newGameState = gameState.update(burnedDeck_ = newBurnedDeck)
 
         return newGameState.buildBuilding(playerTurn, card, generator)

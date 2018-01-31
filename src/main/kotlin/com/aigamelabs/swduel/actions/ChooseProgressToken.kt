@@ -14,7 +14,7 @@ class ChooseProgressToken(playerTurn: PlayerTurn, val card : Card) : Action(play
         val newPlayerCities = gameState.playerCities.put(playerTurn,newPlayerCity)
 
         // Remove card from the science deck
-        val newActiveScienceDeck = gameState.activeScienceDeck.removeCard(card)
+        val newActiveScienceDeck = gameState.availableProgressTokens.removeCard(card)
 
         return gameState.update(playerCities_ = newPlayerCities, activeScienceDeck_ = newActiveScienceDeck)
                 .checkScienceSupremacy(playerTurn, logger)

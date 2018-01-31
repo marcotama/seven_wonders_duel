@@ -55,7 +55,7 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
             }
 
             Wonders.THE_MAUSOLEUM -> {
-                return if (gameState.burnedDeck.size() > 0) {
+                return if (gameState.burnedCards.size() > 0) {
                     val newDecisionQueue = gameState.decisionQueue.insert(0, buildBurned(gameState))
                     gameState.update(decisionQueue_ = newDecisionQueue)
                 } else {
@@ -105,13 +105,13 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
     }
 
     private fun buildBurned(gameState: GameState): Decision {
-        val actions = gameState.burnedDeck.cards
+        val actions = gameState.burnedCards.cards
                 .map { BuildBurned(playerTurn, it) }
         return Decision(playerTurn, Vector.ofAll(actions), "BuildWonder.buildBurned")
     }
 
     private fun addProgressTokenSelectionAction(gameState: GameState): Decision {
-        val actions = gameState.unusedScienceDeck.cards
+        val actions = gameState.discardedProgressTokens.cards
                 .map { ChooseUnusedProgressToken(playerTurn, it) }
         return Decision(playerTurn, Vector.ofAll(actions), "BuildWonder.addScienceTokenSelection")
     }

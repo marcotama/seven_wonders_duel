@@ -52,4 +52,10 @@ class CardStructure(var graph: Graph<CardPlaceholder>, private var faceDownPool:
 
         generator.writeEnd()
     }
+
+    override fun toString(): String {
+        return "$graph\n\nFace-down cards pool:\n" +
+                faceDownPool.cards.map { "  ${it.name}\n" }
+                .fold("", { acc, s -> "$acc$s"}) + "\n"
+    }
 }

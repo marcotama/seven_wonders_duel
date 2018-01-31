@@ -50,6 +50,7 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
             var gameState = startingGameState
             while (!gameState.decisionQueue.isEmpty) {
                 gameState = iterate(gameState, generator)
+                logger.info(gameState.toString())
             }
 
             // Determine winner

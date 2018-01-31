@@ -37,6 +37,16 @@ data class MilitaryBoard(
         generator.writeEnd()
     }
 
+    override fun toString(): String {
+        return "Conflict pawn position: $conflictPawnPosition\n" +
+                "Tokens on Player 1 side:\n" +
+                "  ${if (token1P1Present) "O" else "X"} 2 coins\n" +
+                "  ${if (token2P1Present) "O" else "X"} 5 coins\n" +
+                "Tokens on Player 2 side:\n" +
+                "  ${if (token1P2Present) "O" else "X"} 2 coins\n" +
+                "  ${if (token2P2Present) "O" else "X"} 5 coins"
+    }
+
     /**
      * Creates a new instance, with every field updated as specified. Null values are ignored.
      *

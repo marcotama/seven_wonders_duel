@@ -39,7 +39,7 @@ object DeckFactory {
         return Deck("Wonders", CardFactory.createFromWonders())
     }
 
-    fun createScienceTokenDeck () : Deck {
+    fun createProgressTokensDeck() : Deck {
         return Deck("Science Tokens", CardFactory.createFromScience())
     }
 }

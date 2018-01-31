@@ -176,10 +176,6 @@ data class PlayerCity(
         }
     }
 
-    fun getBuildingsByColor(color: CardColor) : HashSet<Card> {
-        return buildings.filter { c -> c.color == color }
-    }
-
     fun countBuildingsByColor(color: CardColor) : Int {
         return buildings.filter { c -> c.color == color }.size()
     }
@@ -207,5 +203,37 @@ data class PlayerCity(
         generator.writeEnd()
 
         generator.writeEnd()
+    }
+
+    override fun toString(): String {
+        val ret = StringBuilder()
+        ret.append("  Coins: $coins\n")
+        if (!buildings.isEmpty) {
+            ret.append("  Buildings:\n")
+            CardColor.values().forEach { color ->
+                val names = buildings.filter { it.color == color }
+                if (!names.isEmpty) {
+                    ret.append("Color $color:")
+                    names.forEach { ret.append("      ${it.name}\n") }
+                    ret.append("\n")
+                }
+            }
+        }
+        if (!wonders.isEmpty) {
+            ret.append("  Wonders:\n")
+            wonders.forEach { ret.append("    ${it.name}\n") }
+            ret.append("\n")
+        }
+        if (!progressTokens.isEmpty) {
+            ret.append("  Progress tokens:\n")
+            progressTokens.forEach { ret.append("    ${it.name}\n") }
+            ret.append("\n")
+        }
+        if (!unbuiltWonders.isEmpty) {
+            ret.append("  Unbuilt wonders:\n")
+            unbuiltWonders.forEach { ret.append("    ${it.name}\n") }
+            ret.append("\n")
+        }
+        return ret.toString()
     }
 }

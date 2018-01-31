@@ -15,16 +15,15 @@ import java.util.logging.Logger
 import javax.json.stream.JsonGenerator
 
 data class GameState(
-        val activeScienceDeck : Deck,
-        val unusedScienceDeck : Deck,
-        val wondersForPickDeck : Deck,
-        val unusedWondersDeck : Deck,
-        val burnedDeck : Deck,
+        val availableProgressTokens: Deck,
+        val discardedProgressTokens: Deck,
+        val wondersForPick: Deck,
+        val discardedWonders: Deck,
+        val burnedCards: Deck,
         val cardStructure : CardStructure?,
         val militaryBoard: MilitaryBoard,
         val playerCities : HashMap<PlayerTurn,PlayerCity>,
         val decisionQueue: Queue<Decision>,
-        private val progressTokens : HashSet<ProgressToken>,
         val gamePhase: GamePhase,
         private val nextPlayer: PlayerTurn
 ) {
@@ -36,7 +35,6 @@ data class GameState(
             unusedWondersDeck_ : Deck? = null,
             burnedDeck_ : Deck? = null,
             cardStructure_ : CardStructure? = null,
-            progressTokens_ : HashSet<ProgressToken>? = null,
             militaryBoard_ : MilitaryBoard? = null,
             playerCities_ : HashMap<PlayerTurn,PlayerCity>? = null,
             decisionQueue_ : Queue<Decision>? = null,
@@ -44,16 +42,15 @@ data class GameState(
             nextPlayer_: PlayerTurn? = null
     ) : GameState {
         return GameState(
-                activeScienceDeck_ ?: activeScienceDeck,
-                unusedScienceDeck_ ?: unusedScienceDeck,
-                wondersForPickDeck_ ?: wondersForPickDeck,
-                unusedWondersDeck_ ?: unusedWondersDeck,
-                burnedDeck_ ?: burnedDeck,
+                activeScienceDeck_ ?: availableProgressTokens,
+                unusedScienceDeck_ ?: discardedProgressTokens,
+                wondersForPickDeck_ ?: wondersForPick,
+                unusedWondersDeck_ ?: discardedWonders,
+                burnedDeck_ ?: burnedCards,
                 cardStructure_ ?: cardStructure,
                 militaryBoard_ ?: militaryBoard,
                 playerCities_ ?: playerCities,
                 decisionQueue_ ?: decisionQueue,
-                progressTokens_ ?: progressTokens,
                 gamePhase_ ?: gamePhase,
                 nextPlayer_ ?: nextPlayer
         )
@@ -67,7 +64,7 @@ data class GameState(
     fun updateBoard(generator: RandomWithTracker?, logger: Logger? = null) : GameState {
         when (gamePhase) {
             GamePhase.WONDERS_SELECTION -> {
-                return if (wondersForPickDeck.size() == 0 && unusedWondersDeck.size() == 4) {
+                return if (wondersForPick.size() == 0 && discardedWonders.size() == 4) {
                     logger?.info("Switching to Age I")
                     // Setup cards structure
                     val newCardStructure = CardStructureFactory.makeFirstAgeCardStructure(generator)
@@ -275,7 +272,7 @@ data class GameState(
         val updatedDecisionQueue =
                 if (card.color == CardColor.GREEN &&
                         playerCity.buildings.filter { it.scienceSymbol == card.scienceSymbol }.size() == 2) {
-                    val actions: Vector<Action> = activeScienceDeck.cards
+                    val actions: Vector<Action> = availableProgressTokens.cards
                             .map { ChooseProgressToken(playerTurn, it) }
                     val decision = Decision(playerTurn, actions, "BuildBuilding.process")
                     decisionQueue.enqueue(decision)
@@ -319,18 +316,13 @@ data class GameState(
     fun toJson(generator: JsonGenerator, name: String?) {
         if (name == null) generator.writeStartObject()
         else generator.writeStartObject(name)
-
-        activeScienceDeck.toJson(generator, "active_science_tokens")
-        unusedScienceDeck.toJson(generator, "unused_science_tokens")
-        wondersForPickDeck.toJson(generator, "wonders_for_pick")
-        unusedWondersDeck.toJson(generator, "unused_wonders")
-        burnedDeck.toJson(generator, "burned_cards")
+        availableProgressTokens.toJson(generator, "available_progress_tokens")
+        discardedProgressTokens.toJson(generator, "discarded_progress_tokens")
+        wondersForPick.toJson(generator, "wonders_for_pick")
+        discardedWonders.toJson(generator, "unused_wonders")
+        burnedCards.toJson(generator, "burned_cards")
 
         cardStructure?.toJson(generator, "card_structure")
-
-        generator.writeStartArray("progress_tokens")
-        progressTokens.forEach { generator.write(it.toString()) }
-        generator.writeEnd()
 
         militaryBoard.toJson(generator, "military_board")
 
@@ -346,6 +338,40 @@ data class GameState(
         generator.write("default_player", nextPlayer.toString())
 
         generator.writeEnd()
+    }
+
+    override fun toString(): String {
+        val ret = StringBuilder()
+        ret.append(
+                "Game phase: $gamePhase\n\n",
+                "Player 1 city:\n\n  ${getPlayerCity(PlayerTurn.PLAYER_1).toString()
+                        .replace("\n", "\n  ")}\n",
+                "Player 2 city:\n\n  ${getPlayerCity(PlayerTurn.PLAYER_2).toString()
+                        .replace("\n", "\n  ")}\n",
+                "Available progress tokens:\n",
+                availableProgressTokens.cards.map { "  ${it.name}\n" }
+                        .fold("", { acc, s -> "$acc$s"}) + "\n",
+                "Discarded progress tokens:\n",
+                discardedProgressTokens.cards.map { "  ${it.name}\n" }
+                        .fold("", { acc, s -> "$acc$s"}) + "\n",
+                "Wonders for picking:\n",
+                wondersForPick.cards.map { "  ${it.name}\n" }
+                        .fold("", { acc, s -> "$acc$s"}) + "\n",
+                "Discarded wonders:\n",
+                discardedWonders.cards.map { "  ${it.name}\n" }
+                        .fold("", { acc, s -> "$acc$s"}) + "\n",
+                "Discarded wonders:\n",
+                burnedCards.cards.map { "  ${it.name}\n" }
+                        .fold("", { acc, s -> "$acc$s"}) + "\n",
+                "Military board:\n${militaryBoard.toString().replace("\n", "\n  ")}\n\n",
+                "Next player: $nextPlayer\n",
+                "Decision queue:\n" +
+                        decisionQueue.forEachIndexed { index, decision -> "  #$index (${decision.player}) options:\n" +
+                                decision.options.map { option -> "    $option\n" }
+                                        .fold("", { acc, s -> "$acc$s"}) + "\n"
+                                }
+                )
+        return ret.toString()
     }
 
 }
