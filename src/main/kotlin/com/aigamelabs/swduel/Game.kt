@@ -29,14 +29,17 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
 
     init {
 
+        val level = Level.INFO
+        logger.level = level
+
         val fileHandler = FileHandler(Paths.get(logPath, "${gameId}_game.log").toAbsolutePath().toString())
         fileHandler.formatter = SimpleFormatter()
-        fileHandler.level = Level.INFO
+        fileHandler.level = level
         logger.addHandler(fileHandler)
 
         val consoleHandler = ConsoleHandler()
         consoleHandler.formatter = SimpleFormatter()
-        consoleHandler.level = Level.INFO
+        consoleHandler.level = level
         logger.addHandler(consoleHandler)
     }
 

@@ -26,7 +26,7 @@ data class GameState(
         val decisionQueue: Queue<Decision>,
         private val progressTokens : HashSet<ProgressToken>,
         val gamePhase: GamePhase,
-        val nextPlayer: PlayerTurn
+        private val nextPlayer: PlayerTurn
 ) {
 
     fun update(

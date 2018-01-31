@@ -30,17 +30,19 @@ abstract class Manager(
     var maxUctTreeDepth: Int = 20
 
     /** UCT execution time budget (in frames)  */
-    var uctBudgetInNanoseconds: Long = 10_000_000_000
+    var uctBudgetInNanoseconds: Long = 5_000_000_000
 
     internal val logger = Logger.getLogger("SevenWondersDuel_$id")
     init {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH.mm.ss")
         val gameId = dateFormat.format(Calendar.getInstance().time)
+        val level = Level.INFO
 
         val fileHandler = FileHandler(Paths.get(outPath, "${gameId}_player_$id.log").toAbsolutePath().toString())
         fileHandler.formatter = SimpleFormatter()
-        fileHandler.level = Level.INFO
+        fileHandler.level = level
         logger.addHandler(fileHandler)
+        logger.level = level
     }
 
 

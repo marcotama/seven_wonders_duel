@@ -22,7 +22,7 @@ data class Deck(val name: String, val cards: Vector<Card>) {
     fun removeCard(card : Card) : Deck {
         val cardIdx = cards.indexOf(card)
         if (cardIdx == -1)
-            throw Exception("Card not present")
+            throw Exception("Card \"${card.name}\" not present in deck \"$name\" (contents: ${toString()})")
         else
             return update(cards_ = cards.removeAt(cardIdx))
     }
@@ -87,6 +87,11 @@ data class Deck(val name: String, val cards: Vector<Card>) {
     }
 
     override fun toString(): String {
-        return cards.map { it.name }.foldLeft("", { acc, el -> "$acc$el, "} )
+        return if (cards.isEmpty)
+            "<Empty>"
+        else {
+            val tmp = cards.map { it.name }.foldLeft("", { acc, el -> "$acc$el, " })
+            tmp.substring(0, tmp.length - 2)
+        }
     }
 }

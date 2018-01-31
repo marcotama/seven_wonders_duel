@@ -7,11 +7,12 @@ import com.aigamelabs.mcts.TreeNode
 import com.aigamelabs.mcts.Util
 import com.aigamelabs.swduel.enums.GamePhase
 import java.util.*
+import java.util.logging.Level
 
 /**
  * Executes UCT on the given node.
  */
-class UctWorker(internal var manager: UctParallelizationManager) : Runnable {
+class UctWorker(internal var manager: UctParallelizationManager, private val workerId: String) : Runnable {
 
     var timeout: Long = 0
 
@@ -19,9 +20,14 @@ class UctWorker(internal var manager: UctParallelizationManager) : Runnable {
 
     override fun run() {
         while (System.nanoTime() <= timeout) {
-            uct()
+            try {
+                uct()
+            }
+            catch (e: Exception) {
+                manager.logger.log(Level.WARNING, "Exception in worker $workerId", e)
+                throw e
+            }
         }
-        println("UCT run " + manager.rootNode!!.games + " times.")
     }
 
     /**
@@ -51,7 +57,6 @@ class UctWorker(internal var manager: UctParallelizationManager) : Runnable {
     private fun uct() {
 
         var currentNode = manager.rootNode!!
-        var gameState = manager.rootGameState!!
 
         // Descend from the root node to a leaf, and expand the leaf if appropriate
         while ((currentNode.hasChildren() || currentNode.games >= manager.uctNodeCreateThreshold)
@@ -60,7 +65,8 @@ class UctWorker(internal var manager: UctParallelizationManager) : Runnable {
             if (currentNode.nodeType == NodeType.STOCHASTIC_NODE) {
                 val parent = currentNode.parent!!
                 // Re-apply parent action to parent game state to sample another game state for the child
-                val newGameState = parent.gameState.applyAction(parent.selectedAction!!, generator)
+                val (unqueuedParentGameState, _) = parent.gameState.dequeAction()
+                val newGameState = unqueuedParentGameState.applyAction(parent.selectedAction!!, generator)
                 // The random integers generated during the action application are the unique identifier for the child
                 val childId = generator.popAll()
                 // If a child with that id does not exist, create it
@@ -68,14 +74,12 @@ class UctWorker(internal var manager: UctParallelizationManager) : Runnable {
                     currentNode.children!![childId] = TreeNode(currentNode, currentNode.childrenType, null, newGameState, manager)
                 // Descend in the child with the calculated id
                 currentNode = currentNode.children!![childId]!!
+                manager.logger.log(Level.FINE, "Worker $workerId: stochastically descending into \"$childId\"")
+                manager.logger.log(Level.FINEST, "Worker $workerId: new state is ${currentNode.gameState}")
             }
             else {
-                // Deque next decision to be made
-                val (gameState_, thisDecision) = gameState.dequeAction()
-                gameState = gameState_
-
                 // If node has no children, create them using decision options
-                currentNode.createChildren(thisDecision.options)
+                currentNode.createChildren()
 
                 // Retrieve non-visited nodes
                 val nonVisitedChildren = currentNode.children!!.values
@@ -83,7 +87,10 @@ class UctWorker(internal var manager: UctParallelizationManager) : Runnable {
 
                 // If there are any, choose one and descend in it
                 if (nonVisitedChildren.size > 0) {
-                    currentNode = nonVisitedChildren[rnd.nextInt(nonVisitedChildren.size)]
+                    val childIdx = rnd.nextInt(nonVisitedChildren.size)
+                    currentNode = nonVisitedChildren[childIdx]
+                    manager.logger.log(Level.FINE, "Worker $workerId: descending into \"${nonVisitedChildren[childIdx].selectedAction}\"")
+                    manager.logger.log(Level.FINEST, "Worker $workerId: new state is ${currentNode.gameState}")
                 }
                 // Otherwise choose the child with highest UCB score
                 else {
@@ -101,6 +108,7 @@ class UctWorker(internal var manager: UctParallelizationManager) : Runnable {
         // Calculate score for end game
         val playerScore = getPlayerScore(endGameState)
         val opponentScore = getOpponentScore(endGameState)
+        manager.logger.log(Level.FINE, "Worker $workerId: playout ended with ${endGameState.gamePhase}, scores are P1: $playerScore and P2: $opponentScore")
         // Backpropagate
         while (true) {
             currentNode.updateScore(playerScore, opponentScore)
@@ -128,6 +136,8 @@ class UctWorker(internal var manager: UctParallelizationManager) : Runnable {
                 val options = decision.options
                 val choice = rnd.nextInt(options.size())
                 gameState = gameState.applyAction(options[choice])
+                manager.logger.log(Level.FINE, "Worker $workerId: randomly choosing \"$choice\" in playout")
+                manager.logger.log(Level.FINEST, "Worker $workerId: new state is $gameState")
             }
         return gameState
     }

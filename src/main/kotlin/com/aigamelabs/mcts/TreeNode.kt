@@ -16,7 +16,27 @@ import java.util.stream.IntStream
  *
  * @author Marco Tamassia
  */
-class TreeNode(val parent: TreeNode?, val nodeType: NodeType, val selectedAction: Action?, val gameState: GameState, val manager: Manager) {
+class TreeNode(
+        /**
+         * The parent of this node
+         */
+        val parent: TreeNode?,
+        /**
+         * A flag signaling whether this node represents a decision of a player or an imaginary game (stochastic) decision
+         */
+        val nodeType: NodeType,
+        /**
+         * The action that needs to be taken at the parent's game state to get to this node's game state (null for the root)
+         */
+        val selectedAction: Action?,
+        /**
+         * The game state represented by this node; the state should *include* the decision that its children represent
+         */
+        val gameState: GameState,
+        /**
+         * The manager of all the UCT workers
+         */
+        val manager: Manager) {
 
     /** Children nodes  */
     var children: HashMap<List<Int>, TreeNode>? = null
@@ -99,15 +119,16 @@ class TreeNode(val parent: TreeNode?, val nodeType: NodeType, val selectedAction
      * Creates children for the current node, if the node has no children yet.
      */
     @Synchronized
-    fun createChildren(actions: Vector<Action>) {
+    fun createChildren() {
 
         if (children == null) {
+            val (unqueuedGameState, decision) = gameState.dequeAction()
 
             children = HashMap()
-            IntStream.range(0, actions.size())
+            IntStream.range(0, decision.options.size())
                     .forEach {
-                        val action = actions[it]
-                        val newGameState =  gameState.applyAction(action)
+                        val action = decision.options[it]
+                        val newGameState =  unqueuedGameState.applyAction(action)
                         children!![listOf(it)] = TreeNode(this, childrenType, action, newGameState, manager)
                     }
         }

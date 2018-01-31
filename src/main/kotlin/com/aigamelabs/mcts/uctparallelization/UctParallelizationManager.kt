@@ -27,13 +27,13 @@ class UctParallelizationManager(
     /** Pool of workers  */
     private var executor: ExecutorService
 
-
     init {
-        val processors = Runtime.getRuntime().availableProcessors()
-        this.workers = (0 until Math.max(1, processors - 1))
-                .map { UctWorker(this) }
+        val processors = 1//Runtime.getRuntime().availableProcessors()
+        workers = (0 until Math.max(1, processors - 1))
+                .map { UctWorker(this, "#$it") }
                 .toTypedArray()
-        this.executor = Executors.newFixedThreadPool(workers.size)
+        logger.info("Setup ${workers.size} workers")
+        executor = Executors.newFixedThreadPool(workers.size)
     }
 
     override fun shutdown() {
@@ -48,6 +48,7 @@ class UctParallelizationManager(
     override fun run(gameState: GameState): Action {
         rootGameState = gameState
         rootNode = TreeNode(null, NodeType.PLAYER_NODE, null, rootGameState!!, this)
+        rootNode!!.createChildren()
 
         val timeout = System.nanoTime() + uctBudgetInNanoseconds
 
