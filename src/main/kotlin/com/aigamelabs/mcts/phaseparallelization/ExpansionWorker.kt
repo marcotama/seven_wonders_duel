@@ -30,7 +30,7 @@ class ExpansionWorker(
         if (!node.hasChildren()
                 && node.games >= manager.uctNodeCreateThreshold
                 && node.depth < manager.maxUctTreeDepth) {
-            node.createChildren(options.toJavaList())
+            node.createChildren(options)
         }
     }
 }

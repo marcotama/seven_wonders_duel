@@ -4,8 +4,6 @@ import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.enums.GameOutcome
 import com.aigamelabs.swduel.enums.PlayerTurn
 import java.nio.file.Paths
-import java.text.SimpleDateFormat
-import java.util.*
 import java.util.logging.*
 
 
@@ -25,14 +23,13 @@ import java.util.logging.*
  *    The `process` method also takes care of adding new decisions to the queue, if any.
  *  - Repeat
  */
-class Game(private val players : Map<PlayerTurn, Player>, logPath: String) {
+class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPath: String) {
 
     private val logger = Logger.getLogger("SevenWondersDuel")
-    init {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH.mm.ss")
-        val gameId = dateFormat.format(Calendar.getInstance().time)
 
-        val fileHandler = FileHandler(Paths.get(logPath, "game_$gameId.log").toAbsolutePath().toString())
+    init {
+
+        val fileHandler = FileHandler(Paths.get(logPath, "${gameId}_game.log").toAbsolutePath().toString())
         fileHandler.formatter = SimpleFormatter()
         fileHandler.level = Level.INFO
         logger.addHandler(fileHandler)
@@ -85,7 +82,7 @@ class Game(private val players : Map<PlayerTurn, Player>, logPath: String) {
                         .fold("", { a, b -> a + b } ) +
                 "Decision prompted by ${thisDecision.addedBy}\n"
         )
-        val action = players[thisDecision.player]!!.decide(gameState_, thisDecision.options)
+        val action = players[thisDecision.player]!!.decide(gameState)
 
         logger?.info("${thisDecision.player} chose: $action\n\n")
 

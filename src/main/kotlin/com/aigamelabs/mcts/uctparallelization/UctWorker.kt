@@ -20,8 +20,8 @@ class UctWorker(internal var manager: UctParallelizationManager) : Runnable {
     override fun run() {
         while (System.nanoTime() <= timeout) {
             uct()
-            println(timeout.toString() + " " +System.nanoTime().toString())
         }
+        println("UCT run " + manager.rootNode!!.games + " times.")
     }
 
     /**
@@ -75,7 +75,7 @@ class UctWorker(internal var manager: UctParallelizationManager) : Runnable {
                 gameState = gameState_
 
                 // If node has no children, create them using decision options
-                currentNode.createChildren(thisDecision.options.toJavaList())
+                currentNode.createChildren(thisDecision.options)
 
                 // Retrieve non-visited nodes
                 val nonVisitedChildren = currentNode.children!!.values

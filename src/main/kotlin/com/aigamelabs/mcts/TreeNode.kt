@@ -2,6 +2,7 @@ package com.aigamelabs.mcts
 
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.actions.Action
+import io.vavr.collection.Vector
 
 import javax.json.Json
 import javax.json.stream.JsonGenerator
@@ -98,12 +99,12 @@ class TreeNode(val parent: TreeNode?, val nodeType: NodeType, val selectedAction
      * Creates children for the current node, if the node has no children yet.
      */
     @Synchronized
-    fun createChildren(actions: List<Action>) {
+    fun createChildren(actions: Vector<Action>) {
 
         if (children == null) {
 
             children = HashMap()
-            IntStream.range(0, actions.size)
+            IntStream.range(0, actions.size())
                     .forEach {
                         val action = actions[it]
                         val newGameState =  gameState.applyAction(action)

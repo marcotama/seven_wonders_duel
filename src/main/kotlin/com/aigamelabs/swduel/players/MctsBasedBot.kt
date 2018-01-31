@@ -8,7 +8,6 @@ import com.aigamelabs.mcts.nodeevaluation.NodeEvaluator
 import com.aigamelabs.mcts.uctparallelization.UctParallelizationManager
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.actions.Action
-import io.vavr.collection.Vector
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -21,13 +20,14 @@ import javax.json.stream.JsonGenerator
  * @author Marco Tamassia
  */
 abstract class MctsBasedBot(
-        name: String,
+        playerId: String,
+        gameId: String,
         gameData: GameData,
         actionSelector: ActionSelector,
         playerNodeEvaluator: NodeEvaluator,
         opponentNodeEvaluator: NodeEvaluator,
         private val outPath: String? = null
-) : Player(name, gameData) {
+) : Player(playerId, gameData) {
 
     /** JSON generator */
     private var generator: JsonGenerator? = null
@@ -40,7 +40,7 @@ abstract class MctsBasedBot(
     private val exportTree = false
 
     /** Uct threads manager  */
-    internal var manager = UctParallelizationManager(actionSelector, playerNodeEvaluator, opponentNodeEvaluator, outPath)
+    internal var manager = UctParallelizationManager(actionSelector, playerNodeEvaluator, opponentNodeEvaluator, outPath, gameId, name)
 
     /**
      * Opens the JSON log and leaves the generator inside the games array. It does not open the first game object.
@@ -129,10 +129,8 @@ abstract class MctsBasedBot(
     }
 
     override fun init() {
-        if (!exportTree)
-            return
-
-        openLog(outPath + "mcts.log")
+        if (exportTree)
+            openLog(outPath + "mcts.log")
     }
 
     override fun finalize(gameState: GameState) {
@@ -149,8 +147,8 @@ abstract class MctsBasedBot(
     /**
 	 * This method processes the data from AI. It is executed in each frame.
 	 */
-    override fun decide(gameState: GameState, options: Vector<Action>): Action {
-        lastAction = manager.run(gameState, options)
+    override fun decide(gameState: GameState): Action {
+        lastAction = manager.run(gameState)
         logDecision()
         return lastAction!!
     }

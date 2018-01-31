@@ -7,7 +7,6 @@ import com.aigamelabs.mcts.NodeType
 import com.aigamelabs.mcts.TreeNode
 import com.aigamelabs.mcts.actionselection.ActionSelector
 import com.aigamelabs.mcts.nodeevaluation.NodeEvaluator
-import io.vavr.collection.Vector
 
 import java.util.LinkedList
 import java.util.concurrent.*
@@ -17,8 +16,9 @@ class PhaseParallelizationManager(
         actionSelector: ActionSelector,
         playerNodeEvaluator: NodeEvaluator,
         opponentNodeEvaluator: NodeEvaluator,
-        outPath: String?
-) : Manager(actionSelector, playerNodeEvaluator, opponentNodeEvaluator, outPath) {
+        outPath: String?,
+        id: String?
+) : Manager(actionSelector, playerNodeEvaluator, opponentNodeEvaluator, outPath, id) {
 
     /** Workers  */
     private var workers: LinkedList<Runnable>
@@ -103,9 +103,9 @@ class PhaseParallelizationManager(
      *
      * @return Action with the highest number of visits
      */
-    override fun run(gameState: GameState, options: Vector<Action>): Action {
+    override fun run(gameState: GameState): Action {
         rootGameState = gameState
-        rootNode = createRoot(options)
+        rootNode = TreeNode(null, NodeType.PLAYER_NODE, null, rootGameState!!, this)
 
         running = true
         try {
@@ -129,11 +129,5 @@ class PhaseParallelizationManager(
             rootNode!!.children!![listOf(0)]!!.selectedAction!! // Default: first action in the list
         else
             rootNode!!.children!![listOf(selected)]!!.selectedAction!!
-    }
-
-    private fun createRoot(options: Vector<Action>) : TreeNode {
-        val rootNode = TreeNode(null, NodeType.PLAYER_NODE, null, rootGameState!!, this)
-        rootNode.createChildren(options.toJavaList())
-        return rootNode
     }
 }
