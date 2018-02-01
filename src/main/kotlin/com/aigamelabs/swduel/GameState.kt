@@ -7,10 +7,10 @@ import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.swduel.actions.ChooseNextPlayer
 import com.aigamelabs.swduel.actions.ChooseProgressToken
 import com.aigamelabs.swduel.enums.*
-import io.vavr.collection.HashSet
 import io.vavr.collection.HashMap
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
+import java.util.logging.Level
 import java.util.logging.Logger
 import javax.json.stream.JsonGenerator
 
@@ -127,47 +127,103 @@ data class GameState(
         }
     }
 
-    fun checkScienceSupremacy(playerTurn: PlayerTurn, logger: Logger? = null) : GameState {
-        // Count science symbols
+
+    private fun testScienceSupremacy(playerTurn: PlayerTurn) : Boolean {
         val playerCity = getPlayerCity(playerTurn)
         val hasLawToken = !playerCity.progressTokens.filter { it.enhancement == Enhancement.LAW }.isEmpty
         val symbolsFromGreenCards = playerCity.buildings.map { it.scienceSymbol }.distinct().size()
         val distinctScienceSymbols = symbolsFromGreenCards + if (hasLawToken) 1 else 0
 
-        return if (distinctScienceSymbols >= 6) {
-            logger?.info("Science supremacy")
-            update(gamePhase_ = GamePhase.SCIENCE_SUPREMACY)
-        }
-        else this
+        return distinctScienceSymbols >= 6
     }
 
-    fun checkMilitarySupremacy(logger: Logger? = null) : GameState {
+    fun checkScienceSupremacy(playerTurn: PlayerTurn) : GameState {
+        return if (testScienceSupremacy(playerTurn))
+            update(gamePhase_ = GamePhase.SCIENCE_SUPREMACY, decisionQueue_ = Queue.empty())
+        else
+            this
+    }
+
+    fun checkMilitarySupremacy() : GameState {
         return if (militaryBoard.isMilitarySupremacy()) {
-            logger?.info("Military supremacy")
-            update(gamePhase_ = GamePhase.MILITARY_SUPREMACY)
+            update(gamePhase_ = GamePhase.MILITARY_SUPREMACY, decisionQueue_ = Queue.empty())
         }
         else this
     }
 
-    private fun calculateVictoryPoints(player : PlayerTurn) : Int {
+    private fun calculateVictoryPoints(player : PlayerTurn, logger: Logger?) : Int {
         val playerCity = getPlayerCity(player)
         val opponentCity = getPlayerCity(player.opponent())
-        val totalFromBuildings = playerCity.buildings
-                .filter { it.victoryPointsFormula == Formula.ABSOLUTE }
-                .map { it.victoryPoints * getMultiplier(it.victoryPointsFormula, it.victoryPointsReferenceCity, playerCity, opponentCity) }
-                .fold(0, { a, b -> a + b } )
-        val totalFromWonders = playerCity.wonders
-                .filter { c -> c.victoryPointsFormula == Formula.ABSOLUTE }
-                .map { c -> c.victoryPoints }
-                .fold(0, { a, b -> a + b } )
-        val totalFromProgressTokens = playerCity.progressTokens
-                .filter { c -> c.victoryPointsFormula == Formula.ABSOLUTE }
-                .map { c -> c.victoryPoints }
-                .fold(0, { a, b -> a + b } )
-        val totalFromMathToken = if (playerCity.hasProgressToken(Enhancement.MATHEMATICS))
-            3 * playerCity.progressTokens.size() else 0
+        val logMsg = StringBuilder()
+        var total = 0
 
-        return totalFromBuildings + totalFromWonders + totalFromProgressTokens + totalFromMathToken
+        playerCity.buildings.forEach{
+            val multiplier = getMultiplier(it.victoryPointsFormula, it.victoryPointsReferenceCity, playerCity, opponentCity)
+            val contribution = it.victoryPoints * multiplier
+            if (contribution > 0)
+                logMsg.append("  $contribution pts from ${it.name}\n")
+            total += contribution
+        }
+
+        playerCity.wonders.forEach{
+            val multiplier = getMultiplier(it.victoryPointsFormula, it.victoryPointsReferenceCity, playerCity, opponentCity)
+            val contribution = it.victoryPoints * multiplier
+            if (contribution > 0)
+                logMsg.append("  $contribution pts from ${it.name}\n")
+            total += contribution
+        }
+
+        playerCity.progressTokens.forEach{
+            val multiplier = getMultiplier(it.victoryPointsFormula, it.victoryPointsReferenceCity, playerCity, opponentCity)
+            val contribution = it.victoryPoints * multiplier
+            if (contribution > 0)
+                logMsg.append("  $contribution pts from ${it.name}\n")
+            total += contribution
+        }
+
+        val mathTokenContribution = if (playerCity.hasProgressToken(Enhancement.MATHEMATICS))
+            3 * playerCity.progressTokens.size() else 0
+        if (mathTokenContribution > 0)
+            logMsg.append("  $mathTokenContribution pts from Math progress token\n")
+
+        val coinsContribution = playerCity.coins / 3
+        if (coinsContribution > 0)
+            logMsg.append("  $coinsContribution pts from coins\n")
+
+        val militaryContribution = when (militaryBoard.conflictPawnPosition) {
+            0 -> 0
+            +1, +2 -> when (player) {
+                PlayerTurn.PLAYER_1 -> 2
+                PlayerTurn.PLAYER_2 -> 0
+            }
+            -1, -2 -> when (player) {
+                PlayerTurn.PLAYER_1 -> 0
+                PlayerTurn.PLAYER_2 -> 2
+            }
+            +3, +4, +5 -> when (player) {
+                PlayerTurn.PLAYER_1 -> 5
+                PlayerTurn.PLAYER_2 -> 0
+            }
+            -3, -4, -5 -> when (player) {
+                PlayerTurn.PLAYER_1 -> 0
+                PlayerTurn.PLAYER_2 -> 5
+            }
+            +6, +7, +8 -> when (player) {
+                PlayerTurn.PLAYER_1 -> 10
+                PlayerTurn.PLAYER_2 -> 0
+            }
+            -6, -7, -8 -> when (player) {
+                PlayerTurn.PLAYER_1 -> 0
+                PlayerTurn.PLAYER_2 -> 10
+            }
+            +9, -9 -> throw Exception("Conflict pawn is far enough to grant military supremacy; why is this function being called: : ${militaryBoard.conflictPawnPosition}")
+            else -> throw Exception("Conflict pawn in an invalid position: ${militaryBoard.conflictPawnPosition}")
+        }
+        if (militaryContribution > 0)
+            logMsg.append("  $militaryContribution pts from military advantage\n")
+
+        logger?.log(Level.INFO, logMsg.toString())
+        return total + mathTokenContribution + coinsContribution + militaryContribution
     }
 
     private fun getMultiplier(formula: Formula, cityForFormula: CityForFormula, playerCity: PlayerCity, opponentCity: PlayerCity) : Int {
@@ -225,18 +281,28 @@ data class GameState(
     /**
      * Calculates the winner and the victory points
      */
-    fun calculateWinner(): Triple<GameOutcome, Int, Int> {
-        val endGamePhases = HashSet.of(GamePhase.MILITARY_SUPREMACY, GamePhase.SCIENCE_SUPREMACY, GamePhase.CIVILIAN_VICTORY)
-        return if (endGamePhases.contains(gamePhase)) {
-            val p1VictoryPoints = calculateVictoryPoints(PlayerTurn.PLAYER_1)
-            val p2VictoryPoints = calculateVictoryPoints(PlayerTurn.PLAYER_2)
-            when {
-                p1VictoryPoints > p2VictoryPoints -> Triple(GameOutcome.PLAYER_1_VICTORY, p1VictoryPoints, p2VictoryPoints)
-                p2VictoryPoints > p1VictoryPoints -> Triple(GameOutcome.PLAYER_2_VICTORY, p1VictoryPoints, p2VictoryPoints)
-                else -> Triple(GameOutcome.TIE, p1VictoryPoints, p2VictoryPoints)
+    fun calculateWinner(logger: Logger? = null): Triple<GameOutcome, Int, Int> {
+        return when (gamePhase) {
+            GamePhase.CIVILIAN_VICTORY -> {
+                val p1VictoryPoints = calculateVictoryPoints(PlayerTurn.PLAYER_1, logger)
+                val p2VictoryPoints = calculateVictoryPoints(PlayerTurn.PLAYER_2, logger)
+                when {
+                    p1VictoryPoints > p2VictoryPoints -> Triple(GameOutcome.PLAYER_1_VICTORY, p1VictoryPoints, p2VictoryPoints)
+                    p2VictoryPoints > p1VictoryPoints -> Triple(GameOutcome.PLAYER_2_VICTORY, p1VictoryPoints, p2VictoryPoints)
+                    else -> Triple(GameOutcome.TIE, p1VictoryPoints, p2VictoryPoints)
+                }
             }
-        } else {
-            throw Exception("The game has not finished yet; current phase: $gamePhase")
+            GamePhase.SCIENCE_SUPREMACY -> when {
+                testScienceSupremacy(PlayerTurn.PLAYER_1) -> Triple(GameOutcome.PLAYER_1_VICTORY, 0, 0)
+                testScienceSupremacy(PlayerTurn.PLAYER_2) -> Triple(GameOutcome.PLAYER_2_VICTORY, 0, 0)
+                else -> throw Exception("Phase is science supremacy, but none of the players satisfy the conditions")
+            }
+            GamePhase.MILITARY_SUPREMACY -> when {
+                militaryBoard.conflictPawnPosition >= +9 -> Triple(GameOutcome.PLAYER_1_VICTORY, 0, 0)
+                militaryBoard.conflictPawnPosition <= -9 -> Triple(GameOutcome.PLAYER_2_VICTORY, 0, 0)
+                else -> throw Exception("Phase is military supremacy but conflict pawn is -9 < x < +9")
+            }
+            else -> throw Exception("The game has not finished yet; current phase: $gamePhase")
         }
     }
 
@@ -360,7 +426,7 @@ data class GameState(
                 "Discarded wonders:\n",
                 discardedWonders.cards.map { "  ${it.name}\n" }
                         .fold("", { acc, s -> "$acc$s"}) + "\n",
-                "Discarded wonders:\n",
+                "Burned cards:\n",
                 burnedCards.cards.map { "  ${it.name}\n" }
                         .fold("", { acc, s -> "$acc$s"}) + "\n",
                 "Military board:\n${militaryBoard.toString().replace("\n", "\n  ")}\n\n",

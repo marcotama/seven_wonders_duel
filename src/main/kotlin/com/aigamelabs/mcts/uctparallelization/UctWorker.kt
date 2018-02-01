@@ -81,6 +81,10 @@ class UctWorker(internal var manager: UctParallelizationManager, private val wor
                 // If node has no children, create them using decision options
                 currentNode.createChildren()
 
+                // Terminal node
+                if (currentNode.children == null)
+                    break
+
                 // Retrieve non-visited nodes
                 val nonVisitedChildren = currentNode.children!!.values
                         .filterTo(LinkedList()) { it.games == 0 }

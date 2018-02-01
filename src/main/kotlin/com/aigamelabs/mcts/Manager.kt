@@ -30,7 +30,7 @@ abstract class Manager(
     var maxUctTreeDepth: Int = 20
 
     /** UCT execution time budget (in frames)  */
-    var uctBudgetInNanoseconds: Long = 5_000_000_000
+    var uctBudgetInNanoseconds: Long = 1_000_000_000
 
     internal val logger = Logger.getLogger("SevenWondersDuel_$id")
     init {

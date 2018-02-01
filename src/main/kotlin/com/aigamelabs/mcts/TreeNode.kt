@@ -2,7 +2,6 @@ package com.aigamelabs.mcts
 
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.actions.Action
-import io.vavr.collection.Vector
 
 import javax.json.Json
 import javax.json.stream.JsonGenerator
@@ -122,7 +121,8 @@ class TreeNode(
     fun createChildren() {
 
         if (children == null) {
-            val (unqueuedGameState, decision) = gameState.dequeAction()
+            try {
+                val (unqueuedGameState, decision) = gameState.dequeAction()
 
             children = HashMap()
             IntStream.range(0, decision.options.size())
@@ -131,6 +131,8 @@ class TreeNode(
                         val newGameState =  unqueuedGameState.applyAction(action)
                         children!![listOf(it)] = TreeNode(this, childrenType, action, newGameState, manager)
                     }
+            }
+            catch (e: NoSuchElementException) {}
         }
     }
 

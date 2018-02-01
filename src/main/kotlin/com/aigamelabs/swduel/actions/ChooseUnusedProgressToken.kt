@@ -13,7 +13,7 @@ class ChooseUnusedProgressToken(playerTurn: PlayerTurn, val card : Card) : Actio
         val newPlayerCity = playerCity.update(scienceTokens_ = newScienceTokens)
         val newPlayerCities = gameState.playerCities.put(playerTurn,newPlayerCity)
         return gameState.update(playerCities_ = newPlayerCities)
-                .checkScienceSupremacy(playerTurn, logger)
+                .checkScienceSupremacy(playerTurn)
     }
 
     override fun toString(): String {

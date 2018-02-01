@@ -213,9 +213,8 @@ data class PlayerCity(
             CardColor.values().forEach { color ->
                 val names = buildings.filter { it.color == color }
                 if (!names.isEmpty) {
-                    ret.append("Color $color:")
+                    ret.append("    Color $color:\n")
                     names.forEach { ret.append("      ${it.name}\n") }
-                    ret.append("\n")
                 }
             }
         }

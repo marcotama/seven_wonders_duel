@@ -17,7 +17,7 @@ class ChooseProgressToken(playerTurn: PlayerTurn, val card : Card) : Action(play
         val newActiveScienceDeck = gameState.availableProgressTokens.removeCard(card)
 
         return gameState.update(playerCities_ = newPlayerCities, activeScienceDeck_ = newActiveScienceDeck)
-                .checkScienceSupremacy(playerTurn, logger)
+                .checkScienceSupremacy(playerTurn)
     }
 
     override fun toString(): String {

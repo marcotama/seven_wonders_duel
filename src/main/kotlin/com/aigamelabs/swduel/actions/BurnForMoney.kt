@@ -16,8 +16,8 @@ class BurnForMoney(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn)
 
         //Add coins to player
         val playerCity = gameState.getPlayerCity(playerTurn)
-        val numberOfCoinsToAdd = playerCity.buildings.filter { c -> c.color == CardColor.GOLD }.length() + 2
-        val updatedPlayerCity = playerCity.update(coins_ = numberOfCoinsToAdd)
+        val numberOfCoinsToAdd = playerCity.buildings.filter { it.color == CardColor.GOLD }.length() + 2
+        val updatedPlayerCity = playerCity.update(coins_ = playerCity.coins + numberOfCoinsToAdd)
         val updatedPlayerCities = gameState.playerCities.put(playerTurn, updatedPlayerCity)
 
 

@@ -7,7 +7,7 @@ import javax.json.stream.JsonGenerator
  * Represents the military situation.
  */
 data class MilitaryBoard(
-        private val conflictPawnPosition: Int,
+        val conflictPawnPosition: Int,
         private val token1P1Present : Boolean,
         private val token2P1Present : Boolean,
         private val token1P2Present : Boolean,
@@ -95,8 +95,8 @@ data class MilitaryBoard(
         var cost = 0
         cost += if (token1P1Present && newPosition <= -3) 2 else 0
         cost += if (token1P1Present && newPosition <= -6) 5 else 0
-        val newToken1P1Present = token1P1Present && newPosition >= -3
-        val newToken2P1Present = token2P1Present && newPosition >= -6
+        val newToken1P1Present = token1P1Present && newPosition > -3
+        val newToken2P1Present = token2P1Present && newPosition > -6
         val newBoard = update(
                 conflictPawnPosition_ = newPosition,
                 token1P1Present_ = newToken1P1Present,
@@ -110,8 +110,8 @@ data class MilitaryBoard(
         var cost = 0
         cost += if (token1P2Present && newPosition >= +3) 2 else 0
         cost += if (token1P2Present && newPosition >= +6) 5 else 0
-        val newToken1P2Present = token1P2Present && newPosition >= +3
-        val newToken2P2Present = token2P2Present && newPosition >= +6
+        val newToken1P2Present = token1P2Present && newPosition < +3
+        val newToken2P2Present = token2P2Present && newPosition < +6
         val newBoard = update(
                 conflictPawnPosition_ = newPosition,
                 token1P2Present_ = newToken1P2Present,
