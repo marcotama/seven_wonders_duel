@@ -57,8 +57,8 @@ data class Deck(val name: String, val cards: Vector<Card>) {
             else
                 generator.shuffle(indices)
 
-            val drawnCards = indices.subList(0, n).map { i -> cards[indices[i]] }
-            val newDeck = update(cards_ = cards.filter { card -> !drawnCards.contains(card) } )
+            val drawnCards = indices.subList(0, n).map { cards[indices[it]] }
+            val newDeck = update(cards_ = cards.filter { !drawnCards.contains(it) } )
             Pair(Vector.ofAll(drawnCards), newDeck)
         }
         else {

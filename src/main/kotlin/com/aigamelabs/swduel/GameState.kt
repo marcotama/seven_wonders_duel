@@ -101,7 +101,7 @@ data class GameState(
                     val newCardStructure = CardStructureFactory.makeThirdAgeCardStructure(generator)
                     // Create decision for starting player
                     val choosingPlayer = militaryBoard.getDisadvantagedPlayer() ?: nextPlayer.opponent() // Last player of the previous age
-                    val actions = PlayerTurn.values().map { p -> ChooseNextPlayer(choosingPlayer, p) }
+                    val actions = PlayerTurn.values().map { ChooseNextPlayer(choosingPlayer, it) }
                     val decision = Decision(choosingPlayer, Vector.ofAll(actions), "GameState.updateBoard")
 
                     update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.THIRD_AGE,
@@ -405,7 +405,7 @@ data class GameState(
                 "Next player: $nextPlayer\n",
                 "Decision queue:\n" +
                         decisionQueue.forEachIndexed { index, decision -> "  #$index (${decision.player}) options:\n" +
-                                decision.options.map { option -> "    $option\n" }
+                                decision.options.map { "    $it\n" }
                                         .fold("", { acc, s -> "$acc$s"}) + "\n"
                                 }
                 )

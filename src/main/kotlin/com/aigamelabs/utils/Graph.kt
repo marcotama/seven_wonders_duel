@@ -156,8 +156,8 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
                         .fold("", { acc, pair -> acc + "\n" + pair._1 + ": " + pair._2} ) +
                 "\n\nEdges:" +
                 (0 until numVertices * numVertices)
-                        .filter { k -> adjMatrix[k]}
-                        .map { k -> toCoords(k, numVertices) }
+                        .filter { adjMatrix[it]}
+                        .map { toCoords(it, numVertices) }
                         .fold("", { acc, pair -> acc + "\n" + pair.first + " -> " + pair.second} )/* +
                 "\n\nAdjacency matrix:" +
                 (0 until numVertices).map { i ->

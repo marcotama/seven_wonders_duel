@@ -80,7 +80,7 @@ data class PlayerCity(
     }
 
     fun hasProgressToken(enhancement: Enhancement) : Boolean {
-        return !progressTokens.filter { t -> t.enhancement == enhancement}.isEmpty
+        return !progressTokens.filter { it.enhancement == enhancement}.isEmpty
     }
 
     /**
@@ -91,8 +91,8 @@ data class PlayerCity(
      */
     private fun pureResourceProduction(resource : Resource) : Int {
         var resourceProduction = 0
-        buildings.forEach { building ->
-            building.resourceProduction.forEach {r, tot ->
+        buildings.forEach {
+            it.resourceProduction.forEach {r, tot ->
                 resourceProduction += if (r == resource) tot else 0
             }
         }
@@ -106,8 +106,8 @@ data class PlayerCity(
      * @return `true` if this city has a trading agreement for the given resource, `false` otherwise
      */
     private fun hasTradingAgreement(resource : Resource) : Boolean {
-        buildings.forEach { building ->
-            if (building.tradingBonuses.contains(resource)) {
+        buildings.forEach {
+            if (it.tradingBonuses.contains(resource)) {
                 return true
             }
         }
@@ -153,19 +153,19 @@ data class PlayerCity(
             when (alternative) {
                 ResourcesAlternative.ANY -> {
                     return Stream.of(Resource.WOOD, Resource.CLAY, Resource.STONE, Resource.GLASS, Resource.PAPER)
-                            .map { resource -> calcMinCost(costAfterPaying(resource, cost), newProduction, opponentCity) }
+                            .map { calcMinCost(costAfterPaying(it, cost), newProduction, opponentCity) }
                             .minBy { c -> c?.toFloat() ?: Float.POSITIVE_INFINITY }
                             .orNull
                 }
                 ResourcesAlternative.WOOD_OR_CLAY_OR_STONE -> {
                     return Stream.of(Resource.WOOD, Resource.CLAY, Resource.STONE)
-                            .map { resource -> calcMinCost(costAfterPaying(resource, cost), newProduction, opponentCity) }
+                            .map { calcMinCost(costAfterPaying(it, cost), newProduction, opponentCity) }
                             .minBy { c -> c?.toFloat() ?: Float.POSITIVE_INFINITY }
                             .orNull
                 }
                 ResourcesAlternative.GLASS_OR_PAPER -> {
                     return Stream.of(Resource.GLASS, Resource.PAPER)
-                            .map { resource -> calcMinCost(costAfterPaying(resource, cost), newProduction, opponentCity) }
+                            .map { calcMinCost(costAfterPaying(it, cost), newProduction, opponentCity) }
                             .minBy { c -> c?.toFloat() ?: Float.POSITIVE_INFINITY }
                             .orNull
                 }
@@ -177,7 +177,7 @@ data class PlayerCity(
     }
 
     fun countBuildingsByColor(color: CardColor) : Int {
-        return buildings.filter { c -> c.color == color }.size()
+        return buildings.filter { it.color == color }.size()
     }
 
     /**

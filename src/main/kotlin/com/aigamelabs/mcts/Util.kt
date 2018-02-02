@@ -12,11 +12,11 @@ class Util {
         fun indexOfMin(array: DoubleArray): Int {
             val minValue = Arrays.stream(array)
                     .boxed()
-                    .filter { d -> !d!!.isNaN() }
+                    .filter { !it!!.isNaN() }
                     .min(Comparator.naturalOrder<Double>())
                     .orElse(java.lang.Double.NaN)
             val indicesOfMin = IntStream.range(0, array.size)
-                    .filter { i -> array[i] == minValue }
+                    .filter { array[it] == minValue }
                     .toArray()
             return if (indicesOfMin.isEmpty())
                 Random().nextInt(array.size)
@@ -46,8 +46,8 @@ class Util {
         fun indexOfRank(array: DoubleArray, rank: Int): Int {
             val sortedIndices = IntStream.range(0, array.size)
                     .boxed()
-                    .sorted(Comparator.comparing<Int, Double> { i -> array[i] })
-                    .mapToInt { ele -> ele }
+                    .sorted(Comparator.comparing<Int, Double> { array[it] })
+                    .mapToInt { it }
                     .toArray()
             return sortedIndices[rank]
         }
