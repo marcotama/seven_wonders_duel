@@ -25,50 +25,51 @@ class ChooseStartingWonder(player: PlayerTurn, val card : Card) : Action(player)
         val numUnused = updatedGameState.discardedWonders.size()
 
         // First round of wonders choice (P1, P2, P2, P1)
-        if (numUnused == 8) {
-            if (numForPick == 3 || numForPick == 2) {
-                val decision = createDecision(PlayerTurn.PLAYER_2, updatedGameState.wondersForPick)
-                return updatedGameState.update(decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
-            } else if (numForPick == 1) {
-                // Give remaining card to P1
-                val lastWonder = updatedGameState.wondersForPick.drawCard(generator).first
-                val player1City = updatedGameState.getPlayerCity(PlayerTurn.PLAYER_1)
-                val updatedPlayer1City = player1City.update(unbuiltWonders_ = player1City.unbuiltWonders.add(lastWonder))
-                // Draw another 4 wonders for pick
-                val drawOutcome = updatedGameState.discardedWonders.drawCards(4, generator)
-                val updatedUnusedWondersDeck = drawOutcome.second
-                updatedWondersForPickDeck = Deck("Wonders for pick", drawOutcome.first)
+        when (numUnused) {
+            8 -> when (numForPick) {
+                3, 2 -> {
+                    val decision = createDecision(PlayerTurn.PLAYER_2, updatedGameState.wondersForPick)
+                    return updatedGameState.update(decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
+                }
+                1 -> {
+                    val decision = createDecision(PlayerTurn.PLAYER_1, updatedGameState.wondersForPick)
+                    return updatedGameState.update(decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
+                }
+                0 -> {
+                    // Draw another 4 wonders for pick
+                    val drawOutcome = updatedGameState.discardedWonders.drawCards(4, generator)
+                    val updatedUnusedWondersDeck = drawOutcome.second
+                    updatedWondersForPickDeck = Deck("Wonders for pick", drawOutcome.first)
 
-                val decision = createDecision(PlayerTurn.PLAYER_2, updatedWondersForPickDeck)
-                return updatedGameState.update(unusedWondersDeck_ = updatedUnusedWondersDeck,
-                        wondersForPickDeck_ = updatedWondersForPickDeck, player1City_ = updatedPlayer1City,
-                        decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
-            }
-            else {
-                throw Exception("This should not happen")
+                    val decision = createDecision(PlayerTurn.PLAYER_2, updatedWondersForPickDeck)
+                    return updatedGameState.update(
+                            unusedWondersDeck_ = updatedUnusedWondersDeck,
+                            wondersForPickDeck_ = updatedWondersForPickDeck,
+                            decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision)
+                    )
+                }
+                else -> throw Exception("This should not happen")
             }
 
         // Second round of wonders choice (P2, P1, P1, P2)
-        } else if (numUnused == 4) {
-            if (numForPick == 3 || numForPick == 2) {
-                val decision = createDecision(PlayerTurn.PLAYER_1, updatedGameState.wondersForPick)
-                return updatedGameState.update(decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
-            } else if (numForPick == 1) {
-                // Give remaining card to P2
-                val lastWonder = updatedGameState.wondersForPick.drawCard(generator).first
-                val player2City = updatedGameState.getPlayerCity(PlayerTurn.PLAYER_2)
-                val updatedPlayer2City = player2City.update(unbuiltWonders_ = player2City.unbuiltWonders.add(lastWonder))
-                // Update game phase
-                updatedWondersForPickDeck = Deck("Wonders for pick")
-                return updatedGameState.update(wondersForPickDeck_ = updatedWondersForPickDeck, player2City_ = updatedPlayer2City)
-                        .updateBoard(generator)
+            4 -> when (numForPick) {
+                3, 2 -> {
+                    val decision = createDecision(PlayerTurn.PLAYER_1, updatedGameState.wondersForPick)
+                    return updatedGameState.update(decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
+                }
+                1 -> {
+                    val decision = createDecision(PlayerTurn.PLAYER_1, updatedGameState.wondersForPick)
+                    return updatedGameState.update(decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
+                }
+                0 -> {
+                    // Update game phase
+                    updatedWondersForPickDeck = Deck("Wonders for pick")
+                    return updatedGameState.update(wondersForPickDeck_ = updatedWondersForPickDeck)
+                            .updateBoard(generator)
+                }
+                else -> throw Exception("This should not happen")
             }
-            else {
-                throw Exception("This should not happen")
-            }
-        }
-        else {
-            throw Exception("This should not happen")
+            else -> throw Exception("This should not happen")
         }
 
 
