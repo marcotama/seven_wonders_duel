@@ -7,7 +7,6 @@ import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.swduel.actions.ChooseNextPlayer
 import com.aigamelabs.swduel.actions.ChooseProgressToken
 import com.aigamelabs.swduel.enums.*
-import io.vavr.collection.HashMap
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
 import java.util.logging.Level
@@ -22,7 +21,8 @@ data class GameState(
         val burnedCards: Deck,
         val cardStructure : CardStructure?,
         val militaryBoard: MilitaryBoard,
-        val playerCities : HashMap<PlayerTurn,PlayerCity>,
+        val player1City : PlayerCity,
+        val player2City : PlayerCity,
         val decisionQueue: Queue<Decision>,
         val gamePhase: GamePhase,
         private val nextPlayer: PlayerTurn
@@ -36,7 +36,8 @@ data class GameState(
             burnedDeck_ : Deck? = null,
             cardStructure_ : CardStructure? = null,
             militaryBoard_ : MilitaryBoard? = null,
-            playerCities_ : HashMap<PlayerTurn,PlayerCity>? = null,
+            player1City_ : PlayerCity? = null,
+            player2City_ : PlayerCity? = null,
             decisionQueue_ : Queue<Decision>? = null,
             gamePhase_: GamePhase? = null,
             nextPlayer_: PlayerTurn? = null
@@ -49,7 +50,8 @@ data class GameState(
                 burnedDeck_ ?: burnedCards,
                 cardStructure_ ?: cardStructure,
                 militaryBoard_ ?: militaryBoard,
-                playerCities_ ?: playerCities,
+                player1City_ ?: player1City,
+                player2City_ ?: player2City,
                 decisionQueue_ ?: decisionQueue,
                 gamePhase_ ?: gamePhase,
                 nextPlayer_ ?: nextPlayer
@@ -57,8 +59,10 @@ data class GameState(
     }
 
     fun getPlayerCity(playerTurn : PlayerTurn) : PlayerCity {
-        return playerCities.get(playerTurn)
-                .getOrElseThrow { Exception("Player city not found") }
+        return when (playerTurn) {
+            PlayerTurn.PLAYER_1 -> player1City
+            PlayerTurn.PLAYER_2 -> player2City
+        }
     }
 
     fun updateBoard(generator: RandomWithTracker?, logger: Logger? = null) : GameState {
@@ -278,54 +282,58 @@ data class GameState(
         }
     }
 
-    fun buildBuilding(playerTurn: PlayerTurn, card: Card, generator: RandomWithTracker?): GameState {
+    fun buildBuilding(player: PlayerTurn, card: Card, generator: RandomWithTracker?): GameState {
 
 
         // Add card to appropriate player city
-        val playerCity = getPlayerCity(playerTurn)
-        val opponentCity = getPlayerCity(playerTurn.opponent())
+        val playerCity = getPlayerCity(player)
+        val opponentCity = getPlayerCity(player.opponent())
         val coins = if (card.coinsProduced > 0)
             card.coinsProduced * getMultiplier(card.coinsProducedFormula, card.coinsProducedReferenceCity, playerCity, opponentCity)
         else
             0
         val updatedPlayerCity = playerCity.update(buildings_ = playerCity.buildings.add(card), coins_ = playerCity.coins + coins)
-        var updatedPlayerCities = playerCities.put(playerTurn, updatedPlayerCity)
 
         // Handle military cards
         val updatedMilitaryBoard: MilitaryBoard
+        val updatedOpponentCity: PlayerCity
         if (card.color == CardColor.RED) {
-            val additionOutcome = militaryBoard.addMilitaryPointsTo(card.militaryPoints, playerTurn)
+            val additionOutcome = militaryBoard.addMilitaryPointsTo(card.militaryPoints, player)
             updatedMilitaryBoard = additionOutcome.second
             // Apply penalty to opponent city, if any
             val opponentPenalty = additionOutcome.first
-            if (opponentPenalty > 0) {
-                val updatedOpponentCity = opponentCity.update(coins_ = opponentCity.coins - opponentPenalty)
-                updatedPlayerCities = playerCities.put(playerTurn.opponent(), updatedOpponentCity)
-            }
+            updatedOpponentCity = if (opponentPenalty > 0)
+                opponentCity.update(coins_ = opponentCity.coins - opponentPenalty)
+            else
+                opponentCity
         } else {
             // Unchanged
             updatedMilitaryBoard = militaryBoard
+            updatedOpponentCity = opponentCity
         }
 
         val updatedDecisionQueue =
                 if (card.color == CardColor.GREEN &&
                         playerCity.buildings.filter { it.scienceSymbol == card.scienceSymbol }.size() == 2) {
                     val actions: Vector<Action> = availableProgressTokens.cards
-                            .map { ChooseProgressToken(playerTurn, it) }
-                    val decision = Decision(playerTurn, actions, "BuildBuilding.process")
+                            .map { ChooseProgressToken(player, it) }
+                    val decision = Decision(player, actions, "BuildBuilding.process")
                     decisionQueue.enqueue(decision)
                 } else
                     null
 
+        val updatedPlayer1City = if (player == PlayerTurn.PLAYER_1) updatedPlayerCity else updatedOpponentCity
+        val updatedPlayer2City = if (player == PlayerTurn.PLAYER_2) updatedPlayerCity else updatedOpponentCity
         val updatedGameState = update(
-                playerCities_ = updatedPlayerCities,
+                player1City_ = updatedPlayer1City,
+                player2City_ = updatedPlayer2City,
                 militaryBoard_ = updatedMilitaryBoard,
                 nextPlayer_ = nextPlayer.opponent(),
                 decisionQueue_ = updatedDecisionQueue
         ).updateBoard(generator)
 
         return when {
-            card.color == CardColor.GREEN -> updatedGameState.checkScienceSupremacy(playerTurn)
+            card.color == CardColor.GREEN -> updatedGameState.checkScienceSupremacy(player)
             card.color == CardColor.RED -> updatedGameState.checkMilitarySupremacy()
             else -> updatedGameState
         }
@@ -365,7 +373,8 @@ data class GameState(
         militaryBoard.toJson(generator, "military_board")
 
         generator.writeStartObject("player_cities")
-        playerCities.forEach { it._2.toJson(generator, it._1.toString()) }
+        player1City.toJson(generator, "Player 1")
+        player2City.toJson(generator, "Player 2")
         generator.writeEnd()
 
         generator.writeStartArray("decision_queue")

@@ -5,6 +5,6 @@ import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.utils.RandomWithTracker
 import java.util.logging.Logger
 
-abstract class Action(val playerTurn: PlayerTurn) {
+abstract class Action(val player: PlayerTurn) {
     abstract fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger? = null) : GameState
 }

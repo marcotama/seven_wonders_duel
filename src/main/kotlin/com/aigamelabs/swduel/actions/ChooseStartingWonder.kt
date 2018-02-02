@@ -7,16 +7,19 @@ import com.aigamelabs.swduel.enums.PlayerTurn
 import io.vavr.collection.Vector
 import java.util.logging.Logger
 
-class ChooseStartingWonder(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
+class ChooseStartingWonder(player: PlayerTurn, val card : Card) : Action(player) {
     override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?) : GameState {
         // Remove wonder from for-pick deck
         var updatedWondersForPickDeck = gameState.wondersForPick.removeCard(card)
         // Give wonder to the player
         var updatedGameState = gameState
-        val playerCity = updatedGameState.getPlayerCity(playerTurn)
+        val playerCity = updatedGameState.getPlayerCity(player)
+        val opponentCity = updatedGameState.getPlayerCity(player.opponent())
         val updatedPlayerCity = playerCity.update(unbuiltWonders_ = playerCity.unbuiltWonders.add(card))
-        var updatedPlayerCities = updatedGameState.playerCities.put(playerTurn, updatedPlayerCity)
-        updatedGameState = updatedGameState.update(playerCities_ = updatedPlayerCities, wondersForPickDeck_ = updatedWondersForPickDeck)
+        val updatedPlayer1City = if (player == PlayerTurn.PLAYER_1) updatedPlayerCity else opponentCity
+        val updatedPlayer2City = if (player == PlayerTurn.PLAYER_2) updatedPlayerCity else opponentCity
+        updatedGameState = updatedGameState.update(player1City_ = updatedPlayer1City, player2City_ = updatedPlayer2City,
+                wondersForPickDeck_ = updatedWondersForPickDeck)
 
         val numForPick = updatedGameState.wondersForPick.size()
         val numUnused = updatedGameState.discardedWonders.size()
@@ -31,7 +34,6 @@ class ChooseStartingWonder(playerTurn: PlayerTurn, val card : Card) : Action(pla
                 val lastWonder = updatedGameState.wondersForPick.drawCard(generator).first
                 val player1City = updatedGameState.getPlayerCity(PlayerTurn.PLAYER_1)
                 val updatedPlayer1City = player1City.update(unbuiltWonders_ = player1City.unbuiltWonders.add(lastWonder))
-                updatedPlayerCities = updatedGameState.playerCities.put(PlayerTurn.PLAYER_1, updatedPlayer1City)
                 // Draw another 4 wonders for pick
                 val drawOutcome = updatedGameState.discardedWonders.drawCards(4, generator)
                 val updatedUnusedWondersDeck = drawOutcome.second
@@ -39,7 +41,7 @@ class ChooseStartingWonder(playerTurn: PlayerTurn, val card : Card) : Action(pla
 
                 val decision = createDecision(PlayerTurn.PLAYER_2, updatedWondersForPickDeck)
                 return updatedGameState.update(unusedWondersDeck_ = updatedUnusedWondersDeck,
-                        wondersForPickDeck_ = updatedWondersForPickDeck, playerCities_ = updatedPlayerCities,
+                        wondersForPickDeck_ = updatedWondersForPickDeck, player1City_ = updatedPlayer1City,
                         decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
             }
             else {
@@ -56,10 +58,9 @@ class ChooseStartingWonder(playerTurn: PlayerTurn, val card : Card) : Action(pla
                 val lastWonder = updatedGameState.wondersForPick.drawCard(generator).first
                 val player2City = updatedGameState.getPlayerCity(PlayerTurn.PLAYER_2)
                 val updatedPlayer2City = player2City.update(unbuiltWonders_ = player2City.unbuiltWonders.add(lastWonder))
-                updatedPlayerCities = updatedGameState.playerCities.put(PlayerTurn.PLAYER_2, updatedPlayer2City)
                 // Update game phase
                 updatedWondersForPickDeck = Deck("Wonders for pick")
-                return updatedGameState.update(wondersForPickDeck_ = updatedWondersForPickDeck, playerCities_ = updatedPlayerCities)
+                return updatedGameState.update(wondersForPickDeck_ = updatedWondersForPickDeck, player2City_ = updatedPlayer2City)
                         .updateBoard(generator)
             }
             else {

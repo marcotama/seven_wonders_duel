@@ -6,7 +6,6 @@ import com.aigamelabs.swduel.actions.ChooseStartingWonder
 import com.aigamelabs.swduel.enums.GamePhase
 import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.swduel.enums.ProgressToken
-import io.vavr.collection.HashMap
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
 
@@ -41,14 +40,8 @@ object GameStateFactory {
         val allTokens = ProgressToken.values().toMutableList()
         allTokens.shuffle()
 
-        // Set cities
-        val playerCities = HashMap.of<PlayerTurn, PlayerCity>(
-                PlayerTurn.PLAYER_1, PlayerCity(p1Name),
-                PlayerTurn.PLAYER_2, PlayerCity(p2Name)
-        )
-
         return GameState(activeScienceDeck, unusedScienceDeck, wondersForPickDeck, unusedWondersDeck,
-                burnedDeck, null, MilitaryBoard(), playerCities, Queue.of(decision),
-                GamePhase.WONDERS_SELECTION, PlayerTurn.PLAYER_1)
+                burnedDeck, null, MilitaryBoard(), PlayerCity(p1Name), PlayerCity(p2Name),
+                Queue.of(decision), GamePhase.WONDERS_SELECTION, PlayerTurn.PLAYER_1)
     }
 }

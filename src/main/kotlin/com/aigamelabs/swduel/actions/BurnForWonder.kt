@@ -13,15 +13,15 @@ class BurnForWonder(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn
         // Remove card from appropriate deck
         val updatedCardStructure = gameState.cardStructure!!.pickUpCard(card, generator)
 
-        val playerCity = gameState.getPlayerCity(playerTurn)
-        val opponentCity = gameState.getPlayerCity(playerTurn.opponent())
+        val playerCity = gameState.getPlayerCity(player)
+        val opponentCity = gameState.getPlayerCity(player.opponent())
         val wondersToBuild = playerCity.unbuiltWonders
         val affordableWonders = wondersToBuild.filter { playerCity.canBuild(it, opponentCity) != null }
-        val chooseWonderToBuildActions = affordableWonders.map { BuildWonder(playerTurn, it) }
+        val chooseWonderToBuildActions = affordableWonders.map { BuildWonder(player, it) }
 
         val updatedGameState = gameState.update(cardStructure_ = updatedCardStructure)
         val updatedDecisionQueue = gameState.decisionQueue
-                .enqueue(Decision(playerTurn, Vector.ofAll(chooseWonderToBuildActions), "BurnForWonder.process"))
+                .enqueue(Decision(player, Vector.ofAll(chooseWonderToBuildActions), "BurnForWonder.process"))
 
         return updatedGameState.update(decisionQueue_ = updatedDecisionQueue)
     }

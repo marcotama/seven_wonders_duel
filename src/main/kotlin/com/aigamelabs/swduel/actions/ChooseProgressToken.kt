@@ -8,16 +8,18 @@ import java.util.logging.Logger
 
 class ChooseProgressToken(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
     override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?) : GameState {
-        val playerCity =  gameState.getPlayerCity(playerTurn)
+        val playerCity =  gameState.getPlayerCity(player)
+        val opponentCity =  gameState.getPlayerCity(player.opponent())
         val updatedProgressTokens = playerCity.progressTokens.add(card)
         val updatedPlayerCity = playerCity.update(progressTokens_ = updatedProgressTokens)
-        val updatedPlayerCities = gameState.playerCities.put(playerTurn,updatedPlayerCity)
+        val updatedPlayer1City = if (player == PlayerTurn.PLAYER_1) updatedPlayerCity else opponentCity
+        val updatedPlayer2City = if (player == PlayerTurn.PLAYER_2) updatedPlayerCity else opponentCity
 
         // Remove card from the science deck
         val updatedActiveScienceDeck = gameState.availableProgressTokens.removeCard(card)
 
-        return gameState.update(playerCities_ = updatedPlayerCities, activeScienceDeck_ = updatedActiveScienceDeck)
-                .checkScienceSupremacy(playerTurn)
+        return gameState.update(player1City_ = updatedPlayer1City, player2City_ = updatedPlayer2City,
+                activeScienceDeck_ = updatedActiveScienceDeck).checkScienceSupremacy(player)
     }
 
     override fun toString(): String {

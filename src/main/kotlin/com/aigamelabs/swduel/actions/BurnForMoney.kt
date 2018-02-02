@@ -15,17 +15,20 @@ class BurnForMoney(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn)
         val updatedCardStructure = gameState.cardStructure!!.pickUpCard(card, generator)
 
         //Add coins to player
-        val playerCity = gameState.getPlayerCity(playerTurn)
+        val playerCity = gameState.getPlayerCity(player)
+        val opponentCity = gameState.getPlayerCity(player.opponent())
         val numberOfCoinsToAdd = playerCity.buildings.filter { it.color == CardColor.GOLD }.length() + 2
         val updatedPlayerCity = playerCity.update(coins_ = playerCity.coins + numberOfCoinsToAdd)
-        val updatedPlayerCities = gameState.playerCities.put(playerTurn, updatedPlayerCity)
 
 
         //Add card to discard deck
         val updatedBurnedDeck = gameState.burnedCards.add(card)
 
-        return gameState.update(cardStructure_ = updatedCardStructure, playerCities_ = updatedPlayerCities,
-                burnedDeck_ = updatedBurnedDeck, nextPlayer_ = playerTurn.opponent()).updateBoard(generator, logger)
+        val updatedPlayer1City = if (player == PlayerTurn.PLAYER_1) updatedPlayerCity else opponentCity
+        val updatedPlayer2City = if (player == PlayerTurn.PLAYER_2) updatedPlayerCity else opponentCity
+        return gameState.update(player1City_ = updatedPlayer1City, player2City_ = updatedPlayer2City,
+                cardStructure_ = updatedCardStructure, burnedDeck_ = updatedBurnedDeck,
+                nextPlayer_ = player.opponent()).updateBoard(generator, logger)
     }
 
     override fun toString(): String {
