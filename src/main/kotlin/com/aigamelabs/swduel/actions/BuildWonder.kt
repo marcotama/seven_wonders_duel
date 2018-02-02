@@ -113,7 +113,7 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
     private fun addProgressTokenSelectionAction(gameState: GameState): Decision {
         val actions = gameState.discardedProgressTokens.cards
                 .map { ChooseUnusedProgressToken(playerTurn, it) }
-        return Decision(playerTurn, Vector.ofAll(actions), "BuildWonder.addScienceTokenSelection")
+        return Decision(playerTurn, Vector.ofAll(actions), "BuildWonder.addProgressTokenSelection")
     }
 
     /**

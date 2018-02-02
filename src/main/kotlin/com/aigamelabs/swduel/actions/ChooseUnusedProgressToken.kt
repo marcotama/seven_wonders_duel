@@ -10,7 +10,7 @@ class ChooseUnusedProgressToken(playerTurn: PlayerTurn, val card : Card) : Actio
     override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?) : GameState {
         val playerCity =  gameState.getPlayerCity(playerTurn)
         val updatedProgressTokens = playerCity.progressTokens.add(card)
-        val updatedPlayerCity = playerCity.update(scienceTokens_ = updatedProgressTokens)
+        val updatedPlayerCity = playerCity.update(progressTokens_ = updatedProgressTokens)
         val updatedPlayerCities = gameState.playerCities.put(playerTurn,updatedPlayerCity)
         return gameState.update(playerCities_ = updatedPlayerCities)
                 .checkScienceSupremacy(playerTurn)

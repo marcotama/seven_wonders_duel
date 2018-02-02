@@ -23,7 +23,7 @@ data class PlayerCity(
             coins_ : Int? = null,
             buildings_ : HashSet<Card>? = null,
             wonders_ : HashSet<Card>? = null,
-            scienceTokens_ : HashSet<Card>? = null,
+            progressTokens_: HashSet<Card>? = null,
             unbuiltWonders_ : HashSet<Card>? = null
     ) : PlayerCity {
         return PlayerCity(
@@ -31,7 +31,7 @@ data class PlayerCity(
                 coins_ ?: coins,
                 buildings_ ?: buildings,
                 wonders_ ?: wonders,
-                scienceTokens_ ?: progressTokens,
+                progressTokens_ ?: progressTokens,
                 unbuiltWonders_ ?: unbuiltWonders
         )
     }

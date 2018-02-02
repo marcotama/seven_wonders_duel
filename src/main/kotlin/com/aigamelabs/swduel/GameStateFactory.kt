@@ -19,9 +19,9 @@ object GameStateFactory {
     fun createNewGameState(p1Name : String, p2Name : String, generator : RandomWithTracker?) : GameState {
 
         // Initialise the 2 Science token decks
-        val scienceTokensDraw = DeckFactory.createProgressTokensDeck().drawCards(5, generator)
-        val activeScienceDeck = Deck("Active Science Tokens", scienceTokensDraw.first)
-        val unusedScienceDeck = scienceTokensDraw.second.update("Unused Science Tokens")
+        val progressTokensDraw = DeckFactory.createProgressTokensDeck().drawCards(5, generator)
+        val activeScienceDeck = Deck("Active Science Tokens", progressTokensDraw.first)
+        val unusedScienceDeck = progressTokensDraw.second.update("Unused Science Tokens")
 
         // Initialize wonder decks
         val drawOutcome = DeckFactory.createWondersDeck().drawCards(4, generator)

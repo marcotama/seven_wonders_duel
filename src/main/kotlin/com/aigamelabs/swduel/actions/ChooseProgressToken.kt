@@ -9,8 +9,8 @@ import java.util.logging.Logger
 class ChooseProgressToken(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
     override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?) : GameState {
         val playerCity =  gameState.getPlayerCity(playerTurn)
-        val updatedScienceTokens = playerCity.progressTokens.add(card)
-        val updatedPlayerCity = playerCity.update(scienceTokens_ = updatedScienceTokens)
+        val updatedProgressTokens = playerCity.progressTokens.add(card)
+        val updatedPlayerCity = playerCity.update(progressTokens_ = updatedProgressTokens)
         val updatedPlayerCities = gameState.playerCities.put(playerTurn,updatedPlayerCity)
 
         // Remove card from the science deck
