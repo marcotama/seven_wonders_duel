@@ -66,12 +66,12 @@ class UctWorker(internal var manager: UctParallelizationManager, private val wor
                 val parent = currentNode.parent!!
                 // Re-apply parent action to parent game state to sample another game state for the child
                 val (unqueuedParentGameState, _) = parent.gameState.dequeAction()
-                val newGameState = unqueuedParentGameState.applyAction(parent.selectedAction!!, generator)
+                val updatedGameState = unqueuedParentGameState.applyAction(parent.selectedAction!!, generator)
                 // The random integers generated during the action application are the unique identifier for the child
                 val childId = generator.popAll()
                 // If a child with that id does not exist, create it
                 if (!currentNode.children!!.containsKey(childId))
-                    currentNode.children!![childId] = TreeNode(currentNode, currentNode.childrenType, null, newGameState, manager)
+                    currentNode.children!![childId] = TreeNode(currentNode, currentNode.childrenType, null, updatedGameState, manager)
                 // Descend in the child with the calculated id
                 currentNode = currentNode.children!![childId]!!
                 manager.logger.log(Level.FINE, "Worker $workerId: stochastically descending into \"$childId\"")

@@ -9,10 +9,10 @@ import java.util.logging.Logger
 class ChooseUnusedProgressToken(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
     override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?) : GameState {
         val playerCity =  gameState.getPlayerCity(playerTurn)
-        val newScienceTokens = playerCity.progressTokens.add(card)
-        val newPlayerCity = playerCity.update(scienceTokens_ = newScienceTokens)
-        val newPlayerCities = gameState.playerCities.put(playerTurn,newPlayerCity)
-        return gameState.update(playerCities_ = newPlayerCities)
+        val updatedProgressTokens = playerCity.progressTokens.add(card)
+        val updatedPlayerCity = playerCity.update(scienceTokens_ = updatedProgressTokens)
+        val updatedPlayerCities = gameState.playerCities.put(playerTurn,updatedPlayerCity)
+        return gameState.update(playerCities_ = updatedPlayerCities)
                 .checkScienceSupremacy(playerTurn)
     }
 

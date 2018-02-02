@@ -69,9 +69,9 @@ data class GameState(
                     // Setup cards structure
                     val newCardStructure = CardStructureFactory.makeFirstAgeCardStructure(generator)
                     // Add main turn decision
-                    val newGameState = update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.FIRST_AGE)
-                    val decision = DecisionFactory.makeTurnDecision(PlayerTurn.PLAYER_1, newGameState)
-                    newGameState.update(decisionQueue_ = decisionQueue.enqueue(decision))
+                    val updatedGameState = update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.FIRST_AGE)
+                    val decision = DecisionFactory.makeTurnDecision(PlayerTurn.PLAYER_1, updatedGameState)
+                    updatedGameState.update(decisionQueue_ = decisionQueue.enqueue(decision))
                 } else {
                     // Wonder selection is handled by ChooseStartingWonder
                     this
@@ -245,8 +245,8 @@ data class GameState(
     fun dequeAction() : Pair<GameState, Decision> {
         val dequeueOutcome = decisionQueue.dequeue()
         val thisDecision = dequeueOutcome._1
-        val newDecisionsQueue = dequeueOutcome._2
-        val returnGameState = update(decisionQueue_ = newDecisionsQueue)
+        val updatedDecisionsQueue = dequeueOutcome._2
+        val returnGameState = update(decisionQueue_ = updatedDecisionsQueue)
         return Pair(returnGameState, thisDecision)
     }
 
@@ -288,23 +288,23 @@ data class GameState(
             card.coinsProduced * getMultiplier(card.coinsProducedFormula, card.coinsProducedReferenceCity, playerCity, opponentCity)
         else
             0
-        val newPlayerCity = playerCity.update(buildings_ = playerCity.buildings.add(card), coins_ = playerCity.coins + coins)
-        var newPlayerCities = playerCities.put(playerTurn, newPlayerCity)
+        val updatedPlayerCity = playerCity.update(buildings_ = playerCity.buildings.add(card), coins_ = playerCity.coins + coins)
+        var updatedPlayerCities = playerCities.put(playerTurn, updatedPlayerCity)
 
         // Handle military cards
-        val newMilitaryBoard: MilitaryBoard
+        val updatedMilitaryBoard: MilitaryBoard
         if (card.color == CardColor.RED) {
             val additionOutcome = militaryBoard.addMilitaryPointsTo(card.militaryPoints, playerTurn)
-            newMilitaryBoard = additionOutcome.second
+            updatedMilitaryBoard = additionOutcome.second
             // Apply penalty to opponent city, if any
             val opponentPenalty = additionOutcome.first
             if (opponentPenalty > 0) {
-                val newOpponentCity = opponentCity.update(coins_ = opponentCity.coins - opponentPenalty)
-                newPlayerCities = playerCities.put(playerTurn.opponent(), newOpponentCity)
+                val updatedOpponentCity = opponentCity.update(coins_ = opponentCity.coins - opponentPenalty)
+                updatedPlayerCities = playerCities.put(playerTurn.opponent(), updatedOpponentCity)
             }
         } else {
             // Unchanged
-            newMilitaryBoard = militaryBoard
+            updatedMilitaryBoard = militaryBoard
         }
 
         val updatedDecisionQueue =
@@ -317,17 +317,17 @@ data class GameState(
                 } else
                     null
 
-        val newGameState = update(
-                playerCities_ = newPlayerCities,
-                militaryBoard_ = newMilitaryBoard,
+        val updatedGameState = update(
+                playerCities_ = updatedPlayerCities,
+                militaryBoard_ = updatedMilitaryBoard,
                 nextPlayer_ = nextPlayer.opponent(),
                 decisionQueue_ = updatedDecisionQueue
         ).updateBoard(generator)
 
         return when {
-            card.color == CardColor.GREEN -> newGameState.checkScienceSupremacy(playerTurn)
-            card.color == CardColor.RED -> newGameState.checkMilitarySupremacy()
-            else -> newGameState
+            card.color == CardColor.GREEN -> updatedGameState.checkScienceSupremacy(playerTurn)
+            card.color == CardColor.RED -> updatedGameState.checkMilitarySupremacy()
+            else -> updatedGameState
         }
     }
 
@@ -338,14 +338,14 @@ data class GameState(
     fun applyAction(action: Action, generator: RandomWithTracker? = null): GameState {
 
         // Process action
-        var newGameState = action.process(this, generator)
+        var updatedGameState = action.process(this, generator)
 
         // If the cards structure is empty, switch to next age
-        if (newGameState.cardStructure == null || newGameState.cardStructure!!.isEmpty()) {
-            newGameState = newGameState.updateBoard(generator)
+        if (updatedGameState.cardStructure == null || updatedGameState.cardStructure!!.isEmpty()) {
+            updatedGameState = updatedGameState.updateBoard(generator)
         }
 
-        return newGameState
+        return updatedGameState
     }
 
     /**

@@ -8,10 +8,10 @@ import java.util.logging.Logger
 class BuildBuilding(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
     override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?) : GameState {
 
-        val newCardStructure = gameState.cardStructure!!.pickUpCard(card, generator)
-        val newGameState = gameState.update(cardStructure_ = newCardStructure)
+        val updatedCardStructure = gameState.cardStructure!!.pickUpCard(card, generator)
+        val updatedGameState = gameState.update(cardStructure_ = updatedCardStructure)
 
-        return newGameState.buildBuilding(playerTurn, card, generator)
+        return updatedGameState.buildBuilding(playerTurn, card, generator)
     }
 
     override fun toString(): String {

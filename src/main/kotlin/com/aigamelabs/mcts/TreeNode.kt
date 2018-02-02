@@ -128,8 +128,8 @@ class TreeNode(
             IntStream.range(0, decision.options.size())
                     .forEach {
                         val action = decision.options[it]
-                        val newGameState =  unqueuedGameState.applyAction(action)
-                        children!![listOf(it)] = TreeNode(this, childrenType, action, newGameState, manager)
+                        val updatedGraph =  unqueuedGameState.applyAction(action)
+                        children!![listOf(it)] = TreeNode(this, childrenType, action, updatedGraph, manager)
                     }
             }
             catch (e: NoSuchElementException) {}

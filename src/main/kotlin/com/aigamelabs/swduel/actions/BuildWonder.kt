@@ -23,10 +23,10 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
         val playerCoins = playerCity.coins
 
         // Move card
-        val newUnbuiltWonders = playerCity.unbuiltWonders.remove(card)
-        val newWonders = playerCity.wonders.add(card)
-        val newPlayerCity = playerCity.update(wonders_ = newWonders, unbuiltWonders_ = newUnbuiltWonders, coins_ = playerCoins - cost)
-        val newPlayerCities = gameState.playerCities.put(playerTurn, newPlayerCity)
+        val updatedUnbuiltWonders = playerCity.unbuiltWonders.remove(card)
+        val updatedWonders = playerCity.wonders.add(card)
+        val updatedPlayerCity = playerCity.update(wonders_ = updatedWonders, unbuiltWonders_ = updatedUnbuiltWonders, coins_ = playerCoins - cost)
+        val updatedPlayerCities = gameState.playerCities.put(playerTurn, updatedPlayerCity)
 
 
         val hasExtraTurn = gameState.getPlayerCity(playerTurn).hasProgressToken(Enhancement.THEOLOGY) ||
@@ -38,26 +38,26 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
                         Wonders.THE_TEMPLE_OF_ARTEMIS
                 ).contains(card.wonders)
 
-        val newGameState = if (hasExtraTurn)
-            gameState.update(playerCities_ = newPlayerCities)
+        val updatedGameState = if (hasExtraTurn)
+            gameState.update(playerCities_ = updatedPlayerCities)
         else
-            gameState.update(playerCities_ = newPlayerCities, nextPlayer_ = playerTurn.opponent())
+            gameState.update(playerCities_ = updatedPlayerCities, nextPlayer_ = playerTurn.opponent())
 
-        return processWonders(newGameState).updateBoard(generator, logger)
+        return processWonders(updatedGameState).updateBoard(generator, logger)
     }
 
     private fun processWonders(gameState: GameState): GameState {
         return when (card.wonders) {
             Wonders.THE_GREAT_LIBRARY -> {
-                val newDecisionQueue = gameState.decisionQueue.
+                val updatedDecisionQueue = gameState.decisionQueue.
                         insert(0, addProgressTokenSelectionAction(gameState))
-                gameState.update(decisionQueue_ = newDecisionQueue)
+                gameState.update(decisionQueue_ = updatedDecisionQueue)
             }
 
             Wonders.THE_MAUSOLEUM -> {
                 return if (gameState.burnedCards.size() > 0) {
-                    val newDecisionQueue = gameState.decisionQueue.insert(0, buildBurned(gameState))
-                    gameState.update(decisionQueue_ = newDecisionQueue)
+                    val updatedDecisionQueue = gameState.decisionQueue.insert(0, buildBurned(gameState))
+                    gameState.update(decisionQueue_ = updatedDecisionQueue)
                 } else {
                     gameState
                 }
@@ -161,8 +161,8 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
         else {
             val actions = burnable.map { BurnOpponentCard(playerTurn, it) }
             val newDecision = Decision(playerTurn, Vector.ofAll(actions), "BuildWonder.addBuildingToBurnActions")
-            val newDecisionQueue = updatedGameState.decisionQueue.insert(0, newDecision)
-            gameState.update(decisionQueue_ = newDecisionQueue)
+            val updatedDecisionQueue = updatedGameState.decisionQueue.insert(0, newDecision)
+            gameState.update(decisionQueue_ = updatedDecisionQueue)
         }
 
     }

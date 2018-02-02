@@ -8,9 +8,9 @@ import java.util.logging.Logger
 
 class ChooseNextPlayer(playerTurn: PlayerTurn, private val chosenPlayer: PlayerTurn) : Action(playerTurn) {
     override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?) : GameState {
-        val decision = DecisionFactory.makeTurnDecision(chosenPlayer, gameState)
-        val newDecisionQueue = gameState.decisionQueue.enqueue(decision)
-        return gameState.update(decisionQueue_ = newDecisionQueue, nextPlayer_ = chosenPlayer)
+        val newDecision = DecisionFactory.makeTurnDecision(chosenPlayer, gameState)
+        val updatedDecisionQueue = gameState.decisionQueue.enqueue(newDecision)
+        return gameState.update(decisionQueue_ = updatedDecisionQueue, nextPlayer_ = chosenPlayer)
     }
 
     override fun toString(): String {

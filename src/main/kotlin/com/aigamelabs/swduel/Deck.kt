@@ -40,8 +40,8 @@ data class Deck(val name: String, val cards: Vector<Card>) {
             val cardIdx = generator?.nextInt(cards.size())
                     ?: ThreadLocalRandom.current().nextInt(0, cards.size())
             val drawnCard = cards[cardIdx]
-            val newDeck = update(cards_ = cards.removeAt(cardIdx))
-            Pair(drawnCard, newDeck)
+            val updatedDeck = update(cards_ = cards.removeAt(cardIdx))
+            Pair(drawnCard, updatedDeck)
         }
         else {
             throw Exception("The deck is empty")
@@ -58,8 +58,8 @@ data class Deck(val name: String, val cards: Vector<Card>) {
                 generator.shuffle(indices)
 
             val drawnCards = indices.subList(0, n).map { cards[indices[it]] }
-            val newDeck = update(cards_ = cards.filter { !drawnCards.contains(it) } )
-            Pair(Vector.ofAll(drawnCards), newDeck)
+            val updatedDeck = update(cards_ = cards.filter { !drawnCards.contains(it) } )
+            Pair(Vector.ofAll(drawnCards), updatedDeck)
         }
         else {
             throw Exception("The deck is empty")
@@ -70,8 +70,8 @@ data class Deck(val name: String, val cards: Vector<Card>) {
         return Deck(name, cards.append(first))
     }
 
-    fun addAll(newCards : Vector<Card>) : Deck {
-        return Deck(name, cards.appendAll(newCards))
+    fun addAll(updatedCards: Vector<Card>) : Deck {
+        return Deck(name, cards.appendAll(updatedCards))
     }
 
     fun merge(deck : Deck) : Deck {

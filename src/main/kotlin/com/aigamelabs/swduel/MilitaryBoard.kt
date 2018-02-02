@@ -95,33 +95,33 @@ data class MilitaryBoard(
     }
 
     private fun addPointsToPlayer1(n : Int) : Pair<Int, MilitaryBoard> {
-        val newPosition = conflictPawnPosition + n
+        val updatedPosition = conflictPawnPosition + n
         var cost = 0
-        cost += if (token1P1Present && newPosition >= +3) 2 else 0
-        cost += if (token1P1Present && newPosition >= +6) 5 else 0
-        val newToken1P1Present = token1P1Present && newPosition < +3
-        val newToken2P1Present = token2P1Present && newPosition < +6
-        val newBoard = update(
-                conflictPawnPosition_ = newPosition,
-                token1P1Present_ = newToken1P1Present,
-                token2P1Present_ = newToken2P1Present
+        cost += if (token1P1Present && updatedPosition >= +3) 2 else 0
+        cost += if (token1P1Present && updatedPosition >= +6) 5 else 0
+        val updatedToken1P1Present = token1P1Present && updatedPosition < +3
+        val updatedToken2P1Present = token2P1Present && updatedPosition < +6
+        val updatedBoard = update(
+                conflictPawnPosition_ = updatedPosition,
+                token1P1Present_ = updatedToken1P1Present,
+                token2P1Present_ = updatedToken2P1Present
         )
-        return Pair(cost, newBoard)
+        return Pair(cost, updatedBoard)
     }
 
     private fun addPointsToPlayer2(n : Int) : Pair<Int, MilitaryBoard> {
-        val newPosition = conflictPawnPosition - n
+        val updatedPosition = conflictPawnPosition - n
         var cost = 0
-        cost += if (token1P2Present && newPosition <= -3) 2 else 0
-        cost += if (token1P2Present && newPosition <= -6) 5 else 0
-        val newToken1P2Present = token1P2Present && newPosition > -3
-        val newToken2P2Present = token2P2Present && newPosition > -6
-        val newBoard = update(
-                conflictPawnPosition_ = newPosition,
-                token1P2Present_ = newToken1P2Present,
-                token2P2Present_ = newToken2P2Present
+        cost += if (token1P2Present && updatedPosition <= -3) 2 else 0
+        cost += if (token1P2Present && updatedPosition <= -6) 5 else 0
+        val updatedToken1P2Present = token1P2Present && updatedPosition > -3
+        val updatedToken2P2Present = token2P2Present && updatedPosition > -6
+        val updatedBoard = update(
+                conflictPawnPosition_ = updatedPosition,
+                token1P2Present_ = updatedToken1P2Present,
+                token2P2Present_ = updatedToken2P2Present
         )
-        return Pair(cost, newBoard)
+        return Pair(cost, updatedBoard)
     }
 
     fun isMilitarySupremacy() : Boolean {

@@ -13,20 +13,20 @@ class CardStructure(var graph: Graph<CardPlaceholder>, var faceDownPool: Deck) {
         }
         else {
             // Remove card from the vertices list
-            var newGraph = graph.setVertex(i, null)
+            var updatedGraph = graph.setVertex(i, null)
             // Turn face-up previously covered cards
             val previouslyCoveredCardsIdx = graph.getOutgoingEdges(i)
-            var newFaceDownPool = faceDownPool
+            var updatedFaceDownPool = faceDownPool
             previouslyCoveredCardsIdx.forEach {
-                newGraph = newGraph.removeEdge(i, it)
-                if (newGraph.getIncomingEdges(it).size() == 0 && newGraph.vertices[it] !is Card) {
-                    val drawOutcome = newFaceDownPool.drawCard(generator)
+                updatedGraph = updatedGraph.removeEdge(i, it)
+                if (updatedGraph.getIncomingEdges(it).size() == 0 && updatedGraph.vertices[it] !is Card) {
+                    val drawOutcome = updatedFaceDownPool.drawCard(generator)
                     val drawnCard = drawOutcome.first
-                    newFaceDownPool = drawOutcome.second
-                    newGraph = newGraph.setVertex(it, drawnCard)
+                    updatedFaceDownPool = drawOutcome.second
+                    updatedGraph = updatedGraph.setVertex(it, drawnCard)
                 }
             }
-            return CardStructure(newGraph, newFaceDownPool)
+            return CardStructure(updatedGraph, updatedFaceDownPool)
         }
     }
 

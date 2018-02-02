@@ -148,29 +148,29 @@ data class PlayerCity(
         else {
             val last = altProduction.size() - 1
             val alternative = altProduction.get(last)
-            val newProduction = altProduction.removeAt(last)
+            val updatedProduction = altProduction.removeAt(last)
 
             when (alternative) {
                 ResourcesAlternative.ANY -> {
                     return Stream.of(Resource.WOOD, Resource.CLAY, Resource.STONE, Resource.GLASS, Resource.PAPER)
-                            .map { calcMinCost(costAfterPaying(it, cost), newProduction, opponentCity) }
+                            .map { calcMinCost(costAfterPaying(it, cost), updatedProduction, opponentCity) }
                             .minBy { c -> c?.toFloat() ?: Float.POSITIVE_INFINITY }
                             .orNull
                 }
                 ResourcesAlternative.WOOD_OR_CLAY_OR_STONE -> {
                     return Stream.of(Resource.WOOD, Resource.CLAY, Resource.STONE)
-                            .map { calcMinCost(costAfterPaying(it, cost), newProduction, opponentCity) }
+                            .map { calcMinCost(costAfterPaying(it, cost), updatedProduction, opponentCity) }
                             .minBy { c -> c?.toFloat() ?: Float.POSITIVE_INFINITY }
                             .orNull
                 }
                 ResourcesAlternative.GLASS_OR_PAPER -> {
                     return Stream.of(Resource.GLASS, Resource.PAPER)
-                            .map { calcMinCost(costAfterPaying(it, cost), newProduction, opponentCity) }
+                            .map { calcMinCost(costAfterPaying(it, cost), updatedProduction, opponentCity) }
                             .minBy { c -> c?.toFloat() ?: Float.POSITIVE_INFINITY }
                             .orNull
                 }
                 else -> {
-                    return calcMinCost(cost, newProduction, opponentCity)
+                    return calcMinCost(cost, updatedProduction, opponentCity)
                 }
             }
         }

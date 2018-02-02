@@ -15,9 +15,9 @@ class BurnOpponentCard(playerTurn: PlayerTurn, val card : Card) : Action(playerT
         val updatedPlayerCities = gameState.playerCities.put(playerTurn.opponent(), updatedOpponentCity)
 
         // Add burned card to discard deck
-        val newBurnedDeck = gameState.burnedCards.add(card)
+        val updatedBurnedDeck = gameState.burnedCards.add(card)
 
-        return gameState.update(playerCities_ = updatedPlayerCities, burnedDeck_ = newBurnedDeck)
+        return gameState.update(playerCities_ = updatedPlayerCities, burnedDeck_ = updatedBurnedDeck)
     }
 
     override fun toString(): String {
