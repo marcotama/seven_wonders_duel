@@ -7,11 +7,11 @@ import javax.json.stream.JsonGenerator
  * Represents the military situation.
  */
 data class MilitaryBoard(
-        val conflictPawnPosition: Int,
-        private val token1P1Present : Boolean,
-        private val token2P1Present : Boolean,
-        private val token1P2Present : Boolean,
-        private val token2P2Present : Boolean
+        private val conflictPawnPosition: Int,
+        val token1P1Present : Boolean,
+        val token2P1Present : Boolean,
+        val token1P2Present : Boolean,
+        val token2P2Present : Boolean
 ) {
     /*
     Stores an integer representing the position of the conflict pawn, with positive values indicating an advantage for
@@ -72,6 +72,10 @@ data class MilitaryBoard(
         )
     }
 
+    fun getConflictPawnState(): Pair<PlayerTurn?, Int> {
+        return Pair(getAdvantagedPlayer(), Math.abs(conflictPawnPosition))
+    }
+
     /**
      * Adds military points to the given player.
      *
@@ -91,12 +95,12 @@ data class MilitaryBoard(
     }
 
     private fun addPointsToPlayer1(n : Int) : Pair<Int, MilitaryBoard> {
-        val newPosition = conflictPawnPosition - n
+        val newPosition = conflictPawnPosition + n
         var cost = 0
-        cost += if (token1P1Present && newPosition <= -3) 2 else 0
-        cost += if (token1P1Present && newPosition <= -6) 5 else 0
-        val newToken1P1Present = token1P1Present && newPosition > -3
-        val newToken2P1Present = token2P1Present && newPosition > -6
+        cost += if (token1P1Present && newPosition >= +3) 2 else 0
+        cost += if (token1P1Present && newPosition >= +6) 5 else 0
+        val newToken1P1Present = token1P1Present && newPosition < +3
+        val newToken2P1Present = token2P1Present && newPosition < +6
         val newBoard = update(
                 conflictPawnPosition_ = newPosition,
                 token1P1Present_ = newToken1P1Present,
@@ -106,12 +110,12 @@ data class MilitaryBoard(
     }
 
     private fun addPointsToPlayer2(n : Int) : Pair<Int, MilitaryBoard> {
-        val newPosition = conflictPawnPosition + n
+        val newPosition = conflictPawnPosition - n
         var cost = 0
-        cost += if (token1P2Present && newPosition >= +3) 2 else 0
-        cost += if (token1P2Present && newPosition >= +6) 5 else 0
-        val newToken1P2Present = token1P2Present && newPosition < +3
-        val newToken2P2Present = token2P2Present && newPosition < +6
+        cost += if (token1P2Present && newPosition <= -3) 2 else 0
+        cost += if (token1P2Present && newPosition <= -6) 5 else 0
+        val newToken1P2Present = token1P2Present && newPosition > -3
+        val newToken2P2Present = token2P2Present && newPosition > -6
         val newBoard = update(
                 conflictPawnPosition_ = newPosition,
                 token1P2Present_ = newToken1P2Present,
@@ -124,11 +128,51 @@ data class MilitaryBoard(
         return Math.abs(conflictPawnPosition) >= 9
     }
 
+    fun getAdvantagedPlayer() : PlayerTurn? {
+        return when {
+            conflictPawnPosition > 0 -> PlayerTurn.PLAYER_1
+            conflictPawnPosition < 0 -> PlayerTurn.PLAYER_2
+            else -> null
+        }
+    }
+
     fun getDisadvantagedPlayer() : PlayerTurn? {
         return when {
             conflictPawnPosition > 0 -> PlayerTurn.PLAYER_2
             conflictPawnPosition < 0 -> PlayerTurn.PLAYER_1
             else -> null
+        }
+    }
+
+    fun getVictoryPoints(player: PlayerTurn): Int {
+        return when (conflictPawnPosition) {
+            0 -> 0
+            +1, +2 -> when (player) {
+                PlayerTurn.PLAYER_1 -> 2
+                PlayerTurn.PLAYER_2 -> 0
+            }
+            -1, -2 -> when (player) {
+                PlayerTurn.PLAYER_1 -> 0
+                PlayerTurn.PLAYER_2 -> 2
+            }
+            +3, +4, +5 -> when (player) {
+                PlayerTurn.PLAYER_1 -> 5
+                PlayerTurn.PLAYER_2 -> 0
+            }
+            -3, -4, -5 -> when (player) {
+                PlayerTurn.PLAYER_1 -> 0
+                PlayerTurn.PLAYER_2 -> 5
+            }
+            +6, +7, +8 -> when (player) {
+                PlayerTurn.PLAYER_1 -> 10
+                PlayerTurn.PLAYER_2 -> 0
+            }
+            -6, -7, -8 -> when (player) {
+                PlayerTurn.PLAYER_1 -> 0
+                PlayerTurn.PLAYER_2 -> 10
+            }
+            +9, -9 -> throw Exception("Conflict pawn is far enough to grant military supremacy; why is this function being called: : $conflictPawnPosition")
+            else -> throw Exception("Conflict pawn in an invalid position: $conflictPawnPosition")
         }
     }
 }

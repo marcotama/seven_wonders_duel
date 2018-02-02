@@ -190,35 +190,7 @@ data class GameState(
         if (coinsContribution > 0)
             logMsg.append("  $coinsContribution pts from coins\n")
 
-        val militaryContribution = when (militaryBoard.conflictPawnPosition) {
-            0 -> 0
-            +1, +2 -> when (player) {
-                PlayerTurn.PLAYER_1 -> 2
-                PlayerTurn.PLAYER_2 -> 0
-            }
-            -1, -2 -> when (player) {
-                PlayerTurn.PLAYER_1 -> 0
-                PlayerTurn.PLAYER_2 -> 2
-            }
-            +3, +4, +5 -> when (player) {
-                PlayerTurn.PLAYER_1 -> 5
-                PlayerTurn.PLAYER_2 -> 0
-            }
-            -3, -4, -5 -> when (player) {
-                PlayerTurn.PLAYER_1 -> 0
-                PlayerTurn.PLAYER_2 -> 5
-            }
-            +6, +7, +8 -> when (player) {
-                PlayerTurn.PLAYER_1 -> 10
-                PlayerTurn.PLAYER_2 -> 0
-            }
-            -6, -7, -8 -> when (player) {
-                PlayerTurn.PLAYER_1 -> 0
-                PlayerTurn.PLAYER_2 -> 10
-            }
-            +9, -9 -> throw Exception("Conflict pawn is far enough to grant military supremacy; why is this function being called: : ${militaryBoard.conflictPawnPosition}")
-            else -> throw Exception("Conflict pawn in an invalid position: ${militaryBoard.conflictPawnPosition}")
-        }
+        val militaryContribution = militaryBoard.getVictoryPoints(player)
         if (militaryContribution > 0)
             logMsg.append("  $militaryContribution pts from military advantage\n")
 
@@ -297,10 +269,10 @@ data class GameState(
                 testScienceSupremacy(PlayerTurn.PLAYER_2) -> Triple(GameOutcome.PLAYER_2_VICTORY, 0, 0)
                 else -> throw Exception("Phase is science supremacy, but none of the players satisfy the conditions")
             }
-            GamePhase.MILITARY_SUPREMACY -> when {
-                militaryBoard.conflictPawnPosition >= +9 -> Triple(GameOutcome.PLAYER_1_VICTORY, 0, 0)
-                militaryBoard.conflictPawnPosition <= -9 -> Triple(GameOutcome.PLAYER_2_VICTORY, 0, 0)
-                else -> throw Exception("Phase is military supremacy but conflict pawn is -9 < x < +9")
+            GamePhase.MILITARY_SUPREMACY -> when (militaryBoard.getDisadvantagedPlayer()) {
+                PlayerTurn.PLAYER_2 -> Triple(GameOutcome.PLAYER_1_VICTORY, 0, 0)
+                PlayerTurn.PLAYER_1 -> Triple(GameOutcome.PLAYER_2_VICTORY, 0, 0)
+                else -> throw Exception("Phase is military supremacy but conflict pawn is in the middle")
             }
             else -> throw Exception("The game has not finished yet; current phase: $gamePhase")
         }

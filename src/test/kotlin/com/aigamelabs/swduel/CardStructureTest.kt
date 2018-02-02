@@ -9,9 +9,8 @@ import org.jetbrains.spek.api.dsl.on
 import org.junit.jupiter.api.Assertions.*
 
 class CardStructureTest : Spek ({
-    given("a card structure") {
+    given("a fresh card structure") {
         val firstAgeStructure = CardStructureFactory.makeFirstAgeCardStructure(RandomWithTracker(0))
-        val firstAgeDeck = DeckFactory.createFirstAgeDeck()
         /*
 Vertices:
     Altar: 0
@@ -78,7 +77,9 @@ Face-down cards pool:
 
 
         on("checking available cards") {
-            val availableCardsTrue = Vector.of("Altar", "Baths", "Stone pit", "Theater", "Press", "Scriptorium").sorted()
+            val availableCardsTrue = Vector.of(0, 1, 2, 3, 4, 5)
+                    .map { (firstAgeStructure.graph.vertices[it] as Card).name }
+                    .sorted()
 
             it("should return a list of available cards") {
                 val availableCardsReturned = firstAgeStructure.availableCards().map { it.name }.sorted()
@@ -87,7 +88,7 @@ Face-down cards pool:
         }
 
         on("picking up cards") {
-            val cardsToPickUp = setOf("Stone pit", "Theater", "Press").map { firstAgeDeck.getByName(it) }
+            val cardsToPickUp = Vector.of(2, 3, 4).map { firstAgeStructure.graph.vertices[it] as Card }
             var newStructure = firstAgeStructure
             cardsToPickUp.forEach {
                 newStructure = newStructure.pickUpCard(it, RandomWithTracker(0))
