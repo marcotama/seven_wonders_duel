@@ -19,6 +19,14 @@ data class Deck(val name: String, val cards: Vector<Card>) {
         )
     }
 
+    fun getByName(name: String): Card {
+        val matches = cards.filter { it.name == name }
+        if (matches.size() == 1)
+            return matches[0]
+        else
+            throw Exception("Card $name not found in ${toString()}")
+    }
+
     fun removeCard(card : Card) : Deck {
         val cardIdx = cards.indexOf(card)
         if (cardIdx == -1)

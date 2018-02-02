@@ -7,7 +7,7 @@ import javax.json.stream.JsonGenerator
 /**
  * Implements a graph using an adjacency matrix.
  */
-data class Graph<T>(val vertices: Vector<T?>, private val adjMatrix : Vector<Boolean>) {
+data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
     private val numVertices : Int = vertices.size()
 
     /**
@@ -153,12 +153,12 @@ data class Graph<T>(val vertices: Vector<T?>, private val adjMatrix : Vector<Boo
     override fun toString() : String {
         return "Vertices: " +
                 vertices.zipWithIndex()
-                        .fold("", { acc, pair -> acc + "\n" + pair._1 + ": " + pair._2} )/* +
+                        .fold("", { acc, pair -> acc + "\n" + pair._1 + ": " + pair._2} ) +
                 "\n\nEdges:" +
                 (0 until numVertices * numVertices)
                         .filter { k -> adjMatrix[k]}
                         .map { k -> toCoords(k, numVertices) }
-                        .fold("", { acc, pair -> acc + "\n" + pair.first + " -> " + pair.second} ) +
+                        .fold("", { acc, pair -> acc + "\n" + pair.first + " -> " + pair.second} )/* +
                 "\n\nAdjacency matrix:" +
                 (0 until numVertices).map { i ->
                     (0 until numVertices).map { j ->

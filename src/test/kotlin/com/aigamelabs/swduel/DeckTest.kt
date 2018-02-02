@@ -61,7 +61,7 @@ class DeckTest : Spek ({
 
             it("should return a new deck with the cards removed") {
                 assertTrue(deck.cards.containsAll(drawnCards))
-                drawnCards.forEach { c -> assertFalse(newDeck.cards.contains(c)) }
+                drawnCards.forEach { assertFalse(newDeck.cards.contains(it)) }
             }
         }
 
@@ -84,7 +84,7 @@ class DeckTest : Spek ({
             val newDeck = deck.addAll(newCards)
 
             it("should return a new deck with the cards added") {
-                newCards.forEach { c -> assertFalse(deck.cards.contains(c)) }
+                newCards.forEach { assertFalse(deck.cards.contains(it)) }
                 assertTrue(newDeck.cards.containsAll(newCards))
             }
         }
@@ -95,7 +95,7 @@ class DeckTest : Spek ({
             val newDeck = deck.merge(otherDeck)
 
             it("should return a new deck with the cards added") {
-                secondAgeCards.forEach { c -> assertFalse(deck.cards.contains(c)) }
+                secondAgeCards.forEach { assertFalse(deck.cards.contains(it)) }
                 assertTrue(otherDeck.cards.containsAll(secondAgeCards))
                 assertTrue(newDeck.cards.containsAll(firstAgeCards))
                 assertTrue(newDeck.cards.containsAll(secondAgeCards))

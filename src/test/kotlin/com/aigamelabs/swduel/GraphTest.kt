@@ -91,15 +91,15 @@ class GraphTest : Spek({
         on("query for vertices with no incoming edges") {
             it("should return the vertices with no incoming edges") {
                 val answer : Vector<String> = graph.verticesWithNoIncomingEdges()
-                assertTrue(answer.containsAll(listOf("D", "E", "G")))
-                assertEquals(answer.size(), 3)
+                assertTrue(answer.containsAll(listOf("A", "H")))
+                assertEquals(answer.size(), 2)
             }
         }
 
         on("query for incoming edges of a given vertex") {
             it("should return the departure vertices of the incoming edges") {
-                val answer : Vector<Int> = graph.getIncomingEdges(2)
-                assertTrue(answer.containsAll(listOf(4, 5)))
+                val answer : Vector<Int> = graph.getIncomingEdges(4)
+                assertTrue(answer.containsAll(listOf(1, 2)))
                 assertEquals(answer.size(), 2)
             }
 
@@ -107,8 +107,8 @@ class GraphTest : Spek({
 
         on("query for outgoing edges of a given vertex") {
             it("should return the arrival vertices of the outgoing edges") {
-                val answer : Vector<Int> = graph.getOutgoingEdges(4)
-                assertTrue(answer.containsAll(listOf(1, 2)))
+                val answer : Vector<Int> = graph.getOutgoingEdges(2)
+                assertTrue(answer.containsAll(listOf(4, 5)))
                 assertEquals(answer.size(), 2)
             }
 

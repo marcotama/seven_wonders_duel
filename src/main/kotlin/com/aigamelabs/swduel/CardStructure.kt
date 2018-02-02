@@ -5,7 +5,7 @@ import com.aigamelabs.utils.Graph
 import io.vavr.collection.Vector
 import javax.json.stream.JsonGenerator
 
-class CardStructure(var graph: Graph<CardPlaceholder>, private var faceDownPool: Deck) {
+class CardStructure(var graph: Graph<CardPlaceholder>, var faceDownPool: Deck) {
     fun pickUpCard(card: Card, generator : RandomWithTracker?) : CardStructure{
         val i = graph.vertices.indexOf(card)
         if (i == -1) {
