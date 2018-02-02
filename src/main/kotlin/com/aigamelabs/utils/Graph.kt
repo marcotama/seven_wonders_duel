@@ -64,9 +64,9 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
             this
         }
         else {
-            val newAdjMatrix = adjMatrix.toJavaList()
-            newAdjMatrix[k] = true
-            Graph(vertices, Vector.ofAll(newAdjMatrix))
+            val newAdjMatrix = Vector.ofAll(adjMatrix
+                    .mapIndexed { idx, orig -> if (idx == k) true else orig} )
+            Graph(vertices, newAdjMatrix)
         }
     }
 
@@ -83,10 +83,9 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
             this
         }
         else {
-            Graph(vertices, Vector.ofAll(
-                    (0 until adjMatrix.size())
-                    .map { if (it == k) false else adjMatrix[it] }
-            ))
+            val newAdjMatrix = Vector.ofAll(adjMatrix
+                    .mapIndexed { idx, orig -> if (idx == k) false else orig} )
+            Graph(vertices, newAdjMatrix)
         }
     }
     
