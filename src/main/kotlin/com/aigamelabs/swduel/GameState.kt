@@ -387,26 +387,20 @@ data class GameState(
                 "Player 2 city:\n\n  ${getPlayerCity(PlayerTurn.PLAYER_2).toString()
                         .replace("\n", "\n  ")}\n",
                 "Available progress tokens:\n",
-                availableProgressTokens.cards.map { "  ${it.name}\n" }
-                        .fold("", { acc, s -> "$acc$s"}) + "\n",
+                availableProgressTokens.cards.fold("", { acc, s -> "$acc  ${s.name}\n"}) + "\n",
                 "Discarded progress tokens:\n",
-                discardedProgressTokens.cards.map { "  ${it.name}\n" }
-                        .fold("", { acc, s -> "$acc$s"}) + "\n",
+                discardedProgressTokens.cards.fold("", { acc, s -> "$acc  ${s.name}\n"}) + "\n",
                 "Wonders for picking:\n",
-                wondersForPick.cards.map { "  ${it.name}\n" }
-                        .fold("", { acc, s -> "$acc$s"}) + "\n",
+                wondersForPick.cards.fold("", { acc, s -> "$acc  ${s.name}\n"}) + "\n",
                 "Discarded wonders:\n",
-                discardedWonders.cards.map { "  ${it.name}\n" }
-                        .fold("", { acc, s -> "$acc$s"}) + "\n",
+                discardedWonders.cards.fold("", { acc, s -> "$acc  ${s.name}\n"}) + "\n",
                 "Burned cards:\n",
-                burnedCards.cards.map { "  ${it.name}\n" }
-                        .fold("", { acc, s -> "$acc$s"}) + "\n",
+                burnedCards.cards.fold("", { acc, s -> "$acc  ${s.name}\n"}) + "\n",
                 "Military board:\n${militaryBoard.toString().replace("\n", "\n  ")}\n\n",
                 "Next player: $nextPlayer\n",
                 "Decision queue:\n" +
                         decisionQueue.forEachIndexed { index, decision -> "  #$index (${decision.player}) options:\n" +
-                                decision.options.map { "    $it\n" }
-                                        .fold("", { acc, s -> "$acc$s"}) + "\n"
+                                decision.options.fold("", { acc, s -> "$acc    $s\n"}) + "\n"
                                 }
                 )
         return ret.toString()
