@@ -34,4 +34,8 @@ class RandomWithTracker(seed: Long) {
         memory.clear()
         return ret
     }
+
+    fun isEmpty(): Boolean {
+        return memory.isEmpty()
+    }
 }

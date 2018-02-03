@@ -4,6 +4,8 @@ import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.actions.Action
 import com.aigamelabs.mcts.actionselection.ActionSelector
 import com.aigamelabs.mcts.nodeevaluation.NodeEvaluator
+import com.aigamelabs.swduel.Player
+import com.aigamelabs.swduel.enums.PlayerTurn
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
 import java.util.*
@@ -13,6 +15,7 @@ import java.util.logging.Logger
 import java.util.logging.SimpleFormatter
 
 abstract class Manager(
+        val player: PlayerTurn,
         val actionSelector: ActionSelector,
         val playerNodeEvaluator: NodeEvaluator,
         val opponentNodeEvaluator: NodeEvaluator,

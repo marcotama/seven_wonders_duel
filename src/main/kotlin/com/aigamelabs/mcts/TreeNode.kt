@@ -2,13 +2,13 @@ package com.aigamelabs.mcts
 
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.actions.Action
+import com.aigamelabs.utils.RandomWithTracker
 
 import javax.json.Json
 import javax.json.stream.JsonGenerator
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.util.stream.IntStream
 
 /**
  * Node used in MCTS
@@ -31,7 +31,7 @@ class TreeNode(
         /**
          * The game state represented by this node; the state should *include* the decision that its children represent
          */
-        val gameState: GameState,
+        val gameState: GameState?,
         /**
          * The manager of all the UCT workers
          */
@@ -51,16 +51,6 @@ class TreeNode(
 
     /** Evaluation from the point of view of the opponent  */
     var opponentScore: Double = 0.0
-
-    val childrenType: NodeType = when (nodeType) {
-        NodeType.PLAYER_NODE -> NodeType.OPPONENT_NODE
-        NodeType.OPPONENT_NODE -> NodeType.PLAYER_NODE
-        NodeType.STOCHASTIC_NODE -> when (parent!!.nodeType) {
-            NodeType.PLAYER_NODE -> NodeType.OPPONENT_NODE
-            NodeType.OPPONENT_NODE -> NodeType.PLAYER_NODE
-            NodeType.STOCHASTIC_NODE -> throw Exception("Stochastic node child of a stochastic node")
-        }
-    }
 
     // If this a player node, the parent is an opponent node and is trying to maximize the opponent score
     val score: Double
@@ -118,28 +108,77 @@ class TreeNode(
      * Creates children for the current node, if the node has no children yet.
      */
     @Synchronized
-    fun createChildren() {
+    fun createChildren(generator: RandomWithTracker) {
+
+        if (!generator.isEmpty())
+            throw Exception("Generator is dirty")
+
+        if (nodeType == NodeType.STOCHASTIC_NODE)
+            throw Exception("Creating children of a stochastic node should be done via sampling")
 
         if (children == null) {
-            try {
-                val (unqueuedGameState, decision) = gameState.dequeAction()
-
+            val (unqueuedGameState, decision) = gameState!!.dequeAction() // Non-stochastic nodes always have a game state
             children = HashMap()
-            IntStream.range(0, decision.options.size())
-                    .forEach {
-                        val action = decision.options[it]
-                        val updatedGraph =  unqueuedGameState.applyAction(action)
-                        children!![listOf(it)] = TreeNode(this, childrenType, action, updatedGraph, manager)
-                    }
+
+            decision.options.forEachIndexed { index, action ->
+                val updatedGameState =  unqueuedGameState.applyAction(action, generator)
+                val childGameStatePlayer = updatedGameState.dequeAction().second.player
+                val childType = when (childGameStatePlayer) {
+                    manager.player -> NodeType.PLAYER_NODE
+                    else -> NodeType.OPPONENT_NODE
+                }
+
+                // If new game state was generated deterministically
+                if (generator.isEmpty()) {
+                    val child = TreeNode(this, childType, action, updatedGameState, manager)
+                    children!![listOf(index)] = child
+                }
+                // Otherwise, add a stochastic node to model non-determinism
+                else {
+                    val child = TreeNode(this, NodeType.STOCHASTIC_NODE, action, null, manager)
+                    children!![listOf(index)] = child
+                    child.children = HashMap()
+                    val grandchildId = generator.popAll() // The random integers identify the child
+                    // Save the outcome as the first child of the stochastic node
+                    val grandChild = TreeNode(this, childType, null, updatedGameState, manager)
+                    child.children!![grandchildId] = grandChild
+                }
             }
-            catch (e: NoSuchElementException) {}
+        }
+    }
+
+    @Synchronized
+    fun sampleChild(generator: RandomWithTracker): Pair<List<Int>,TreeNode?> {
+
+        if (nodeType != NodeType.STOCHASTIC_NODE)
+            throw Exception("Sampling of children can only be done on stochastic nodes")
+
+        // Re-apply parent action to parent game state to sample another game state for the child
+        val parent = parent!! // Root is never stochastic, so all stochastic nodes have a parent
+        val unqueuedParentGameState = parent.gameState!!.dequeAction().first // Stochastic nodes have non-stochastic parents, which always have a game state
+        val updatedGameState = unqueuedParentGameState.applyAction(selectedAction!!, generator)
+
+        // The random integers identify the child
+        val childId = generator.popAll()
+
+        // If a child with that id does not exist, create it
+        return if (children!!.containsKey(childId)) {
+            Pair(childId, null)
+        }
+        else {
+            val childGameStatePlayer = updatedGameState.dequeAction().second.player
+            val childType = when (childGameStatePlayer) {
+                manager.player -> NodeType.PLAYER_NODE
+                else -> NodeType.OPPONENT_NODE
+            }
+            Pair(childId, TreeNode(this, childType, null, updatedGameState, manager))
         }
     }
 
     companion object {
 
         /** The value of the constant C of UCB 1  */
-        private const val UCB_C = 0.1
+        private const val UCB_C = 3.0
 
 
         private fun exportNode(node: TreeNode, generator: JsonGenerator) {
@@ -151,7 +190,8 @@ class TreeNode(
             generator.write("opponent_score", node.opponentScore)
             generator.write("selected_action", if (node.selectedAction == null) "" else node.selectedAction.toString())
             generator.write("node_type", node.nodeType.toString())
-            node.gameState.toJson(generator, "game_state")
+            if (node.gameState != null)
+                node.gameState.toJson(generator, "game_state")
             generator.writeEnd()
 
             generator.writeStartArray("children")

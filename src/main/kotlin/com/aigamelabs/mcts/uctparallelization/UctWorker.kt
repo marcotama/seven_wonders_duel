@@ -3,7 +3,6 @@ package com.aigamelabs.mcts.uctparallelization
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.mcts.NodeType
-import com.aigamelabs.mcts.TreeNode
 import com.aigamelabs.mcts.Util
 import com.aigamelabs.swduel.enums.GamePhase
 import java.util.*
@@ -59,27 +58,22 @@ class UctWorker(internal var manager: UctParallelizationManager, private val wor
         var currentNode = manager.rootNode!!
 
         // Descend from the root node to a leaf, and expand the leaf if appropriate
-        while ((currentNode.hasChildren() || currentNode.games >= manager.uctNodeCreateThreshold)
-                && currentNode.depth < manager.maxUctTreeDepth) {
+        while (currentNode.nodeType == NodeType.STOCHASTIC_NODE || (
+                (currentNode.hasChildren() || currentNode.games >= manager.uctNodeCreateThreshold)
+                && currentNode.depth < manager.maxUctTreeDepth)) {
 
             if (currentNode.nodeType == NodeType.STOCHASTIC_NODE) {
-                val parent = currentNode.parent!!
-                // Re-apply parent action to parent game state to sample another game state for the child
-                val (unqueuedParentGameState, _) = parent.gameState.dequeAction()
-                val updatedGameState = unqueuedParentGameState.applyAction(parent.selectedAction!!, generator)
-                // The random integers generated during the action application are the unique identifier for the child
-                val childId = generator.popAll()
-                // If a child with that id does not exist, create it
-                if (!currentNode.children!!.containsKey(childId))
-                    currentNode.children!![childId] = TreeNode(currentNode, currentNode.childrenType, null, updatedGameState, manager)
-                // Descend in the child with the calculated id
+                val (childId, childNode) = currentNode.sampleChild(generator)
+                if (childNode != null)
+                    currentNode.children!![childId] = childNode
                 currentNode = currentNode.children!![childId]!!
+
                 manager.logger.log(Level.FINE, "Worker $workerId: stochastically descending into \"$childId\"")
                 manager.logger.log(Level.FINEST, "Worker $workerId: new state is ${currentNode.gameState}")
             }
             else {
                 // If node has no children, create them using decision options
-                currentNode.createChildren()
+                currentNode.createChildren(generator)
 
                 // Terminal node
                 if (currentNode.children == null)
@@ -108,7 +102,7 @@ class UctWorker(internal var manager: UctParallelizationManager, private val wor
         }
 
         // Run a playout
-        val endGameState = playout(currentNode)
+        val endGameState = playout(currentNode.gameState!!) // The while loop never quits on a stochastic node, and non-stochastic nodes have a game state
         // Calculate score for end game
         val playerScore = getPlayerScore(endGameState)
         val opponentScore = getOpponentScore(endGameState)
@@ -127,9 +121,9 @@ class UctWorker(internal var manager: UctParallelizationManager, private val wor
      *
      * @return Result of the playout
      */
-    private fun playout(node: TreeNode): GameState {
+    private fun playout(gameState_: GameState): GameState {
 
-        var gameState = node.gameState
+        var gameState = gameState_
 
         // Apply random actions to the playout
         val activeGamePhases = setOf(GamePhase.FIRST_AGE, GamePhase.SECOND_AGE, GamePhase.THIRD_AGE, GamePhase.WONDERS_SELECTION)

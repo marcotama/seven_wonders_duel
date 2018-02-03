@@ -24,7 +24,7 @@ class Main {
 
         private fun getPlayer(playerClass: String, gameData: GameData, gameId: String, logsPath: String): Player {
             return when (playerClass) {
-                "MctsHighestScore" -> MctsHighestScore("MCTS(HS)", gameId, gameData, logsPath)
+                "MctsHighestScore" -> MctsHighestScore(PlayerTurn.PLAYER_1, "MCTS(HS)", gameId, gameData, logsPath)
                 "RandomPlayer" -> RandomPlayer("Random", gameData)
                 else -> throw Exception("Unknown player controller " + playerClass)
             }

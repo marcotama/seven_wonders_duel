@@ -7,18 +7,20 @@ import com.aigamelabs.mcts.NodeType
 import com.aigamelabs.mcts.TreeNode
 import com.aigamelabs.mcts.actionselection.ActionSelector
 import com.aigamelabs.mcts.nodeevaluation.NodeEvaluator
+import com.aigamelabs.swduel.enums.PlayerTurn
 
 import java.util.LinkedList
 import java.util.concurrent.*
 
 
 class PhaseParallelizationManager(
+        player: PlayerTurn,
         actionSelector: ActionSelector,
         playerNodeEvaluator: NodeEvaluator,
         opponentNodeEvaluator: NodeEvaluator,
         outPath: String?,
         id: String?
-) : Manager(actionSelector, playerNodeEvaluator, opponentNodeEvaluator, outPath, id) {
+) : Manager(player, actionSelector, playerNodeEvaluator, opponentNodeEvaluator, outPath, id) {
 
     /** Workers  */
     private var workers: LinkedList<Runnable>

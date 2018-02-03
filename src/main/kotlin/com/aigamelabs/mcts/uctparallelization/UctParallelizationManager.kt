@@ -7,19 +7,25 @@ import com.aigamelabs.mcts.NodeType
 import com.aigamelabs.mcts.TreeNode
 import com.aigamelabs.mcts.actionselection.ActionSelector
 import com.aigamelabs.mcts.nodeevaluation.NodeEvaluator
+import com.aigamelabs.swduel.enums.PlayerTurn
+import com.aigamelabs.utils.RandomWithTracker
+import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 
 class UctParallelizationManager(
+        player: PlayerTurn,
         actionSelector: ActionSelector,
         playerNodeEvaluator: NodeEvaluator,
         opponentNodeEvaluator: NodeEvaluator,
         outPath: String?,
         private val gameId: String?,
         private val playerId: String?
-) : Manager(actionSelector, playerNodeEvaluator, opponentNodeEvaluator, outPath, playerId) {
+) : Manager(player, actionSelector, playerNodeEvaluator, opponentNodeEvaluator, outPath, playerId) {
+
+    private val generator = RandomWithTracker(Random().nextLong())
 
     /** Workers  */
     private var workers: Array<UctWorker>
@@ -48,7 +54,7 @@ class UctParallelizationManager(
     override fun run(gameState: GameState): Action {
         rootGameState = gameState
         rootNode = TreeNode(null, NodeType.PLAYER_NODE, null, rootGameState!!, this)
-        rootNode!!.createChildren()
+        rootNode!!.createChildren(generator)
 
         val timeout = System.nanoTime() + uctBudgetInNanoseconds
 

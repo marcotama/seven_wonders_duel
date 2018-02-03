@@ -14,7 +14,7 @@ class PlayoutWorker(internal var manager: PhaseParallelizationManager) : Runnabl
         while (true) {
             try {
                 val node = manager.readyForPlayout.take()
-                val gameState = playout(node)
+                val gameState = playout(node.gameState!!) // The while loop never quits on a stochastic node, and non-stochastic nodes have a game state
                 manager.readyForBackprop.put(Pair<TreeNode, GameState>(node, gameState))
             } catch (ignored: Exception) {
             }
@@ -27,9 +27,9 @@ class PlayoutWorker(internal var manager: PhaseParallelizationManager) : Runnabl
      *
      * @return Result of the playout
      */
-    private fun playout(node: TreeNode): GameState {
+    private fun playout(gameState_: GameState): GameState {
 
-        var gameState = node.gameState
+        var gameState = gameState_
 
         // Apply random actions to the playout
         val activeGamePhases = setOf(GamePhase.FIRST_AGE, GamePhase.SECOND_AGE, GamePhase.THIRD_AGE, GamePhase.WONDERS_SELECTION)

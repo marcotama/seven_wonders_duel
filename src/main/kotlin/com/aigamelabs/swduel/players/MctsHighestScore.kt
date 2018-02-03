@@ -6,11 +6,13 @@ import com.aigamelabs.swduel.GameData
 import com.aigamelabs.swduel.enums.PlayerTurn
 
 class MctsHighestScore(
+        player: PlayerTurn,
         playerId: String,
         gameId: String,
         gameData: GameData,
         logFileName: String? = null
 ) : MctsBasedBot(
+        player,
         playerId,
         gameId,
         gameData,
