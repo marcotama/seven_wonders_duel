@@ -31,6 +31,8 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
     init {
 
         val level = Level.INFO
+        while (!logger.handlers.isEmpty())
+            logger.removeHandler(logger.handlers[0])
         logger.level = level
 
         val fileHandler = FileHandler(Paths.get(logPath, "${gameId}_game.log").toAbsolutePath().toString())
@@ -44,7 +46,7 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
         logger.addHandler(consoleHandler)
     }
 
-    fun mainLoop(startingGameState : GameState, generator : RandomWithTracker?) {
+    fun mainLoop(startingGameState : GameState, generator : RandomWithTracker) {
 
         try {
             // Play the game
@@ -75,7 +77,7 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
      * Advances the game by one step by querying the appropriate player for the next decision in the queue and applying
      * the returned action.
      */
-    private fun iterate(gameState: GameState, generator: RandomWithTracker?): GameState {
+    private fun iterate(gameState: GameState, generator: RandomWithTracker): GameState {
 
         // Dequeue decision and enqueue the next one
         var (gameState_, thisDecision) = gameState.dequeAction()

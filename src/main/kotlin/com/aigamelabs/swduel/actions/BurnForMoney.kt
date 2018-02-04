@@ -9,7 +9,7 @@ import java.util.logging.Logger
 
 
 class BurnForMoney(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
-    override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?) : GameState {
+    override fun process(gameState: GameState, generator : RandomWithTracker, logger: Logger?) : GameState {
 
         // Remove card from appropriate deck
         val updatedCardStructure = gameState.cardStructure!!.pickUpCard(card, generator)

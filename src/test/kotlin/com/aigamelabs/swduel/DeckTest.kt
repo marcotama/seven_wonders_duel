@@ -3,17 +3,20 @@ package com.aigamelabs.swduel
 import com.aigamelabs.swduel.enums.CardColor
 import com.aigamelabs.swduel.enums.CardGroup
 import com.aigamelabs.swduel.enums.Resource
+import com.aigamelabs.utils.RandomWithTracker
 import io.vavr.collection.Vector
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
 import org.junit.jupiter.api.Assertions.*
+import java.util.*
 
 class DeckTest : Spek ({
     given("a deck") {
+        val deck = DeckFactory.createFirstAgeDeck()
         val firstAgeCards = CardFactory.createFromFirstAge()
-        val deck = Deck("", firstAgeCards)
+        val generator = RandomWithTracker(Random().nextLong())
 
         on("changing name") {
             val newName = "New deck"
@@ -21,15 +24,6 @@ class DeckTest : Spek ({
 
             it("should return a new deck with the new name") {
                 assertEquals(newDeck.name, newName)
-            }
-        }
-
-        on("changing cards") {
-            val secondAgeCards = CardFactory.createFromSecondAge()
-            val newDeck = deck.update(cards_ = secondAgeCards)
-
-            it("should return a new deck with the new cards") {
-                assertEquals(newDeck.cards, secondAgeCards)
             }
         }
 
@@ -44,7 +38,7 @@ class DeckTest : Spek ({
         }
 
         on("drawing a card") {
-            val drawOutcome = deck.drawCard()
+            val drawOutcome = deck.drawCard(generator)
             val drawnCard = drawOutcome.first
             val newDeck = drawOutcome.second
 
@@ -55,7 +49,7 @@ class DeckTest : Spek ({
         }
 
         on("drawing multiple cards") {
-            val drawOutcome = deck.drawCards(3)
+            val drawOutcome = deck.drawCards(3, generator)
             val drawnCards = drawOutcome.first
             val newDeck = drawOutcome.second
 
@@ -86,19 +80,6 @@ class DeckTest : Spek ({
             it("should return a new deck with the cards added") {
                 newCards.forEach { assertFalse(deck.cards.contains(it)) }
                 assertTrue(newDeck.cards.containsAll(newCards))
-            }
-        }
-
-        on("merging two decks") {
-            val secondAgeCards = CardFactory.createFromSecondAge()
-            val otherDeck = Deck("", secondAgeCards)
-            val newDeck = deck.merge(otherDeck)
-
-            it("should return a new deck with the cards added") {
-                secondAgeCards.forEach { assertFalse(deck.cards.contains(it)) }
-                assertTrue(otherDeck.cards.containsAll(secondAgeCards))
-                assertTrue(newDeck.cards.containsAll(firstAgeCards))
-                assertTrue(newDeck.cards.containsAll(secondAgeCards))
             }
         }
 

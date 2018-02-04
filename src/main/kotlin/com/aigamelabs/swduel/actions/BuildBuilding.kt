@@ -6,7 +6,7 @@ import com.aigamelabs.swduel.enums.PlayerTurn
 import java.util.logging.Logger
 
 class BuildBuilding(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
-    override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?) : GameState {
+    override fun process(gameState: GameState, generator : RandomWithTracker, logger: Logger?) : GameState {
 
         val updatedCardStructure = gameState.cardStructure!!.pickUpCard(card, generator)
         val updatedGameState = gameState.update(cardStructure_ = updatedCardStructure)

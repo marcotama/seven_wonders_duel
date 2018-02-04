@@ -14,7 +14,7 @@ import java.util.logging.Logger
 
 class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
 
-    override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?): GameState {
+    override fun process(gameState: GameState, generator : RandomWithTracker, logger: Logger?): GameState {
 
         // Gather data
         val playerCity = gameState.getPlayerCity(player)

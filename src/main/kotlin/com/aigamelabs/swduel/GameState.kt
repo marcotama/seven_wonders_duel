@@ -65,7 +65,7 @@ data class GameState(
         }
     }
 
-    fun updateBoard(generator: RandomWithTracker?, logger: Logger? = null) : GameState {
+    fun updateBoard(generator: RandomWithTracker, logger: Logger? = null) : GameState {
         when (gamePhase) {
             GamePhase.WONDERS_SELECTION -> {
                 return if (wondersForPick.size() == 0 && discardedWonders.size() == 4) {
@@ -282,7 +282,7 @@ data class GameState(
         }
     }
 
-    fun buildBuilding(player: PlayerTurn, card: Card, generator: RandomWithTracker?): GameState {
+    fun buildBuilding(player: PlayerTurn, card: Card, generator: RandomWithTracker): GameState {
 
 
         // Add card to appropriate player city
@@ -343,7 +343,7 @@ data class GameState(
      * Advances the game by one step by applying the given action to the next decision in the queue. Does not detect
      * cheating.
      */
-    fun applyAction(action: Action, generator: RandomWithTracker? = null): GameState {
+    fun applyAction(action: Action, generator: RandomWithTracker): GameState {
 
         // Process action
         var updatedGameState = action.process(this, generator)

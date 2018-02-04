@@ -7,7 +7,7 @@ import com.aigamelabs.swduel.enums.PlayerTurn
 import java.util.logging.Logger
 
 class ChooseProgressToken(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) {
-    override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?) : GameState {
+    override fun process(gameState: GameState, generator : RandomWithTracker, logger: Logger?) : GameState {
         val playerCity =  gameState.getPlayerCity(player)
         val opponentCity =  gameState.getPlayerCity(player.opponent())
         val updatedProgressTokens = playerCity.progressTokens.add(card)

@@ -1,45 +1,32 @@
 package com.aigamelabs.swduel
 
-import com.aigamelabs.utils.RandomWithTracker
+import io.vavr.collection.Vector
 
 object DeckFactory {
 
-    fun createFirstAgeDeck(generator: RandomWithTracker? = null) : Deck {
-        var firstAgeDeck = Deck("First Age", CardFactory.createFromFirstAge())
-        val drawOutcome = firstAgeDeck.drawCards(3, generator)
-        firstAgeDeck = drawOutcome.second
-
-        return firstAgeDeck
+    fun createFirstAgeDeck() : Deck {
+        val firstAgeCards = CardFactory.createFromFirstAge()
+        return Deck("First Age", Vector.of(Pair(firstAgeCards, 3)))
     }
 
-
-    fun createSecondAgeDeck(generator: RandomWithTracker? = null) : Deck {
-        var secondAgeDeck = Deck("Second Age", CardFactory.createFromSecondAge())
-        val drawOutcome = secondAgeDeck.drawCards(3, generator)
-        secondAgeDeck = drawOutcome.second
-
-        return secondAgeDeck
+    fun createSecondAgeDeck() : Deck {
+        val secondAgeCards = CardFactory.createFromSecondAge()
+        return Deck("Second Age", Vector.of(Pair(secondAgeCards, 3)))
     }
 
-
-    fun createThirdAgeDeck(generator: RandomWithTracker? = null) : Deck {
-        var thirdAgeDeck = Deck("Third Age", CardFactory.createFromThirdAge())
-        val draw1Outcome = thirdAgeDeck.drawCards(3, generator)
-        thirdAgeDeck = draw1Outcome.second
-
-        var guildsDeck = Deck("Guilds", CardFactory.createFromGuilds())
-        val draw2Outcome = guildsDeck.drawCards(4, generator)
-        guildsDeck = draw2Outcome.second
-
-        return thirdAgeDeck.merge(guildsDeck)
+    fun createThirdAgeDeck() : Deck {
+        val thirdAgeCards = CardFactory.createFromThirdAge()
+        val guildAgeCards = CardFactory.createFromGuilds()
+        return Deck("Third Age", Vector.of(Pair(thirdAgeCards, 3), Pair(guildAgeCards, 4)))
     }
-
 
     fun createWondersDeck() : Deck {
-        return Deck("Wonders", CardFactory.createFromWonders())
+        val wondersCards = CardFactory.createFromWonders()
+        return Deck("Wonders", Vector.of(Pair(wondersCards, 0)))
     }
 
     fun createProgressTokensDeck() : Deck {
-        return Deck("Science Tokens", CardFactory.createFromScience())
+        val progressTokens = CardFactory.createFromScience()
+        return Deck("Progress Tokens", Vector.of(Pair(progressTokens, 0)))
     }
 }

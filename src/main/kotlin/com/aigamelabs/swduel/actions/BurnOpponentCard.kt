@@ -7,7 +7,7 @@ import com.aigamelabs.swduel.enums.PlayerTurn
 import java.util.logging.Logger
 
 class BurnOpponentCard(player: PlayerTurn, val card : Card) : Action(player) {
-    override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?) : GameState {
+    override fun process(gameState: GameState, generator : RandomWithTracker, logger: Logger?) : GameState {
 
         // Remove card from opponents city
         val playerCity = gameState.getPlayerCity(player)

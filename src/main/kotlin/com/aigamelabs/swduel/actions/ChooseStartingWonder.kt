@@ -8,7 +8,7 @@ import io.vavr.collection.Vector
 import java.util.logging.Logger
 
 class ChooseStartingWonder(player: PlayerTurn, val card : Card) : Action(player) {
-    override fun process(gameState: GameState, generator : RandomWithTracker?, logger: Logger?) : GameState {
+    override fun process(gameState: GameState, generator : RandomWithTracker, logger: Logger?) : GameState {
         // Remove wonder from for-pick deck
         var updatedWondersForPickDeck = gameState.wondersForPick.removeCard(card)
         // Give wonder to the player
@@ -37,13 +37,12 @@ class ChooseStartingWonder(player: PlayerTurn, val card : Card) : Action(player)
                 }
                 0 -> {
                     // Draw another 4 wonders for pick
-                    val drawOutcome = updatedGameState.discardedWonders.drawCards(4, generator)
-                    val updatedUnusedWondersDeck = drawOutcome.second
-                    updatedWondersForPickDeck = Deck("Wonders for pick", drawOutcome.first)
+                    val (wondersForPick, updatedDiscardedWondersDeck) = updatedGameState.discardedWonders.drawCards(4, generator)
+                    updatedWondersForPickDeck = Deck("Unused Wonders", Vector.of(Pair(wondersForPick, 0)))
 
                     val decision = createDecision(PlayerTurn.PLAYER_2, updatedWondersForPickDeck)
                     return updatedGameState.update(
-                            unusedWondersDeck_ = updatedUnusedWondersDeck,
+                            unusedWondersDeck_ = updatedDiscardedWondersDeck,
                             wondersForPickDeck_ = updatedWondersForPickDeck,
                             decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision)
                     )
@@ -58,7 +57,7 @@ class ChooseStartingWonder(player: PlayerTurn, val card : Card) : Action(player)
                     return updatedGameState.update(decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
                 }
                 1 -> {
-                    val decision = createDecision(PlayerTurn.PLAYER_1, updatedGameState.wondersForPick)
+                    val decision = createDecision(PlayerTurn.PLAYER_2, updatedGameState.wondersForPick)
                     return updatedGameState.update(decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
                 }
                 0 -> {

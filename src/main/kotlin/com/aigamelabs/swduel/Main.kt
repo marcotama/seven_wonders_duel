@@ -16,8 +16,9 @@ class Main {
             val player1 = Pair(PlayerTurn.PLAYER_1, getPlayer(args[0], gameData, gameId, args[2]))
             val player2 = Pair(PlayerTurn.PLAYER_2, getPlayer(args[1], gameData, gameId, args[2]))
             val game = Game(gameId, mapOf(player1, player2), args[2])
-            val generator = RandomWithTracker(Random().nextLong())
-            val initGameState = GameStateFactory.createNewGameState()
+            val generator = RandomWithTracker(Random().nextLong(), true)
+            val initGameState = GameStateFactory.createNewGameState(generator)
+            generator.popAll()
             game.mainLoop(initGameState, generator)
             System.exit(0)
         }

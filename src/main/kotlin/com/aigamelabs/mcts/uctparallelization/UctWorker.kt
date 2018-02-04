@@ -128,15 +128,16 @@ class UctWorker(private var manager: UctParallelizationManager, private val work
         // Apply random actions to the playout
         val activeGamePhases = setOf(GamePhase.FIRST_AGE, GamePhase.SECOND_AGE, GamePhase.THIRD_AGE, GamePhase.WONDERS_SELECTION)
         while (activeGamePhases.contains(gameState.gamePhase)) {
-                val dequeueOutcome = gameState.dequeAction()
-                gameState = dequeueOutcome.first
-                val decision = dequeueOutcome.second
-                val options = decision.options
-                val choice = rnd.nextInt(options.size())
-                gameState = gameState.applyAction(options[choice])
-                manager.logger.log(Level.FINE, "Worker $workerId: randomly choosing \"$choice\" in playout")
-                manager.logger.log(Level.FINEST, "Worker $workerId: new state is $gameState")
-            }
+            val dequeueOutcome = gameState.dequeAction()
+            gameState = dequeueOutcome.first
+            val decision = dequeueOutcome.second
+            val options = decision.options
+            val choice = rnd.nextInt(options.size())
+            gameState = gameState.applyAction(options[choice], generator)
+            generator.popAll()
+            manager.logger.log(Level.FINE, "Worker $workerId: randomly choosing \"$choice\" in playout")
+            manager.logger.log(Level.FINEST, "Worker $workerId: new state is $gameState")
+        }
         return gameState
     }
 

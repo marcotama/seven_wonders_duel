@@ -10,7 +10,7 @@ object CardStructureFactory {
 
 
     private fun makeCardStructure(origDeck : Deck, faceUpCardsIdx: HashSet<Int>, connections: HashSet<Pair<Int,Int>>,
-                                  faceDownCard: FaceDownCard, generator : RandomWithTracker?) : CardStructure {
+                                  faceDownCard: FaceDownCard, generator : RandomWithTracker) : CardStructure {
 
         val numVertices = origDeck.size()
 
@@ -31,7 +31,7 @@ object CardStructureFactory {
     }
 
 
-    fun makeFirstAgeCardStructure(generator : RandomWithTracker?) : CardStructure {
+    fun makeFirstAgeCardStructure(generator : RandomWithTracker) : CardStructure {
         /*
                 18  19
               15  16  17
@@ -53,11 +53,11 @@ object CardStructureFactory {
                 0, 1, 2, 3, 4, 5, 11, 12, 13, 14, 18, 19
         )
 
-        return makeCardStructure(DeckFactory.createFirstAgeDeck(generator), vertices, edges, FaceDownCard(CardGroup.FIRST_AGE), generator)
+        return makeCardStructure(DeckFactory.createFirstAgeDeck(), vertices, edges, FaceDownCard(CardGroup.FIRST_AGE), generator)
 
     }
 
-    fun makeSecondCardStructure(generator : RandomWithTracker?) : CardStructure {
+    fun makeSecondCardStructure(generator : RandomWithTracker) : CardStructure {
         /*
         14  15  16  17  18  19
           09  10  11  12  13
@@ -79,10 +79,10 @@ object CardStructureFactory {
                 0, 1, 5, 6, 7, 8, 14, 15, 16, 17, 18, 19
         )
 
-        return makeCardStructure(DeckFactory.createSecondAgeDeck(generator), vertices, edges, FaceDownCard(CardGroup.SECOND_AGE), generator)
+        return makeCardStructure(DeckFactory.createSecondAgeDeck(), vertices, edges, FaceDownCard(CardGroup.SECOND_AGE), generator)
     }
 
-    fun makeThirdAgeCardStructure(generator : RandomWithTracker?) : CardStructure {
+    fun makeThirdAgeCardStructure(generator : RandomWithTracker) : CardStructure {
         /*
                 18  19
               15  16  17
@@ -108,6 +108,6 @@ object CardStructureFactory {
                 0, 1, 5, 6, 7, 8, 11, 12, 13, 14, 18, 19
         )
 
-        return makeCardStructure(DeckFactory.createThirdAgeDeck(generator), vertices, edges, FaceDownCard(CardGroup.THIRD_AGE), generator)
+        return makeCardStructure(DeckFactory.createThirdAgeDeck(), vertices, edges, FaceDownCard(CardGroup.THIRD_AGE), generator)
     }
 }
