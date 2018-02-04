@@ -23,7 +23,7 @@ class TreeNode(
         /**
          * A flag signaling whether this node represents a decision of a player or an imaginary game (stochastic) decision
          */
-        val nodeType: NodeType,
+        val nodeType: NodeType?,
         /**
          * The action that needs to be taken at the parent's game state to get to this node's game state (null for the root)
          */
@@ -58,6 +58,7 @@ class TreeNode(
             NodeType.PLAYER_NODE -> playerScore  // player node
             NodeType.OPPONENT_NODE -> opponentScore  // opponent node
             NodeType.STOCHASTIC_NODE -> Double.NaN  // stochastic node
+            else -> Double.NaN  // terminal node
         }
 
     fun hasChildren(): Boolean {
@@ -117,31 +118,40 @@ class TreeNode(
             throw Exception("Creating children of a stochastic node should be done via sampling")
 
         if (children == null) {
-            val (unqueuedGameState, decision) = gameState!!.dequeAction() // Non-stochastic nodes always have a game state
-            children = HashMap()
+            // If this is a final game state, do not create children (there are no actions to pick from)
+            if (!gameState!!.decisionQueue.isEmpty) {
+                val (unqueuedGameState, decision) = gameState.dequeAction() // Non-stochastic nodes always have a game state
 
-            decision.options.forEachIndexed { index, action ->
-                val updatedGameState =  unqueuedGameState.applyAction(action, generator)
-                val childGameStatePlayer = updatedGameState.dequeAction().second.player
-                val childType = when (childGameStatePlayer) {
-                    manager.player -> NodeType.PLAYER_NODE
-                    else -> NodeType.OPPONENT_NODE
-                }
+                children = HashMap()
 
-                // If new game state was generated deterministically
-                if (generator.isEmpty()) {
-                    val child = TreeNode(this, childType, action, updatedGameState, manager)
-                    children!![listOf(index)] = child
-                }
-                // Otherwise, add a stochastic node to model non-determinism
-                else {
-                    val child = TreeNode(this, NodeType.STOCHASTIC_NODE, action, null, manager)
-                    children!![listOf(index)] = child
-                    child.children = HashMap()
-                    val grandchildId = generator.popAll() // The random integers identify the child
-                    // Save the outcome as the first child of the stochastic node
-                    val grandChild = TreeNode(this, childType, null, updatedGameState, manager)
-                    child.children!![grandchildId] = grandChild
+                decision.options.forEachIndexed { index, action ->
+                    val updatedGameState =  unqueuedGameState.applyAction(action, generator)
+
+                    val childType = if (!updatedGameState.decisionQueue.isEmpty) {
+                        val childGameStatePlayer = updatedGameState.dequeAction().second.player
+                        when (childGameStatePlayer) {
+                            manager.player -> NodeType.PLAYER_NODE
+                            else -> NodeType.OPPONENT_NODE
+                        }
+                    }
+                    else
+                        null
+
+                    // If new game state was generated deterministically
+                    if (generator.isEmpty()) {
+                        val child = TreeNode(this, childType, action, updatedGameState, manager)
+                        children!![listOf(index)] = child
+                    }
+                    // Otherwise, add a stochastic node to model non-determinism
+                    else {
+                        val child = TreeNode(this, NodeType.STOCHASTIC_NODE, action, null, manager)
+                        children!![listOf(index)] = child
+                        child.children = HashMap()
+                        val grandchildId = generator.popAll() // The random integers identify the child
+                        // Save the outcome as the first child of the stochastic node
+                        val grandChild = TreeNode(child, childType, null, updatedGameState, manager)
+                        child.children!![grandchildId] = grandChild
+                    }
                 }
             }
         }
@@ -180,7 +190,7 @@ class TreeNode(
         /** The value of the constant C of UCB 1  */
         private const val UCB_C = 3.0
 
-
+        @Synchronized
         private fun exportNode(node: TreeNode, generator: JsonGenerator) {
             generator.writeStartObject()
 
