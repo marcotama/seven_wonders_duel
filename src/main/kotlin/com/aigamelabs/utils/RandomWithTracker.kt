@@ -29,7 +29,8 @@ class RandomWithTracker(seed: Long, private val disableTracking: Boolean = false
             if (num > weight)
                 num -= weight
             else {
-                memory[memory.size - 1] = idx // replace the actual random number with one that represents the outcome more neatly
+                if (!disableTracking)
+                    memory[memory.size - 1] = idx // replace the actual random number with one that represents the outcome more neatly
                 return idx
             }
         }
