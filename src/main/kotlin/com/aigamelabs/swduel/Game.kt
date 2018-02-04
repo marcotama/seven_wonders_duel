@@ -3,6 +3,7 @@ package com.aigamelabs.swduel
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.enums.GameOutcome
 import com.aigamelabs.swduel.enums.PlayerTurn
+import com.aigamelabs.utils.MinimalFormatter
 import java.nio.file.Paths
 import java.util.logging.*
 
@@ -33,12 +34,12 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
         logger.level = level
 
         val fileHandler = FileHandler(Paths.get(logPath, "${gameId}_game.log").toAbsolutePath().toString())
-        fileHandler.formatter = SimpleFormatter()
+        fileHandler.formatter = MinimalFormatter()
         fileHandler.level = level
         logger.addHandler(fileHandler)
 
         val consoleHandler = ConsoleHandler()
-        consoleHandler.formatter = SimpleFormatter()
+        consoleHandler.formatter = MinimalFormatter()
         consoleHandler.level = level
         logger.addHandler(consoleHandler)
     }

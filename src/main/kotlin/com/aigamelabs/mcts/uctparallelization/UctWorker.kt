@@ -11,7 +11,7 @@ import java.util.logging.Level
 /**
  * Executes UCT on the given node.
  */
-class UctWorker(internal var manager: UctParallelizationManager, private val workerId: String) : Runnable {
+class UctWorker(private var manager: UctParallelizationManager, private val workerId: String) : Runnable {
 
     var timeout: Long = 0
 

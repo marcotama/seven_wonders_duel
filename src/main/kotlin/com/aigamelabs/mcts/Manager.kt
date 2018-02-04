@@ -4,15 +4,14 @@ import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.actions.Action
 import com.aigamelabs.mcts.actionselection.ActionSelector
 import com.aigamelabs.mcts.nodeevaluation.NodeEvaluator
-import com.aigamelabs.swduel.Player
 import com.aigamelabs.swduel.enums.PlayerTurn
+import com.aigamelabs.utils.MinimalFormatter
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.logging.FileHandler
 import java.util.logging.Level
 import java.util.logging.Logger
-import java.util.logging.SimpleFormatter
 
 abstract class Manager(
         val player: PlayerTurn,
@@ -42,7 +41,7 @@ abstract class Manager(
         val level = Level.INFO
 
         val fileHandler = FileHandler(Paths.get(outPath, "${gameId}_player_$id.log").toAbsolutePath().toString())
-        fileHandler.formatter = SimpleFormatter()
+        fileHandler.formatter = MinimalFormatter()
         fileHandler.level = level
         logger.addHandler(fileHandler)
         logger.level = level
