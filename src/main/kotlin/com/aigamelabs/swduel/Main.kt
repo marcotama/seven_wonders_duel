@@ -1,6 +1,7 @@
 package com.aigamelabs.swduel
 
 import com.aigamelabs.swduel.enums.PlayerTurn
+import com.aigamelabs.swduel.players.KeyboardPlayer
 import com.aigamelabs.swduel.players.MctsHighestScore
 import com.aigamelabs.swduel.players.RandomPlayer
 import com.aigamelabs.utils.RandomWithTracker
@@ -27,6 +28,7 @@ class Main {
             return when (playerClass) {
                 "MctsHighestScore" -> MctsHighestScore(PlayerTurn.PLAYER_1, "MCTS(HS)", gameId, gameData, logsPath)
                 "RandomPlayer" -> RandomPlayer("Random", gameData)
+                "KeyboardPlayer" -> KeyboardPlayer("Keyboard", gameData)
                 else -> throw Exception("Unknown player controller " + playerClass)
             }
         }
