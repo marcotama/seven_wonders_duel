@@ -12,6 +12,7 @@ import com.aigamelabs.swduel.enums.PlayerTurn
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.nio.file.Paths
 import javax.json.Json
 import javax.json.stream.JsonGenerator
 
@@ -22,8 +23,8 @@ import javax.json.stream.JsonGenerator
  */
 abstract class MctsBasedBot(
         player: PlayerTurn,
-        playerId: String,
-        gameId: String,
+        private val playerId: String,
+        private val gameId: String,
         gameData: GameData,
         actionSelector: ActionSelector,
         playerNodeEvaluator: NodeEvaluator,
@@ -39,11 +40,11 @@ abstract class MctsBasedBot(
 
     private var lastAction : Action? = null
 
-    private val exportTree = false
+    private val exportTree = true
 
     /** Uct threads manager  */
     private var manager = UctParallelizationManager(player, actionSelector, playerNodeEvaluator, opponentNodeEvaluator,
-            if (exportTree) outPath else null, gameId, name)
+            outPath, exportTree, gameId, name)
 
     /**
      * Opens the JSON log and leaves the generator inside the games array. It does not open the first game object.
@@ -132,8 +133,7 @@ abstract class MctsBasedBot(
     }
 
     override fun init() {
-        if (exportTree)
-            openLog(outPath + "mcts.log")
+        openLog(Paths.get(outPath, "${gameId}_player_${playerId}_mcts.json").toAbsolutePath().toString())
     }
 
     override fun finalize(gameState: GameState) {

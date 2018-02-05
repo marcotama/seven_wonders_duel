@@ -38,6 +38,7 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
         while (!logger.handlers.isEmpty())
             logger.removeHandler(logger.handlers[0])
         logger.level = level
+        logger.useParentHandlers = false
 
         val fileHandler = FileHandler(Paths.get(logPath, "${gameId}_game.log").toAbsolutePath().toString())
         fileHandler.formatter = MinimalFormatter()
@@ -67,7 +68,7 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
             var gameState = startingGameState
             while (!gameState.decisionQueue.isEmpty) {
                 gameState = iterate(gameState, generator)
-                logger.log(Level.INFO, gameState.toString())
+                //logger.log(Level.INFO, gameState.toString())
             }
 
             jsonGen.writeEnd()

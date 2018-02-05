@@ -21,6 +21,7 @@ class UctParallelizationManager(
         playerNodeEvaluator: NodeEvaluator,
         opponentNodeEvaluator: NodeEvaluator,
         outPath: String?,
+        private val exportTree: Boolean,
         private val gameId: String?,
         private val playerId: String?
 ) : Manager(player, actionSelector, playerNodeEvaluator, opponentNodeEvaluator, outPath, playerId) {
@@ -68,7 +69,7 @@ class UctParallelizationManager(
         } catch (ignored: InterruptedException) {}
 
         // Logging
-        if (outPath != null)
+        if (exportTree)
             rootNode!!.export(outPath + "${gameId}_player_${playerId}_mcts-tree.json")
         if (verbose)
             logger.info("UCT run " + rootNode!!.games + " times.")

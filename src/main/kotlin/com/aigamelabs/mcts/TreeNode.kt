@@ -89,9 +89,10 @@ class TreeNode(
     fun export(jsonName: String) {
         try {
             val file = File(jsonName)
-            val generator: JsonGenerator
             val fos = FileOutputStream(file, false)
-            generator = Json.createGenerator(fos)
+            val properties = mapOf(Pair(JsonGenerator.PRETTY_PRINTING, true))
+            val jgf = Json.createGeneratorFactory(properties)
+            val generator = jgf.createGenerator(fos)
 
             exportNode(this, generator)
 

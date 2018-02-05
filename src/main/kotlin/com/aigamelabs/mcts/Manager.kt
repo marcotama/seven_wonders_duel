@@ -45,6 +45,7 @@ abstract class Manager(
         fileHandler.level = level
         logger.addHandler(fileHandler)
         logger.level = level
+        logger.useParentHandlers = false
     }
 
 
