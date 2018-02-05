@@ -75,12 +75,13 @@ class UctParallelizationManager(
             logger.info("UCT run " + rootNode!!.games + " times.")
 
         // Choose best action based on MCTS scores
-        val selected = actionSelector.chooseBestNode(rootNode!!.children!!.values.toTypedArray())
+        val childrenNodes = rootNode!!.children!!.values.toTypedArray()
+        val selected = actionSelector.chooseBestNode(childrenNodes)
 
         // Return selected
         return if (selected >= rootNode!!.children!!.size)
-            rootNode!!.children!![listOf(0)]!!.selectedAction!! // Default: first action in the list
+            childrenNodes[0].selectedAction!! // Default: first action in the list
         else
-            rootNode!!.children!![listOf(selected)]!!.selectedAction!!
+            childrenNodes[selected].selectedAction!!
     }
 }
