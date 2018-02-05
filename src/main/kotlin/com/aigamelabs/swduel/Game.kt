@@ -2,6 +2,7 @@ package com.aigamelabs.swduel
 
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.enums.GameOutcome
+import com.aigamelabs.swduel.enums.GamePhase
 import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.utils.MinimalFormatter
 import java.io.File
@@ -82,10 +83,23 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
             val outcome = gameOutcome.first
             val p1VictoryPoints = gameOutcome.second
             val p2VictoryPoints = gameOutcome.third
-            when (outcome) {
-                GameOutcome.PLAYER_1_VICTORY -> logger?.info("Player 1 wins with $p1VictoryPoints versus $p2VictoryPoints")
-                GameOutcome.PLAYER_2_VICTORY -> logger?.info("Player 2 wins with $p1VictoryPoints versus $p2VictoryPoints")
-                GameOutcome.TIE -> logger?.info("Players scored the same amount of points: $p1VictoryPoints")
+            when (gameState.gamePhase) {
+                GamePhase.CIVILIAN_VICTORY -> when (outcome) {
+                    GameOutcome.PLAYER_1_VICTORY -> logger?.info("Player 1 wins with $p1VictoryPoints versus $p2VictoryPoints")
+                    GameOutcome.PLAYER_2_VICTORY -> logger?.info("Player 2 wins with $p1VictoryPoints versus $p2VictoryPoints")
+                    GameOutcome.TIE -> logger?.info("Players scored the same amount of points: $p1VictoryPoints")
+                }
+                GamePhase.SCIENCE_SUPREMACY -> when (outcome) {
+                    GameOutcome.PLAYER_1_VICTORY -> logger?.info("Player 1 wins with Science Supremacy")
+                    GameOutcome.PLAYER_2_VICTORY -> logger?.info("Player 2 wins with Science Supremacy")
+                    GameOutcome.TIE -> throw Exception("You cannot have Science Supremacy and a tie")
+                }
+                GamePhase.MILITARY_SUPREMACY -> when (outcome) {
+                    GameOutcome.PLAYER_1_VICTORY -> logger?.info("Player 1 wins with Military Supremacy")
+                    GameOutcome.PLAYER_2_VICTORY -> logger?.info("Player 2 wins with Military Supremacy")
+                    GameOutcome.TIE -> throw Exception("You cannot have Military Supremacy and a tie")
+                }
+                else -> throw Exception("The game is not over yet; current phase is ${gameState.gamePhase}")
             }
         }
         catch (e: Exception) {
