@@ -58,7 +58,9 @@ abstract class MctsBasedBot(
 
         try {
             val fos = FileOutputStream(file, false)
-            generator = Json.createGenerator(fos)
+            val properties = mapOf(Pair(JsonGenerator.PRETTY_PRINTING, true))
+            val jgf = Json.createGeneratorFactory(properties)
+            generator = jgf.createGenerator(fos)
 
         } catch (e: IOException) {
             e.printStackTrace()
@@ -87,7 +89,7 @@ abstract class MctsBasedBot(
         generator?.writeStartObject("children_values")
         manager.rootNode!!.children!!.entries
                 .forEach {
-                    val actionName = it.key.toString()
+                    val actionName = it.value.selectedAction.toString()
                     val value = scorer.getValue(it.value)
                     if (java.lang.Double.isInfinite(value))
                         if (value > 0)

@@ -64,12 +64,16 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
             jsonGen.writeStartArray()
             startingGameState.toJson(jsonGen)
 
+            players.forEach { it.value.init() }
+
             // Play the game
             var gameState = startingGameState
             while (!gameState.decisionQueue.isEmpty) {
                 gameState = iterate(gameState, generator)
                 //logger.log(Level.INFO, gameState.toString())
             }
+
+            players.forEach { it.value.close() }
 
             jsonGen.writeEnd()
 
