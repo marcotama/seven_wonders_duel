@@ -15,7 +15,7 @@ class KeyboardPlayer(name: String, gameData: GameData) : Player(name, gameData) 
         println("Decide one of the following options:")
         options.forEachIndexed { idx, option -> println("  ${idx+1}. $option") }
         val choice = scanner.nextInt()
-        return options[choice]
+        return options[choice - 1]
     }
 
     override fun init() {}
