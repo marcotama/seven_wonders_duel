@@ -15,7 +15,7 @@ import java.util.*
 class DeckTest : Spek ({
     given("a deck") {
         val deck = DeckFactory.createFirstAgeDeck()
-        val firstAgeCards = CardFactory.createFromFirstAge()
+        val firstAgeCards = CardFactory.firstAge
         val generator = RandomWithTracker(Random().nextLong())
 
         on("changing name") {

@@ -1,6 +1,7 @@
 package com.aigamelabs.swduel
 
 import com.aigamelabs.swduel.enums.PlayerTurn
+import org.json.JSONObject
 import javax.json.stream.JsonGenerator
 
 /**
@@ -173,6 +174,18 @@ data class MilitaryBoard(
             }
             +9, -9 -> throw Exception("Conflict pawn is far enough to grant military supremacy; why is this function being called: : $conflictPawnPosition")
             else -> throw Exception("Conflict pawn in an invalid position: $conflictPawnPosition")
+        }
+    }
+
+    companion object {
+        fun loadFromJson(obj: JSONObject): MilitaryBoard {
+            return MilitaryBoard(
+                    obj.getInt("conflict_pawn_position"),
+                    obj.getBoolean("token1_player1"),
+                    obj.getBoolean("token2_player1"),
+                    obj.getBoolean("token1_player2"),
+                    obj.getBoolean("token2_player2")
+            )
         }
     }
 }

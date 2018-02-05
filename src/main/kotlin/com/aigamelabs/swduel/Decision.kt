@@ -20,7 +20,7 @@ data class Decision(val player: PlayerTurn, val options: Vector<Action>, val add
 
         generator.write("player", player.toString())
         generator.writeStartArray("options")
-        options.forEach { it.toString() }
+        options.forEach { generator.write(it.toString()) }
         generator.writeEnd()
 
         generator.writeEnd()

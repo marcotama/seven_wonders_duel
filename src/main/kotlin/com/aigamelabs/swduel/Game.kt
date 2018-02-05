@@ -4,8 +4,12 @@ import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.enums.GameOutcome
 import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.utils.MinimalFormatter
+import java.io.File
+import java.io.FileOutputStream
 import java.nio.file.Paths
 import java.util.logging.*
+import javax.json.Json
+import javax.json.stream.JsonGenerator
 
 
 /**
@@ -26,7 +30,7 @@ import java.util.logging.*
  */
 class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPath: String) {
 
-    private val logger = Logger.getLogger("SevenWondersDuel")
+    private val logger = Logger.getLogger("SevenWondersDuel_Messages")
 
     init {
 
@@ -44,17 +48,29 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
         consoleHandler.formatter = MinimalFormatter()
         consoleHandler.level = level
         logger.addHandler(consoleHandler)
+
     }
+
+    private val file = File(Paths.get(logPath, "${gameId}_game.json").toAbsolutePath().toString())
+    private val fos = FileOutputStream(file, false)
+    private val properties = mapOf(Pair(JsonGenerator.PRETTY_PRINTING, true))
+    private val jgf = Json.createGeneratorFactory(properties)
+    private val jsonGen = jgf.createGenerator(fos)
 
     fun mainLoop(startingGameState : GameState, generator : RandomWithTracker) {
 
         try {
+            jsonGen.writeStartArray()
+            startingGameState.toJson(jsonGen)
+
             // Play the game
             var gameState = startingGameState
             while (!gameState.decisionQueue.isEmpty) {
                 gameState = iterate(gameState, generator)
                 logger.log(Level.INFO, gameState.toString())
             }
+
+            jsonGen.writeEnd()
 
             // Determine winner
             val gameOutcome = gameState.calculateWinner(logger)
@@ -102,6 +118,9 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
 
         // Process action
         gameState_= action.process(gameState_, generator, logger)
+
+        jsonGen.write(action.toString())
+        gameState_.toJson(jsonGen)
 
         return gameState_
     }

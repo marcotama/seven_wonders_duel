@@ -2,6 +2,7 @@ package com.aigamelabs.swduel
 
 import com.aigamelabs.utils.RandomWithTracker
 import io.vavr.collection.Vector
+import org.json.JSONObject
 import javax.json.stream.JsonGenerator
 
 /**
@@ -81,10 +82,22 @@ data class Deck(val name: String, private val groups: Vector<Pair<Vector<Card>,I
      * Dumps the object content in JSON.
      */
     fun toJson(generator: JsonGenerator, name: String?) {
-        if (name == null) generator.writeStartArray()
-        else generator.writeStartArray(name)
+        if (name == null) generator.writeStartObject()
+        else generator.writeStartObject(name)
 
-        cards.forEach { generator.write(it.name) }
+        generator.write("name", name)
+        generator.writeStartArray("groups") // array of groups
+        groups.forEach { group ->
+            generator.writeStartObject() // group
+            generator.write("discarded", group.second)
+            generator.writeStartArray("cards") // array of cards
+            group.first.forEach {
+                generator.write(it.name)
+            }
+            generator.writeEnd() // array of cards
+            generator.writeEnd() // group
+        }
+        generator.writeEnd() // array of groups
 
         generator.writeEnd()
     }
@@ -95,6 +108,23 @@ data class Deck(val name: String, private val groups: Vector<Pair<Vector<Card>,I
         else {
             val tmp = cards.map { it.name }.foldLeft("", { acc, el -> "$acc$el, " })
             tmp.substring(0, tmp.length - 2)
+        }
+    }
+
+    companion object {
+        fun loadFromJson(obj: JSONObject): Deck {
+            val name = obj.getString("name")
+            val groupsObj = obj.getJSONArray("groups")
+            val groups = Vector.ofAll(groupsObj.map { groupObj ->
+                groupObj as JSONObject
+                val discarded = groupObj.getInt("discarded")
+                val cardsObj = groupObj.getJSONArray("cards")
+                val cards = Vector.ofAll(cardsObj.map {
+                    CardFactory.getByName(it as String)
+                })
+                Pair(cards, discarded)
+            })
+            return Deck(name, groups)
         }
     }
 }

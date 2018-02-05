@@ -2,13 +2,14 @@ package com.aigamelabs.utils
 
 import io.vavr.collection.Stream
 import io.vavr.collection.Vector
+import org.json.JSONObject
 import javax.json.stream.JsonGenerator
 
 /**
  * Implements a graph using an adjacency matrix.
  */
 data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
-    private val numVertices : Int = vertices.size()
+    val numVertices : Int = vertices.size()
 
     /**
      * Creates an empty graph with the given capacity
@@ -164,26 +165,6 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
                         if (adjMatrix[toIndex(i,j)]) "o" else " "
                     }.fold("\n", { acc, s -> "$acc$s"} )
                 }.fold("\n", { acc, s -> "$acc$s"})*/
-    }
-
-    /**
-     * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
-     */
-    fun toJson(generator: JsonGenerator, name: String?) {
-        if (name == null) generator.writeStartObject()
-        else generator.writeStartObject(name)
-
-        generator.writeStartArray("vertices")
-        vertices.forEach { it.toString() }
-        generator.writeEnd()
-        generator.writeStartArray("edges")
-        (0 until numVertices * numVertices)
-                .filter { adjMatrix[it] }
-                .map { toCoords(it, numVertices) }
-                .forEach { generator.write(vertices[it.first].toString() + " -> " + vertices[it.second].toString()) }
-        generator.writeEnd()
-
-        generator.writeEnd()
     }
 
 

@@ -1,17 +1,18 @@
 package com.aigamelabs.swduel
 
-import com.aigamelabs.swduel.actions.Action
+import com.aigamelabs.swduel.actions.*
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.enums.GameOutcome
 import com.aigamelabs.swduel.enums.PlayerTurn
-import com.aigamelabs.swduel.actions.ChooseNextPlayer
-import com.aigamelabs.swduel.actions.ChooseProgressToken
 import com.aigamelabs.swduel.enums.*
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
 import java.util.logging.Level
 import java.util.logging.Logger
 import javax.json.stream.JsonGenerator
+import org.json.JSONObject
+
+
 
 data class GameState(
         val availableProgressTokens: Deck,
@@ -359,7 +360,7 @@ data class GameState(
     /**
      * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
      */
-    fun toJson(generator: JsonGenerator, name: String?) {
+    fun toJson(generator: JsonGenerator, name: String? = null) {
         if (name == null) generator.writeStartObject()
         else generator.writeStartObject(name)
         availableProgressTokens.toJson(generator, "available_progress_tokens")
@@ -372,17 +373,15 @@ data class GameState(
 
         militaryBoard.toJson(generator, "military_board")
 
-        generator.writeStartObject("player_cities")
-        player1City.toJson(generator, "Player 1")
-        player2City.toJson(generator, "Player 2")
-        generator.writeEnd()
+        player1City.toJson(generator, "player_1_city")
+        player2City.toJson(generator, "player_2_city")
 
         generator.writeStartArray("decision_queue")
         decisionQueue.forEach { it.toJson(generator, null) }
         generator.writeEnd()
 
         generator.write("game_phase", gamePhase.toString())
-        generator.write("default_player", nextPlayer.toString())
+        generator.write("next_player", nextPlayer.toString())
 
         generator.writeEnd()
     }
@@ -413,6 +412,126 @@ data class GameState(
                                 }
                 )
         return ret.toString()
+    }
+
+    companion object {
+
+        operator fun Regex.contains(text: CharSequence): Boolean = this.matches(text)
+
+        fun loadFromJson(obj: JSONObject): GameState {
+            val availableProgressTokens = Deck.loadFromJson(obj.getJSONObject("available_progress_tokens"))
+            val discardedProgressTokens = Deck.loadFromJson(obj.getJSONObject("discarded_progress_tokens"))
+            val wondersForPick = Deck.loadFromJson(obj.getJSONObject("wonders_for_pick"))
+            val discardedWonders = Deck.loadFromJson(obj.getJSONObject("unused_wonders"))
+            val burnedCards = Deck.loadFromJson(obj.getJSONObject("burned_cards"))
+            val militaryBoard = MilitaryBoard.loadFromJson(obj.getJSONObject("military_board"))
+            val cardStructure = CardStructure.loadFromJson(obj.getJSONObject("card_structure"))
+            val player1City = PlayerCity.loadFromJson(obj.getJSONObject("player_1_city"))
+            val player2City = PlayerCity.loadFromJson(obj.getJSONObject("player_2_city"))
+
+            val nextPlayer = when (obj.getString("next_player")) {
+                "PLAYER_1" -> PlayerTurn.PLAYER_1
+                "PLAYER_2" -> PlayerTurn.PLAYER_2
+                else -> throw Exception("Player unknown ${obj.getString("next_player")}")
+            }
+
+            val buildBuildingPattern = Regex("Build ([A-Za-z ]+)")
+            val buildBurnedPattern = Regex("Build burned card ([A-Za-z ]+)")
+            val buildWonderPattern = Regex("Build wonder ([A-Za-z ]+)")
+            val burnForCoinsPattern = Regex("Burn ([A-Za-z ]+) for coins")
+            val burnForWonderPattern = Regex("Burn ([A-Za-z ]+) to build wonder")
+            val burnOpponentCardPattern = Regex("Burn opponent card ([A-Za-z ]+)")
+            val chooseNextPlayerPattern = Regex("Choose ([A-Za-z 0-9]+) as next player")
+            val chooseStartingWonderPattern = Regex("Choose ([A-Za-z ]+) as starting wonder")
+            val chooseProgressTokenPattern = Regex("Choose progress token ([A-Za-z ]+)")
+            val chooseUnusedProgressTokenPattern = Regex("Choose unused progress token ([A-Za-z ]+)")
+
+            val decisionQueue = Queue.ofAll<Decision>(obj.getJSONArray("decision_queue").map { decisionObj ->
+                decisionObj as JSONObject
+                val player = when (decisionObj.getString("player")) {
+                    "PLAYER_1" -> PlayerTurn.PLAYER_1
+                    "PLAYER_2" -> PlayerTurn.PLAYER_2
+                    else -> throw Exception("Player unknown ${obj.getString("next_player")}")
+                }
+                val options = Vector.ofAll(decisionObj.getJSONArray("options").map { option ->
+                    option as String
+                    when (option) {
+                        in buildBuildingPattern -> {
+                            val cardName = buildBuildingPattern.matchEntire(option)!!.groupValues[1]
+                            BuildBuilding(player, CardFactory.getByName(cardName))
+                        }
+                        in buildBurnedPattern -> {
+                            val cardName = buildBurnedPattern.matchEntire(option)!!.groupValues[1]
+                            BuildBurned(player, CardFactory.getByName(cardName))
+                        }
+                        in buildWonderPattern -> {
+                            val cardName = buildWonderPattern.matchEntire(option)!!.groupValues[1]
+                            BuildWonder(player, CardFactory.getByName(cardName))
+                        }
+                        in burnForCoinsPattern -> {
+                            val cardName = burnForCoinsPattern.matchEntire(option)!!.groupValues[1]
+                            BurnForMoney(player, CardFactory.getByName(cardName))
+                        }
+                        in burnForWonderPattern -> {
+                            val cardName = burnForWonderPattern.matchEntire(option)!!.groupValues[1]
+                            BurnForWonder(player, CardFactory.getByName(cardName))
+                        }
+                        in burnOpponentCardPattern -> {
+                            val cardName = burnOpponentCardPattern.matchEntire(option)!!.groupValues[1]
+                            BurnOpponentCard(player, CardFactory.getByName(cardName))
+                        }
+                        in chooseNextPlayerPattern -> {
+                            val playerStr = chooseNextPlayerPattern.matchEntire(option)!!.groupValues[1]
+                            val playerChoice = when (playerStr) {
+                                "PLAYER_1" -> PlayerTurn.PLAYER_1
+                                "PLAYER_2" -> PlayerTurn.PLAYER_2
+                                else -> throw Exception("Player unknown ${obj.getString("next_player")}")
+                            }
+                            ChooseNextPlayer(player, playerChoice)
+                        }
+                        in chooseStartingWonderPattern -> {
+                            val cardName = chooseStartingWonderPattern.matchEntire(option)!!.groupValues[0]
+                            BuildBuilding(player, CardFactory.getByName(cardName))
+                        }
+                        in chooseProgressTokenPattern -> {
+                            val cardName = chooseProgressTokenPattern.matchEntire(option)!!.groupValues[0]
+                            ChooseProgressToken(player, CardFactory.getByName(cardName))
+                        }
+                        in chooseUnusedProgressTokenPattern -> {
+                            val cardName = chooseUnusedProgressTokenPattern.matchEntire(option)!!.groupValues[0]
+                            ChooseUnusedProgressToken(player, CardFactory.getByName(cardName))
+                        }
+                        else -> throw Exception("Action $option not found")
+                    }
+                })
+                Decision(player, options, "")
+            })
+
+            val gamePhase = when (obj.getString("game_phase")) {
+                "WONDERS_SELECTION" -> GamePhase.WONDERS_SELECTION
+                "FIRST_AGE" -> GamePhase.FIRST_AGE
+                "SECOND_AGE" -> GamePhase.SECOND_AGE
+                "THIRD_AGE" -> GamePhase.THIRD_AGE
+                "SCIENCE_SUPREMACY" -> GamePhase.SCIENCE_SUPREMACY
+                "MILITARY_SUPREMACY" -> GamePhase.MILITARY_SUPREMACY
+                "CIVILIAN_VICTORY" -> GamePhase.CIVILIAN_VICTORY
+                else -> throw Exception("Player unknown ${obj.getString("next_player")}")
+            }
+            return GameState(
+                    availableProgressTokens = availableProgressTokens,
+                    discardedProgressTokens = discardedProgressTokens,
+                    wondersForPick = wondersForPick,
+                    discardedWonders = discardedWonders,
+                    burnedCards = burnedCards,
+                    militaryBoard = militaryBoard,
+                    cardStructure = cardStructure,
+                    player1City = player1City,
+                    player2City = player2City,
+                    gamePhase = gamePhase,
+                    nextPlayer = nextPlayer,
+                    decisionQueue = decisionQueue
+            )
+        }
     }
 
 }

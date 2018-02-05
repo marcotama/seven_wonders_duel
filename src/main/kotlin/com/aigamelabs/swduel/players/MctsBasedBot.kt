@@ -42,7 +42,8 @@ abstract class MctsBasedBot(
     private val exportTree = false
 
     /** Uct threads manager  */
-    internal var manager = UctParallelizationManager(player, actionSelector, playerNodeEvaluator, opponentNodeEvaluator, outPath, gameId, name)
+    private var manager = UctParallelizationManager(player, actionSelector, playerNodeEvaluator, opponentNodeEvaluator,
+            if (exportTree) outPath else null, gameId, name)
 
     /**
      * Opens the JSON log and leaves the generator inside the games array. It does not open the first game object.

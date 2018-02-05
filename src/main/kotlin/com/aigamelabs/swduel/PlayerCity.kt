@@ -5,6 +5,7 @@ import io.vavr.collection.Vector
 import io.vavr.collection.HashMap
 import io.vavr.collection.HashSet
 import io.vavr.collection.Stream
+import org.json.JSONObject
 import javax.json.stream.JsonGenerator
 
 data class PlayerCity(
@@ -234,5 +235,36 @@ data class PlayerCity(
             ret.append("\n")
         }
         return ret.toString()
+    }
+
+    companion object {
+        fun loadFromJson(obj: JSONObject): PlayerCity {
+            val name = obj.getString("name")
+            val coins = obj.getInt("coins")
+            val buildings = HashSet.ofAll(
+                    obj.getJSONArray("buildings")
+                            .map { CardFactory.getByName(it as String) }
+            )
+            val wonders = HashSet.ofAll(
+                    obj.getJSONArray("wonders")
+                            .map { CardFactory.getByName(it as String) }
+            )
+            val progressTokens = HashSet.ofAll(
+                    obj.getJSONArray("progressTokens")
+                            .map { CardFactory.getByName(it as String) }
+            )
+            val unbuiltWonders = HashSet.ofAll(
+                    obj.getJSONArray("unbuilt_wonders")
+                            .map { CardFactory.getByName(it as String) }
+            )
+            return PlayerCity(
+                    name = name,
+                    coins = coins,
+                    buildings = buildings,
+                    wonders = wonders,
+                    progressTokens = progressTokens,
+                    unbuiltWonders = unbuiltWonders
+            )
+        }
     }
 }

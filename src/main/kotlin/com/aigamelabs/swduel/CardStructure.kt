@@ -1,8 +1,11 @@
 package com.aigamelabs.swduel
 
+import com.aigamelabs.swduel.enums.CardGroup
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.utils.Graph
 import io.vavr.collection.Vector
+import org.json.JSONArray
+import org.json.JSONObject
 import javax.json.stream.JsonGenerator
 
 class CardStructure(var graph: Graph<CardPlaceholder>, var faceDownPool: Deck) {
@@ -48,7 +51,24 @@ class CardStructure(var graph: Graph<CardPlaceholder>, var faceDownPool: Deck) {
         else generator.writeStartObject(name)
 
         faceDownPool.toJson(generator, "face_down_pool")
-        graph.toJson(generator, "graph")
+
+
+        generator.writeStartObject("graph")
+        generator.writeStartArray("vertices")
+        graph.vertices.forEach { generator.write(it.toString()) }
+        generator.writeEnd() // vertices
+        generator.writeStartArray("edges")
+        (0 until graph.numVertices * graph.numVertices)
+                .filter { graph.adjMatrix[it] }
+                .map { Graph.toCoords(it, graph.numVertices) }
+                .forEach {
+                    generator.writeStartArray()
+                    generator.write(it.first)
+                    generator.write(it.second)
+                    generator.writeEnd()
+                }
+        generator.writeEnd() // edges
+        generator.writeEnd() // graph
 
         generator.writeEnd()
     }
@@ -57,5 +77,35 @@ class CardStructure(var graph: Graph<CardPlaceholder>, var faceDownPool: Deck) {
         return "$graph\n\nFace-down cards pool:\n" +
                 faceDownPool.cards.map { "  ${it.name}\n" }
                 .fold("", { acc, s -> "$acc$s"}) + "\n"
+    }
+
+    companion object {
+        fun loadFromJson(obj: JSONObject): CardStructure {
+            val faceDownPool = Deck.loadFromJson(obj.getJSONObject("face_down_pool"))
+
+            val graphObj = obj.getJSONObject("graph")
+            val verticesObj = graphObj.getJSONArray("vertices")
+            val vertices = Vector.ofAll<CardPlaceholder>(verticesObj.map {
+                it as String
+                when (it) {
+                    "null" -> null
+                    "Face down card" -> FaceDownCard(CardGroup.FIRST_AGE)
+                    else -> CardFactory.getByName(it)
+                }
+            })
+
+            val edgesObj = graphObj.getJSONArray("edges")
+            val numVertices = vertices.size()
+            val edges = (0 until numVertices * numVertices).map { false }.toMutableList()
+            Vector.of(edgesObj.forEach {
+                it as JSONArray
+                val orig = it[0] as Int
+                val dest = it[1] as Int
+                edges[Graph.toIndex(orig, dest, numVertices)] = true
+            })
+
+            val graph = Graph(vertices, Vector.ofAll(edges))
+            return CardStructure(graph, faceDownPool)
+        }
     }
 }
