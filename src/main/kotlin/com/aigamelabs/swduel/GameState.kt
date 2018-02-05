@@ -490,15 +490,15 @@ data class GameState(
                             ChooseNextPlayer(player, playerChoice)
                         }
                         in chooseStartingWonderPattern -> {
-                            val cardName = chooseStartingWonderPattern.matchEntire(option)!!.groupValues[0]
+                            val cardName = chooseStartingWonderPattern.matchEntire(option)!!.groupValues[1]
                             BuildBuilding(player, CardFactory.getByName(cardName))
                         }
                         in chooseProgressTokenPattern -> {
-                            val cardName = chooseProgressTokenPattern.matchEntire(option)!!.groupValues[0]
+                            val cardName = chooseProgressTokenPattern.matchEntire(option)!!.groupValues[1]
                             ChooseProgressToken(player, CardFactory.getByName(cardName))
                         }
                         in chooseUnusedProgressTokenPattern -> {
-                            val cardName = chooseUnusedProgressTokenPattern.matchEntire(option)!!.groupValues[0]
+                            val cardName = chooseUnusedProgressTokenPattern.matchEntire(option)!!.groupValues[1]
                             ChooseUnusedProgressToken(player, CardFactory.getByName(cardName))
                         }
                         else -> throw Exception("Action $option not found")
