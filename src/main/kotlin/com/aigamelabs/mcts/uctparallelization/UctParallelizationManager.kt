@@ -35,7 +35,7 @@ class UctParallelizationManager(
     private var executor: ExecutorService
 
     init {
-        val processors = 1//Runtime.getRuntime().availableProcessors()
+        val processors = Runtime.getRuntime().availableProcessors()
         workers = (0 until Math.max(1, processors - 1))
                 .map { UctWorker(this, "#$it") }
                 .toTypedArray()
