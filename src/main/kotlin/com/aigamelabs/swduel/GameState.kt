@@ -407,7 +407,7 @@ data class GameState(
                 "Military board:\n${militaryBoard.toString().replace("\n", "\n  ")}\n\n",
                 "Next player: $nextPlayer\n",
                 "Decision queue:\n" +
-                        decisionQueue.forEachIndexed { index, decision -> "  #$index (${decision.player}) options:\n" +
+                        decisionQueue.mapIndexed { index, decision -> "  #$index (${decision.player}) options:\n" +
                                 decision.options.fold("", { acc, s -> "$acc    $s\n"}) + "\n"
                                 }
                 )
