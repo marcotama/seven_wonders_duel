@@ -15,6 +15,7 @@ class ChooseUnusedProgressToken(playerTurn: PlayerTurn, val card : Card) : Actio
         val updatedPlayer1City = if (player == PlayerTurn.PLAYER_1) updatedPlayerCity else opponentCity
         val updatedPlayer2City = if (player == PlayerTurn.PLAYER_2) updatedPlayerCity else opponentCity
         return gameState.update(player1City_ = updatedPlayer1City, player2City_ = updatedPlayer2City)
+                .addMainTurnDecision(generator, logger)
                 .checkScienceSupremacy(player)
     }
 

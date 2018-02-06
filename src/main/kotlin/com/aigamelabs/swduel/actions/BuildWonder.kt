@@ -43,7 +43,7 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
         return processWonders(updatedGameState, generator, logger)
     }
 
-    private fun processWonders(gameState: GameState, generator : RandomWithTracker, logger: Logger?): GameState {
+    private fun processWonders(gameState: GameState, generator: RandomWithTracker, logger: Logger?): GameState {
         return when (card.wonders) {
             Wonders.THE_GREAT_LIBRARY -> {
                 gameState.addSelectDiscardedProgressTokenDecision(player)
@@ -53,18 +53,18 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
                 return if (gameState.burnedCards.size() > 0) {
                     gameState.addSelectBurnedBuildingToBuildDecision(player)
                 } else {
-                    gameState.updateBoard(generator, logger)
+                    gameState.addMainTurnDecision(generator, logger)
                 }
             }
 
             Wonders.THE_COLOSSUS -> {
                 gameState.addMilitaryProgress(2, player)
-                        .updateBoard(generator, logger)
+                        .addMainTurnDecision(generator, logger)
             }
 
             Wonders.CIRCUS_MAXIMUS -> {
                 val updatedGameState = gameState.addBurnOpponentBuildingDecision(player, CardColor.GRAY)
-                        ?: gameState.addMainTurnDecision(player)
+                        ?: gameState.addMainTurnDecision(generator, logger)
 
                 return updatedGameState
                         .addMilitaryProgress(1, player)
@@ -72,7 +72,7 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
             }
             Wonders.THE_STATUE_OF_ZEUS -> {
                 val updatedGameState = gameState.addBurnOpponentBuildingDecision(player, CardColor.BROWN)
-                        ?: gameState.addMainTurnDecision(player)
+                        ?: gameState.addMainTurnDecision(generator, logger)
 
                 return updatedGameState
                         .addMilitaryProgress(1, player)
@@ -86,7 +86,7 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
                 val updatedPlayer1City = if (player == PlayerTurn.PLAYER_1) updatedPlayerCity else updatedOpponentCity
                 val updatedPlayer2City = if (player == PlayerTurn.PLAYER_2) updatedPlayerCity else updatedOpponentCity
                 gameState.update(player1City_ = updatedPlayer1City, player2City_ = updatedPlayer2City)
-                        .updateBoard(generator, logger)
+                        .addMainTurnDecision(generator, logger)
             }
             Wonders.THE_TEMPLE_OF_ARTEMIS,
             Wonders.THE_HANGING_GARDENS -> {
@@ -96,12 +96,12 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
                 val updatedPlayer1City = if (player == PlayerTurn.PLAYER_1) updatedPlayerCity else opponentCity
                 val updatedPlayer2City = if (player == PlayerTurn.PLAYER_2) updatedPlayerCity else opponentCity
                 gameState.update(player1City_ = updatedPlayer1City, player2City_ = updatedPlayer2City)
-                        .updateBoard(generator, logger)
+                        .addMainTurnDecision(generator, logger)
             }
             Wonders.THE_GREAT_LIGHTHOUSE,
             Wonders.THE_SPHINX,
             Wonders.THE_PYRAMIDS,
-            Wonders.PIRAEUS -> gameState.updateBoard(generator, logger)
+            Wonders.PIRAEUS -> gameState.addMainTurnDecision(generator, logger)
             else -> {
                 throw Exception()
             }

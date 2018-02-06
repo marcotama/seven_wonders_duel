@@ -69,7 +69,8 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
 
             // Play the game
             var gameState = startingGameState
-            while (!gameState.decisionQueue.isEmpty) {
+            val endPhases = setOf(GamePhase.MILITARY_SUPREMACY, GamePhase.SCIENCE_SUPREMACY, GamePhase.CIVILIAN_VICTORY)
+            while (!endPhases.contains(gameState.gamePhase)) {
                 gameState = iterate(gameState, generator)
                 //logger.log(Level.INFO, gameState.toString())
             }
@@ -104,6 +105,7 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
         }
         catch (e: Exception) {
             logger?.log(Level.SEVERE, e.message, e)
+
             throw e
         }
     }

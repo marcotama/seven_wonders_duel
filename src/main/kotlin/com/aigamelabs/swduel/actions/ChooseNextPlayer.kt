@@ -8,7 +8,7 @@ import java.util.logging.Logger
 class ChooseNextPlayer(playerTurn: PlayerTurn, private val chosenPlayer: PlayerTurn) : Action(playerTurn) {
     override fun process(gameState: GameState, generator : RandomWithTracker, logger: Logger?) : GameState {
         return gameState.update(nextPlayer_ = chosenPlayer)
-                .addMainTurnDecision(chosenPlayer)
+                .addMainTurnDecision(generator, logger)
     }
 
     override fun toString(): String {

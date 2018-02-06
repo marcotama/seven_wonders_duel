@@ -66,7 +66,10 @@ data class GameState(
         }
     }
 
-    fun updateBoard(generator: RandomWithTracker, logger: Logger? = null) : GameState {
+    private fun updateBoard(generator: RandomWithTracker, logger: Logger? = null) : GameState {
+        if (cardStructure != null && !cardStructure.isEmpty())
+            return this
+
         when (gamePhase) {
             GamePhase.WONDERS_SELECTION -> {
                 return if (wondersForPick.size() == 0 && discardedWonders.size() == 4) {
@@ -75,7 +78,6 @@ data class GameState(
                     val newCardStructure = CardStructureFactory.makeFirstAgeCardStructure(generator)
                     // Add main turn decision
                     update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.FIRST_AGE)
-                            .addMainTurnDecision(PlayerTurn.PLAYER_1)
                 } else {
                     // Wonder selection is handled by ChooseStartingWonder
                     this
@@ -88,7 +90,7 @@ data class GameState(
                     update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.SECOND_AGE)
                             .addSelectStartingPlayerDecision()
                 } else {
-                    addMainTurnDecision(nextPlayer)
+                    this
                 }
             }
             GamePhase.SECOND_AGE -> {
@@ -98,7 +100,7 @@ data class GameState(
                     update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.THIRD_AGE)
                             .addSelectStartingPlayerDecision()
                 } else {
-                    addMainTurnDecision(nextPlayer)
+                    this
                 }
             }
 
@@ -107,7 +109,7 @@ data class GameState(
                     logger?.info("Civilian victory")
                     update(gamePhase_ = GamePhase.CIVILIAN_VICTORY)
                 } else {
-                    addMainTurnDecision(nextPlayer)
+                    this
                 }
             }
             else -> {
@@ -267,9 +269,7 @@ data class GameState(
         }
     }
 
-    fun buildBuilding(player: PlayerTurn, card: Card): GameState {
-
-
+    fun buildBuilding(player: PlayerTurn, card: Card, generator: RandomWithTracker, logger: Logger?): GameState {
         // Add card to appropriate player city
         val playerCity = getPlayerCity(player)
         val opponentCity = getPlayerCity(player.opponent())
@@ -297,7 +297,6 @@ data class GameState(
             updatedOpponentCity = opponentCity
         }
 
-
         val updatedPlayer1City = if (player == PlayerTurn.PLAYER_1) updatedPlayerCity else updatedOpponentCity
         val updatedPlayer2City = if (player == PlayerTurn.PLAYER_2) updatedPlayerCity else updatedOpponentCity
         var updatedGameState = update(
@@ -307,11 +306,10 @@ data class GameState(
                 nextPlayer_ = nextPlayer.opponent()
         )
 
-
         updatedGameState = if (card.color == CardColor.GREEN && playerCity.twoScienceCardsWithSymbol(card.scienceSymbol))
             updatedGameState.addSelectProgressTokenDecision(player)
         else
-            updatedGameState.addMainTurnDecision(player)
+            updatedGameState.addMainTurnDecision(generator, logger)
 
         return when {
             card.color == CardColor.GREEN -> updatedGameState.checkScienceSupremacy(player)
@@ -353,26 +351,31 @@ data class GameState(
         return enqueue(decision)
     }
 
-    fun addMainTurnDecision(player: PlayerTurn): GameState {
-        val playerCity = getPlayerCity(player)
-        val opponentCity = getPlayerCity(player.opponent())
+    fun addMainTurnDecision(generator: RandomWithTracker, logger: Logger?): GameState {
+        return updateBoard(generator, logger).addMainTurnDecisionHelper()
+    }
+
+    private fun addMainTurnDecisionHelper(): GameState {
+
+        val playerCity = getPlayerCity(nextPlayer)
+        val opponentCity = getPlayerCity(nextPlayer.opponent())
         val canBuildSomeWonders =
                 !playerCity.unbuiltWonders.filter { playerCity.canBuild(it, opponentCity) != null }.isEmpty &&
-                        getPlayerCity(player.opponent()).wonders.size() < 4
+                        getPlayerCity(nextPlayer.opponent()).wonders.size() < 4
 
         val availCards = cardStructure!!.availableCards()
         // The player can always burn any uncovered card for money
-        var actions: Vector<Action> = availCards.map { BurnForMoney(player, it) }
+        var actions: Vector<Action> = availCards.map { BurnForMoney(nextPlayer, it) }
         // If the player can afford at least a wonder, then he can also sacrifice any uncovered card to build the wonder
         if (canBuildSomeWonders) {
-            actions = actions.appendAll(availCards.map { BurnForWonder(player, it) })
+            actions = actions.appendAll(availCards.map { BurnForWonder(nextPlayer, it) })
         }
         // The player can also build a card, if the city can afford it
         actions = actions.appendAll(availCards
                 .filter { playerCity.canBuild(it, opponentCity) != null }
-                .map { BuildBuilding(player, it) }
+                .map { BuildBuilding(nextPlayer, it) }
         )
-        val decision = Decision(player, actions)
+        val decision = Decision(nextPlayer, actions)
         return enqueue(decision)
     }
 
@@ -425,16 +428,7 @@ data class GameState(
      * cheating.
      */
     fun applyAction(action: Action, generator: RandomWithTracker): GameState {
-
-        // Process action
-        var updatedGameState = action.process(this, generator)
-
-        // If the cards structure is empty, switch to next age
-        if (updatedGameState.cardStructure == null || updatedGameState.cardStructure!!.isEmpty()) {
-            updatedGameState = updatedGameState.updateBoard(generator)
-        }
-
-        return updatedGameState
+        return action.process(this, generator)
     }
 
     /**

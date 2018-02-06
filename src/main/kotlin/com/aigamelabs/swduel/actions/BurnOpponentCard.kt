@@ -21,6 +21,7 @@ class BurnOpponentCard(player: PlayerTurn, val card : Card) : Action(player) {
         val updatedPlayer2City = if (player == PlayerTurn.PLAYER_2) playerCity else updatedOpponentCity
         return gameState.update(player1City_ = updatedPlayer1City, player2City_ = updatedPlayer2City,
                 burnedDeck_ = updatedBurnedDeck)
+                .addMainTurnDecision(generator, logger)
     }
 
     override fun toString(): String {

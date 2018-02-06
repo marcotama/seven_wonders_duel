@@ -64,7 +64,7 @@ class ChooseStartingWonder(player: PlayerTurn, val card : Card) : Action(player)
                     // Update game phase
                     updatedWondersForPickDeck = Deck("Wonders for pick")
                     return updatedGameState.update(wondersForPickDeck_ = updatedWondersForPickDeck)
-                            .updateBoard(generator)
+                            .addMainTurnDecision(generator, logger)
                 }
                 else -> throw Exception("This should not happen")
             }
