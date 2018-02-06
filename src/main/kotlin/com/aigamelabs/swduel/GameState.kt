@@ -74,9 +74,8 @@ data class GameState(
                     // Setup cards structure
                     val newCardStructure = CardStructureFactory.makeFirstAgeCardStructure(generator)
                     // Add main turn decision
-                    val updatedGameState = update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.FIRST_AGE)
-                    val decision = DecisionFactory.makeTurnDecision(PlayerTurn.PLAYER_1, updatedGameState)
-                    updatedGameState.update(decisionQueue_ = decisionQueue.enqueue(decision))
+                    update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.FIRST_AGE)
+                            .addMainTurnDecision(PlayerTurn.PLAYER_1)
                 } else {
                     // Wonder selection is handled by ChooseStartingWonder
                     this
@@ -85,35 +84,21 @@ data class GameState(
             GamePhase.FIRST_AGE -> {
                 return if (cardStructure!!.isEmpty()) {
                     logger?.info("Switching to Age II")
-                    // Setup cards structure
                     val newCardStructure = CardStructureFactory.makeSecondCardStructure(generator)
-                    // Create decision for starting player
-                    val choosingPlayer = militaryBoard.getDisadvantagedPlayer() ?: nextPlayer.opponent() // Last player of the previous age
-                    val actions = PlayerTurn.values().map { ChooseNextPlayer(choosingPlayer, it) }
-                    val decision = Decision(choosingPlayer, Vector.ofAll(actions), "GameState.updateBoard")
-
-                    update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.SECOND_AGE,
-                            decisionQueue_ = decisionQueue.enqueue(decision))
+                    update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.SECOND_AGE)
+                            .addSelectStartingPlayerDecision()
                 } else {
-                    val decision = DecisionFactory.makeTurnDecision(nextPlayer, this)
-                    update(decisionQueue_ = decisionQueue.enqueue(decision))
+                    addMainTurnDecision(nextPlayer)
                 }
             }
             GamePhase.SECOND_AGE -> {
                 return if (cardStructure!!.isEmpty()) {
                     logger?.info("Switching to Age III")
-                    // Setup cards structure
                     val newCardStructure = CardStructureFactory.makeThirdAgeCardStructure(generator)
-                    // Create decision for starting player
-                    val choosingPlayer = militaryBoard.getDisadvantagedPlayer() ?: nextPlayer.opponent() // Last player of the previous age
-                    val actions = PlayerTurn.values().map { ChooseNextPlayer(choosingPlayer, it) }
-                    val decision = Decision(choosingPlayer, Vector.ofAll(actions), "GameState.updateBoard")
-
-                    update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.THIRD_AGE,
-                            decisionQueue_ = decisionQueue.enqueue(decision))
+                    update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.THIRD_AGE)
+                            .addSelectStartingPlayerDecision()
                 } else {
-                    val decision = DecisionFactory.makeTurnDecision(nextPlayer, this)
-                    update(decisionQueue_ = decisionQueue.enqueue(decision))
+                    addMainTurnDecision(nextPlayer)
                 }
             }
 
@@ -122,8 +107,7 @@ data class GameState(
                     logger?.info("Civilian victory")
                     update(gamePhase_ = GamePhase.CIVILIAN_VICTORY)
                 } else {
-                    val decision = DecisionFactory.makeTurnDecision(nextPlayer, this)
-                    update(decisionQueue_ = decisionQueue.enqueue(decision))
+                    addMainTurnDecision(nextPlayer)
                 }
             }
             else -> {
@@ -283,7 +267,7 @@ data class GameState(
         }
     }
 
-    fun buildBuilding(player: PlayerTurn, card: Card, generator: RandomWithTracker): GameState {
+    fun buildBuilding(player: PlayerTurn, card: Card): GameState {
 
 
         // Add card to appropriate player city
@@ -313,31 +297,127 @@ data class GameState(
             updatedOpponentCity = opponentCity
         }
 
-        val updatedDecisionQueue =
-                if (card.color == CardColor.GREEN &&
-                        playerCity.buildings.filter { it.scienceSymbol == card.scienceSymbol }.size() == 2) {
-                    val actions: Vector<Action> = availableProgressTokens.cards
-                            .map { ChooseProgressToken(player, it) }
-                    val decision = Decision(player, actions, "BuildBuilding.process")
-                    decisionQueue.enqueue(decision)
-                } else
-                    null
 
         val updatedPlayer1City = if (player == PlayerTurn.PLAYER_1) updatedPlayerCity else updatedOpponentCity
         val updatedPlayer2City = if (player == PlayerTurn.PLAYER_2) updatedPlayerCity else updatedOpponentCity
-        val updatedGameState = update(
+        var updatedGameState = update(
                 player1City_ = updatedPlayer1City,
                 player2City_ = updatedPlayer2City,
                 militaryBoard_ = updatedMilitaryBoard,
-                nextPlayer_ = nextPlayer.opponent(),
-                decisionQueue_ = updatedDecisionQueue
-        ).updateBoard(generator)
+                nextPlayer_ = nextPlayer.opponent()
+        )
+
+
+        updatedGameState = if (card.color == CardColor.GREEN && playerCity.twoScienceCardsWithSymbol(card.scienceSymbol))
+            updatedGameState.addSelectProgressTokenDecision(player)
+        else
+            updatedGameState.addMainTurnDecision(player)
 
         return when {
             card.color == CardColor.GREEN -> updatedGameState.checkScienceSupremacy(player)
             card.color == CardColor.RED -> updatedGameState.checkMilitarySupremacy()
             else -> updatedGameState
         }
+    }
+
+    fun addMilitaryProgress(strength: Int, player: PlayerTurn): GameState {
+
+        // Move military tokens
+        val militaryOutcome = militaryBoard.addMilitaryPointsTo(strength, player)
+
+        // Deal with any burning any coins
+        return if (militaryOutcome.first == 0) {
+            update(militaryBoard_ = militaryOutcome.second)
+        } else {
+            val playerCity = getPlayerCity(player)
+            val opponentCity = getPlayerCity(player.opponent())
+            val updatedOpponentCity = opponentCity.removeCoins(militaryOutcome.first)
+            val updatedPlayer1City = if (player == PlayerTurn.PLAYER_1) playerCity else updatedOpponentCity
+            val updatedPlayer2City = if (player == PlayerTurn.PLAYER_2) playerCity else updatedOpponentCity
+            update(player1City_ = updatedPlayer1City, player2City_ = updatedPlayer2City,
+                    militaryBoard_ = militaryOutcome.second)
+        }
+    }
+
+    /* Queue management functions */
+
+    private fun enqueue(decision: Decision): GameState {
+        val updatedDecisionQueue = decisionQueue.insert(0, decision)
+        return update(decisionQueue_ = updatedDecisionQueue)
+    }
+
+    fun addSelectStartingPlayerDecision(): GameState {
+        val choosingPlayer = militaryBoard.getDisadvantagedPlayer() ?: nextPlayer.opponent() // Last player of the previous age
+        val actions = PlayerTurn.values().map { ChooseNextPlayer(choosingPlayer, it) }
+        val decision = Decision(choosingPlayer, Vector.ofAll(actions))
+        return enqueue(decision)
+    }
+
+    fun addMainTurnDecision(player: PlayerTurn): GameState {
+        val playerCity = getPlayerCity(player)
+        val opponentCity = getPlayerCity(player.opponent())
+        val canBuildSomeWonders =
+                !playerCity.unbuiltWonders.filter { playerCity.canBuild(it, opponentCity) != null }.isEmpty &&
+                        getPlayerCity(player.opponent()).wonders.size() < 4
+
+        val availCards = cardStructure!!.availableCards()
+        // The player can always burn any uncovered card for money
+        var actions: Vector<Action> = availCards.map { BurnForMoney(player, it) }
+        // If the player can afford at least a wonder, then he can also sacrifice any uncovered card to build the wonder
+        if (canBuildSomeWonders) {
+            actions = actions.appendAll(availCards.map { BurnForWonder(player, it) })
+        }
+        // The player can also build a card, if the city can afford it
+        actions = actions.appendAll(availCards
+                .filter { playerCity.canBuild(it, opponentCity) != null }
+                .map { BuildBuilding(player, it) }
+        )
+        val decision = Decision(player, actions)
+        return enqueue(decision)
+    }
+
+    fun addBurnOpponentBuildingDecision(player: PlayerTurn, color: CardColor): GameState? {
+        val opponentCity = getPlayerCity(player.opponent())
+        val burnable = opponentCity.getBurnableBuildings(color)
+        return if (burnable.isEmpty)
+            null
+        else {
+            val actions = burnable.map { BurnOpponentCard(player, it) }
+            val decision = Decision(player, Vector.ofAll(actions))
+            enqueue(decision)
+        }
+    }
+
+    fun addSelectProgressTokenDecision(player: PlayerTurn): GameState {
+        val actions = availableProgressTokens.cards
+                .map { ChooseProgressToken(player, it) }
+        val decision = Decision(player, Vector.ofAll(actions))
+        return enqueue(decision)
+    }
+
+    fun addSelectDiscardedProgressTokenDecision(player: PlayerTurn): GameState {
+        val actions = discardedProgressTokens.cards
+                .map { ChooseUnusedProgressToken(player, it) }
+        val decision = Decision(player, Vector.ofAll(actions))
+        return enqueue(decision)
+    }
+
+    fun addSelectBurnedBuildingToBuildDecision(player: PlayerTurn): GameState {
+        val actions = burnedCards.cards
+                .map { BuildBurned(player, it) }
+        val decision = Decision(player, Vector.ofAll(actions))
+        return enqueue(decision)
+    }
+
+    fun addSelectWonderToBuildDecision(player: PlayerTurn): GameState {
+        val playerCity = getPlayerCity(player)
+        val opponentCity = getPlayerCity(player.opponent())
+        val options = playerCity.unbuiltWonders
+                .filter { playerCity.canBuild(it, opponentCity) != null }
+                .map { BuildWonder(player, it) }
+        val decision = Decision(player, Vector.ofAll(options))
+        return enqueue(decision)
+
     }
 
     /**
@@ -456,10 +536,6 @@ data class GameState(
                 val options = Vector.ofAll(decisionObj.getJSONArray("options").map { option ->
                     option as String
                     when (option) {
-                        in buildBuildingPattern -> {
-                            val cardName = buildBuildingPattern.matchEntire(option)!!.groupValues[1]
-                            BuildBuilding(player, CardFactory.getByName(cardName))
-                        }
                         in buildBurnedPattern -> {
                             val cardName = buildBurnedPattern.matchEntire(option)!!.groupValues[1]
                             BuildBurned(player, CardFactory.getByName(cardName))
@@ -467,6 +543,10 @@ data class GameState(
                         in buildWonderPattern -> {
                             val cardName = buildWonderPattern.matchEntire(option)!!.groupValues[1]
                             BuildWonder(player, CardFactory.getByName(cardName))
+                        }
+                        in buildBuildingPattern -> {
+                            val cardName = buildBuildingPattern.matchEntire(option)!!.groupValues[1]
+                            BuildBuilding(player, CardFactory.getByName(cardName))
                         }
                         in burnForCoinsPattern -> {
                             val cardName = burnForCoinsPattern.matchEntire(option)!!.groupValues[1]
@@ -504,7 +584,7 @@ data class GameState(
                         else -> throw Exception("Action $option not found")
                     }
                 })
-                Decision(player, options, "")
+                Decision(player, options)
             })
 
             val gamePhase = when (obj.getString("game_phase")) {

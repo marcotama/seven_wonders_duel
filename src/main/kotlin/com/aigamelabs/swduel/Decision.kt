@@ -9,7 +9,7 @@ import javax.json.stream.JsonGenerator
  * Represents a decision to be made. It includes a list of actions to choose from and the player who will make the
  * decision.
  */
-data class Decision(val player: PlayerTurn, val options: Vector<Action>, val addedBy: String) {
+data class Decision(val player: PlayerTurn, val options: Vector<Action>) {
 
     /**
      * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.

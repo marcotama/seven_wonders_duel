@@ -78,7 +78,7 @@ class ChooseStartingWonder(player: PlayerTurn, val card : Card) : Action(player)
         // Create decision
         val options : Vector<Action> = wondersForPickDeck.cards
                 .map { ChooseStartingWonder(playerTurn, it) }
-        return Decision(playerTurn, options, "ChooseStartingWonder.createDecision")
+        return Decision(playerTurn, options)
     }
 
     override fun toString(): String {

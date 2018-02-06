@@ -121,8 +121,7 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
         logger?.info("Querying ${thisDecision.player}; options:\n" +
                 thisDecision.options
                         .map { "  $it\n" }
-                        .fold("", { a, b -> a + b } ) +
-                "Decision prompted by ${thisDecision.addedBy}\n"
+                        .fold("", { a, b -> a + b } ) + "\n"
         )
         val action = players[thisDecision.player]!!.decide(gameState)
 

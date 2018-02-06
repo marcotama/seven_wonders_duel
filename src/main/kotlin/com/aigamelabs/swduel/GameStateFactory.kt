@@ -33,7 +33,7 @@ object GameStateFactory {
         // Create decision
         val actions : Vector<Action> = wondersForPickDeck.cards
                 .map { ChooseStartingWonder(PlayerTurn.PLAYER_1, it) }
-        val decision = Decision(PlayerTurn.PLAYER_1, actions, "GameStateFactory.createNewGameState")
+        val decision = Decision(PlayerTurn.PLAYER_1, actions)
 
 
         // Setup progress tokens
