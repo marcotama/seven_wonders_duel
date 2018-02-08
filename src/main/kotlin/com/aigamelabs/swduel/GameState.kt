@@ -310,7 +310,7 @@ data class GameState(
                 nextPlayer_ = nextPlayer.opponent()
         )
 
-        updatedGameState = if (card.color == CardColor.GREEN && playerCity.twoScienceCardsWithSymbol(card.scienceSymbol))
+        updatedGameState = if (card.color == CardColor.GREEN && updatedPlayerCity.twoScienceCardsWithSymbol(card.scienceSymbol))
             updatedGameState.addSelectProgressTokenDecision(player)
         else
             updatedGameState.addMainTurnDecision(generator, logger)
