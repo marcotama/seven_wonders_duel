@@ -47,7 +47,7 @@ data class PlayerCity(
         var altProduction : Vector<ResourcesAlternative> = Vector.empty()
         for (building in buildings.plus(wonders)) {
             // Check linking symbols
-            if (newBuilding.linksTo == building.linkingSymbol) {
+            if (newBuilding.linksTo != LinkingSymbol.NONE && newBuilding.linksTo == building.linkingSymbol) {
                 return 0
             }
             // Calculate resources production
