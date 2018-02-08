@@ -81,7 +81,7 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
             Wonders.THE_APPIAN_WAY -> {
                 val playerCity = gameState.getPlayerCity(player)
                 val opponentCity = gameState.getPlayerCity(player.opponent())
-                val updatedPlayerCity = playerCity.addCoins( card.coinsProduced) // Add player coins
+                val updatedPlayerCity = playerCity.addCoins(card.coinsProduced) // Add player coins
                 val updatedOpponentCity = opponentCity.removeCoins(3) // Remove opponent coins
                 val updatedPlayer1City = if (player == PlayerTurn.PLAYER_1) updatedPlayerCity else updatedOpponentCity
                 val updatedPlayer2City = if (player == PlayerTurn.PLAYER_2) updatedPlayerCity else updatedOpponentCity
