@@ -19,7 +19,7 @@ object CardFactory {
                     if (!matches.isEmpty)
                         return matches[0]
                 }
-        throw Exception("Card not found")
+        throw Exception("Card not found: $name")
     }
 
     private fun createFromFirstAge() : Vector<Card> {
