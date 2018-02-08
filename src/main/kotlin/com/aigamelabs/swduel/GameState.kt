@@ -524,7 +524,7 @@ data class GameState(
             val burnForCoinsPattern = Regex("Burn ([A-Za-z ]+) for coins")
             val burnForWonderPattern = Regex("Burn ([A-Za-z ]+) to build wonder")
             val burnOpponentCardPattern = Regex("Burn opponent card ([A-Za-z ]+)")
-            val chooseNextPlayerPattern = Regex("Choose ([A-Za-z 0-9]+) as next player")
+            val chooseNextPlayerPattern = Regex("Choose ([A-Za-z_90-9]+) as next player")
             val chooseStartingWonderPattern = Regex("Choose ([A-Za-z ]+) as starting wonder")
             val chooseProgressTokenPattern = Regex("Choose progress token ([A-Za-z ]+)")
             val chooseUnusedProgressTokenPattern = Regex("Choose unused progress token ([A-Za-z ]+)")
