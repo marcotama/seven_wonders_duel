@@ -115,9 +115,11 @@ data class PlayerCity(
     }
 
     fun twoScienceCardsWithSymbol(symbol: ScienceSymbol): Boolean {
-        return buildings
-                .filter { it.scienceSymbol == symbol }
-                .size() == 2
+        return if (symbol == ScienceSymbol.NONE)
+            false
+        else
+            buildings.filter { it.scienceSymbol == symbol }
+                    .size() == 2
     }
 
     /**
