@@ -11,7 +11,7 @@ class BuildBuilding(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn
         val updatedCardStructure = gameState.cardStructure!!.pickUpCard(card, generator)
         val updatedGameState = gameState.update(cardStructure_ = updatedCardStructure)
 
-        return updatedGameState.buildBuilding(player, card, generator, logger, false)
+        return updatedGameState.swapNextPlayer().buildBuilding(player, card, generator, logger, false)
     }
 
     override fun toString(): String {

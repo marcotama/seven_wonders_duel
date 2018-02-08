@@ -427,6 +427,10 @@ data class GameState(
 
     }
 
+    fun swapNextPlayer(): GameState {
+        return update(nextPlayer_ = nextPlayer.opponent())
+    }
+
     /**
      * Advances the game by one step by applying the given action to the next decision in the queue. Does not detect
      * cheating.
@@ -487,8 +491,8 @@ data class GameState(
                 "Decision queue:\n" +
                         decisionQueue.mapIndexed { index, decision -> "  #$index (${decision.player}) options:\n" +
                                 decision.options.fold("", { acc, s -> "$acc    $s\n"}) + "\n"
-                                }
-                )
+                        }
+        )
         return ret.toString()
     }
 
