@@ -93,7 +93,7 @@ data class Card(
     constructor(cardGroup: CardGroup, name: String, resourceCost: Map<Resource, Int>,
                 linkingSymbol: LinkingSymbol, linksTo: LinkingSymbol,
                 victoryPoints: Int) :
-            this(cardGroup = cardGroup, name = name, color = CardColor.GOLD,
+            this(cardGroup = cardGroup, name = name, color = CardColor.BLUE,
                     resourceCost = HashMap.ofAll(resourceCost),
                     linkingSymbol = linkingSymbol, linksTo = linksTo,
                     victoryPoints = victoryPoints
