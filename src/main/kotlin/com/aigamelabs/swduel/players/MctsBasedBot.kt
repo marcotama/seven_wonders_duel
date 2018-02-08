@@ -40,7 +40,7 @@ abstract class MctsBasedBot(
 
     private var lastAction : Action? = null
 
-    private val exportTree = true
+    private val exportTree = false
 
     /** Uct threads manager  */
     private var manager = UctParallelizationManager(player, actionSelector, playerNodeEvaluator, opponentNodeEvaluator,
