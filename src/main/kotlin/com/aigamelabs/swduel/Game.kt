@@ -138,9 +138,11 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
 
         // Process action
         gameState_= action.process(gameState_, generator, logger)
+        logger.handlers.forEach { it.flush() }
 
         jsonGen.write(action.toString())
         gameState_.toJson(jsonGen)
+        jsonGen.flush()
 
         return gameState_
     }
