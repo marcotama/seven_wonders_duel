@@ -14,8 +14,18 @@ class KeyboardPlayer(name: String, gameData: GameData) : Player(name, gameData) 
         val options = thisDecision.options
         println("Decide one of the following options:")
         options.forEachIndexed { idx, option -> println("  ${idx+1}. $option") }
-        val choice = scanner.nextInt()
+        val choice = readInt(options.size())
         return options[choice - 1]
+    }
+
+    private fun readInt(inclusiveUpperBound: Int): Int {
+        do {
+            try {
+                val value = scanner.nextInt()
+                if (value <= inclusiveUpperBound)
+                    return value
+            } catch (e: NoSuchElementException) {}
+        } while (true)
     }
 
     override fun init() {}
