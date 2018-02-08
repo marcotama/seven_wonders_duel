@@ -269,7 +269,7 @@ data class GameState(
         }
     }
 
-    fun buildBuilding(player: PlayerTurn, card: Card, generator: RandomWithTracker, logger: Logger?): GameState {
+    fun buildBuilding(player: PlayerTurn, card: Card, generator: RandomWithTracker, logger: Logger?, forFree: Boolean): GameState {
         // Add card to appropriate player city
         val playerCity = getPlayerCity(player)
         val opponentCity = getPlayerCity(player.opponent())
@@ -277,7 +277,11 @@ data class GameState(
             card.coinsProduced * getMultiplier(card.coinsProducedFormula, card.coinsProducedReferenceCity, playerCity, opponentCity)
         else
             0
-        val updatedPlayerCity = playerCity.update(buildings_ = playerCity.buildings.add(card), coins_ = playerCity.coins + coins)
+        val cost = if (forFree)
+            0
+        else
+            playerCity.canBuild(card, opponentCity) ?: throw Exception("Building not affordable $card")
+        val updatedPlayerCity = playerCity.update(buildings_ = playerCity.buildings.add(card), coins_ = playerCity.coins + coins - cost)
 
         // Handle military cards
         val updatedMilitaryBoard: MilitaryBoard

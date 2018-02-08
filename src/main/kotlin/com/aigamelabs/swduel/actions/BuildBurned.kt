@@ -11,7 +11,7 @@ class BuildBurned(playerTurn: PlayerTurn, val card : Card) : Action(playerTurn) 
         val updatedBurnedDeck = gameState.burnedCards.removeCard(card)
         val updatedGameState = gameState.update(burnedDeck_ = updatedBurnedDeck)
 
-        return updatedGameState.buildBuilding(player, card, generator, logger)
+        return updatedGameState.buildBuilding(player, card, generator, logger, true)
     }
 
     override fun toString(): String {
