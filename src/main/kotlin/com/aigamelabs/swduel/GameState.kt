@@ -357,7 +357,11 @@ data class GameState(
     }
 
     fun addMainTurnDecision(generator: RandomWithTracker, logger: Logger?): GameState {
-        return updateBoard(generator, logger).addMainTurnDecisionHelper()
+        val updatedGameState = updateBoard(generator, logger)
+        return if (updatedGameState.decisionQueue.isEmpty)
+            updatedGameState.addMainTurnDecisionHelper()
+        else
+            updatedGameState
     }
 
     private fun addMainTurnDecisionHelper(): GameState {
