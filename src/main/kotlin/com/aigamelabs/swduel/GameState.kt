@@ -287,7 +287,9 @@ data class GameState(
         val updatedMilitaryBoard: MilitaryBoard
         val updatedOpponentCity: PlayerCity
         if (card.color == CardColor.RED) {
-            val additionOutcome = militaryBoard.addMilitaryPointsTo(card.militaryPoints, player)
+            val hasStrategyToken = !playerCity.progressTokens.filter { it.enhancement == Enhancement.STRATEGY }.isEmpty
+            val militaryShift = if (hasStrategyToken) card.militaryPoints + 1 else card.militaryPoints
+            val additionOutcome = militaryBoard.addMilitaryPointsTo(militaryShift, player)
             updatedMilitaryBoard = additionOutcome.second
             // Apply penalty to opponent city, if any
             val opponentPenalty = additionOutcome.first
@@ -306,8 +308,7 @@ data class GameState(
         var updatedGameState = update(
                 player1City_ = updatedPlayer1City,
                 player2City_ = updatedPlayer2City,
-                militaryBoard_ = updatedMilitaryBoard,
-                nextPlayer_ = nextPlayer.opponent()
+                militaryBoard_ = updatedMilitaryBoard
         )
 
         updatedGameState = if (card.color == CardColor.GREEN && updatedPlayerCity.twoScienceCardsWithSymbol(card.scienceSymbol))
