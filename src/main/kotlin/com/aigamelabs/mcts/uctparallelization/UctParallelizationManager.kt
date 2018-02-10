@@ -9,6 +9,7 @@ import com.aigamelabs.mcts.actionselection.ActionSelector
 import com.aigamelabs.mcts.nodeevaluation.NodeEvaluator
 import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.utils.RandomWithTracker
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -69,8 +70,10 @@ class UctParallelizationManager(
         } catch (ignored: InterruptedException) {}
 
         // Logging
-        if (exportTree)
-            rootNode!!.export(outPath + "${gameId}_player_${playerId}_mcts-tree.json")
+        if (exportTree) {
+            val time = SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(Calendar.getInstance().time)
+            rootNode!!.export(outPath + "${gameId}_player_${playerId}_mcts-tree_$time.json")
+        }
         if (verbose)
             logger.info("UCT run " + rootNode!!.games + " times.")
 
