@@ -20,23 +20,27 @@ class Main {
     companion object {
 
         @JvmStatic
-        fun buildArgParser(): Options {
+        private fun buildArgParser(): Options {
             val optionP1 = Option.builder("P1")
                     .required(true)
+                    .hasArg()
                     .desc("Controller for Player 1 (one of MCTS, Keyboard, Random)")
                     .longOpt("player1")
                     .build()
             val optionP2 = Option.builder("P2")
                     .required(true)
+                    .hasArg()
                     .desc("Controller for Player 2 (one of MCTS, Keyboard, Random)")
                     .longOpt("player2")
                     .build()
             val optionLogs = Option.builder("L")
                     .required(true)
+                    .hasArg()
                     .desc("The S option")
                     .longOpt("logs-folder")
                     .build()
             val optionInit = Option.builder("S")
+                    .hasArg()
                     .desc("Location of JSON file containing the initial state")
                     .longOpt("initial-state")
                     .build()
@@ -54,24 +58,13 @@ class Main {
             val parser = DefaultParser()
             val commandLine = parser.parse(options, args)
 
-            val logsLocation = if (commandLine.hasOption("L"))
-                commandLine.getOptionValue("L")
-            else
-                throw Exception("Logs location must be passed as an argument")
-
-            val player1Controller = if (commandLine.hasOption("P1"))
-                commandLine.getOptionValue("P1")
-            else
-                throw Exception("Player 1 controller must be passed as an argument")
-
-            val player2Controller = if (commandLine.hasOption("P2"))
-                commandLine.getOptionValue("P2")
-            else
-                throw Exception("Player 1 controller must be passed as an argument")
+            val logsLocation = commandLine.getOptionValue("L")
+            val player1Controller = commandLine.getOptionValue("P1")
+            val player2Controller = commandLine.getOptionValue("P2")
+            val initGameStateLocation = commandLine.getOptionValue("S")
 
             val generator = RandomWithTracker(Random().nextLong(), true)
             val initGameState = if (commandLine.hasOption("S")) {
-                val initGameStateLocation = commandLine.getOptionValue("S")
                 val content = readFile(initGameStateLocation, Charset.defaultCharset())
                 GameState.loadFromJson(JSONObject(content))
             }
