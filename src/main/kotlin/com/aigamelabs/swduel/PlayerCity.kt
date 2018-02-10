@@ -85,7 +85,7 @@ data class PlayerCity(
      * @param resource the resource of interest
      * @return the total production of the given resource
      */
-    private fun pureResourceProduction(resource : Resource) : Int {
+    fun pureResourceProduction(resource : Resource) : Int {
         var resourceProduction = 0
         buildings.forEach {
             it.resourceProduction.forEach { r, tot ->
@@ -128,7 +128,7 @@ data class PlayerCity(
      * @param resource the resource of interest
      * @return `true` if this city has a trading agreement for the given resource, `false` otherwise
      */
-    private fun hasTradingAgreement(resource : Resource) : Boolean {
+    fun hasTradingAgreement(resource : Resource) : Boolean {
         buildings.forEach {
             if (it.tradingBonuses.contains(resource)) {
                 return true
