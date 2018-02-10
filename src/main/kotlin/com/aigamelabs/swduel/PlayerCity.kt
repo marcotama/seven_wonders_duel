@@ -71,7 +71,7 @@ data class PlayerCity(
         // Calculate remaining coin cost given optimal choices
         val minCost = calcMinCost(resourceCost, altProduction, opponentCity) + newBuilding.coinCost
 
-        return if (minCost >= coins) null else minCost
+        return if (minCost > coins) null else minCost
 
     }
 
