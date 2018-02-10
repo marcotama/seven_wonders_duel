@@ -122,7 +122,10 @@ data class GameState(
     private fun testScienceSupremacy(playerTurn: PlayerTurn) : Boolean {
         val playerCity = getPlayerCity(playerTurn)
         val hasLawToken = !playerCity.progressTokens.filter { it.enhancement == Enhancement.LAW }.isEmpty
-        val symbolsFromGreenCards = playerCity.buildings.map { it.scienceSymbol }.distinct().size()
+        val symbolsFromGreenCards = playerCity.buildings
+                .filter{ it.scienceSymbol != ScienceSymbol.NONE}
+                .map { it.scienceSymbol }
+                .distinct().size()
         val distinctScienceSymbols = symbolsFromGreenCards + if (hasLawToken) 1 else 0
 
         return distinctScienceSymbols >= 6
