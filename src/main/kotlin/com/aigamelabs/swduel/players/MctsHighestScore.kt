@@ -17,7 +17,7 @@ class MctsHighestScore(
         gameId,
         gameData,
         HighestScore(),
-        GameVictory(PlayerTurn.PLAYER_1),
-        GameVictory(PlayerTurn.PLAYER_2),
+        GameVictory(player),
+        GameVictory(player.opponent()),
         logFileName
 )
