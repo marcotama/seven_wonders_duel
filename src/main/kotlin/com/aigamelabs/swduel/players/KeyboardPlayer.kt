@@ -1,5 +1,8 @@
 package com.aigamelabs.swduel.players
 
+import com.aigamelabs.mcts.actionselection.HighestScore
+import com.aigamelabs.mcts.nodeevaluation.GameVictory
+import com.aigamelabs.mcts.uctparallelization.UctParallelizationManager
 import com.aigamelabs.swduel.GameData
 import com.aigamelabs.swduel.actions.Action
 import com.aigamelabs.swduel.Player
@@ -11,19 +14,52 @@ import com.aigamelabs.utils.RandomWithTracker
 import java.util.*
 import kotlin.collections.HashMap
 
-class KeyboardPlayer(name: String, gameData: GameData) : Player(name, gameData) {
+class KeyboardPlayer(
+        player: PlayerTurn,
+        playerId: String,
+        gameId: String,
+        gameData: GameData,
+        outPath: String? = null
+) : Player(playerId, gameData) {
     private val scanner = Scanner(System.`in`)
     private val generator = RandomWithTracker(Random().nextLong())
+    private var manager = UctParallelizationManager(
+            player,
+            HighestScore(),
+            GameVictory(PlayerTurn.PLAYER_1),
+            GameVictory(PlayerTurn.PLAYER_2),
+            outPath,
+            false,
+            gameId,
+            playerId
+    )
+
+    private fun Double.format(digits: Int) = String.format("%.${digits}f", this)
 
     override fun decide(gameState: GameState): Action {
         val (_, thisDecision) = gameState.dequeAction()
         val options = thisDecision.options
         println("Decide one of the following options:")
+        println("  0. Run MCTS and print analysis")
         options.forEachIndexed { idx, action ->
             println("  ${idx+1}. ${getActionMessage(action, gameState, thisDecision.player)}")
         }
         println("Player info:\n${getHelpersMessage(gameState, thisDecision.player)}")
-        val choice = readInt(options.size())
+        var choice = readInt(0, options.size())
+        if (choice == 0) {
+            manager.run(gameState)
+            println("MCTS analysis:")
+            manager.rootNode!!.children!!
+                    .toSortedMap(compareBy {
+                        val node = manager.rootNode!!.children!![it]!!
+                        -node.playerScore / node.games
+                    })
+                    .forEach {
+                        val score = it.value.playerScore / it.value.games
+                        println("${score.format(2)} -> ${it.value.selectedAction!!}")
+                    }
+            choice = readInt(1, options.size())
+        }
         return options[choice - 1]
     }
 
@@ -123,11 +159,11 @@ class KeyboardPlayer(name: String, gameData: GameData) : Player(name, gameData) 
             "$action [$diff coins: $origCoins -> $newCoins]"
     }
 
-    private fun readInt(inclusiveUpperBound: Int): Int {
+    private fun readInt(inclusiveLowerBound: Int, inclusiveUpperBound: Int): Int {
         do {
             try {
                 val value = scanner.nextInt()
-                if (value <= inclusiveUpperBound)
+                if (value in inclusiveLowerBound..inclusiveUpperBound)
                     return value
             } catch (e: NoSuchElementException) {}
         } while (true)

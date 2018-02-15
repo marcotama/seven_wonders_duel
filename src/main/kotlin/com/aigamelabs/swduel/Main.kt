@@ -74,8 +74,8 @@ class Main {
 
             val gameId = SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(Calendar.getInstance().time)
             val gameData = GameData(player1Controller, player2Controller)
-            val player1 = Pair(PlayerTurn.PLAYER_1, getPlayer(player1Controller, gameData, gameId, logsLocation))
-            val player2 = Pair(PlayerTurn.PLAYER_2, getPlayer(player2Controller, gameData, gameId, logsLocation))
+            val player1 = Pair(PlayerTurn.PLAYER_1, getPlayer(PlayerTurn.PLAYER_1, player1Controller, gameData, gameId, logsLocation))
+            val player2 = Pair(PlayerTurn.PLAYER_2, getPlayer(PlayerTurn.PLAYER_2, player2Controller, gameData, gameId, logsLocation))
             val game = Game(gameId, mapOf(player1, player2), logsLocation)
 
             generator.popAll()
@@ -90,11 +90,11 @@ class Main {
             return String(encoded, encoding)
         }
 
-        private fun getPlayer(playerClass: String, gameData: GameData, gameId: String, logsPath: String): Player {
+        private fun getPlayer(player: PlayerTurn, playerClass: String, gameData: GameData, gameId: String, logsPath: String): Player {
             return when (playerClass) {
-                "MCTS" -> MctsHighestScore(PlayerTurn.PLAYER_1, "MCTS(HS)", gameId, gameData, logsPath)
+                "MCTS" -> MctsHighestScore(player, "MCTS(HS)", gameId, gameData, logsPath)
                 "Random" -> RandomPlayer("Random", gameData)
-                "Keyboard" -> KeyboardPlayer("Keyboard", gameData)
+                "Keyboard" -> KeyboardPlayer(player, "Keyboard", gameId, gameData, logsPath)
                 else -> throw Exception("Unknown player controller " + playerClass)
             }
         }
