@@ -13,6 +13,7 @@ import com.aigamelabs.swduel.enums.ResourcesAlternative
 import com.aigamelabs.utils.RandomWithTracker
 import java.util.*
 import kotlin.collections.HashMap
+import kotlin.math.roundToInt
 
 class KeyboardPlayer(
         player: PlayerTurn,
@@ -34,8 +35,6 @@ class KeyboardPlayer(
             playerId
     )
 
-    private fun Double.format(digits: Int) = String.format("%.${digits}f", this)
-
     override fun decide(gameState: GameState): Action {
         val (_, thisDecision) = gameState.dequeAction()
         val options = thisDecision.options
@@ -55,8 +54,8 @@ class KeyboardPlayer(
                         -node.playerScore / node.games
                     })
                     .forEach {
-                        val score = it.value.playerScore / it.value.games
-                        println("${score.format(2)} -> ${it.value.selectedAction!!}")
+                        val score = (100 * it.value.playerScore / it.value.games).roundToInt()
+                        println("Victory chance $score%: ${it.value.selectedAction!!}")
                     }
             choice = readInt(1, options.size())
         }
