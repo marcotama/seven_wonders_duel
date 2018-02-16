@@ -391,15 +391,15 @@ data class GameState(
         return enqueue(decision)
     }
 
-    fun addBurnOpponentBuildingDecision(player: PlayerTurn, color: CardColor): GameState? {
+    fun addBurnOpponentBuildingDecision(player: PlayerTurn, color: CardColor): GameState {
         val opponentCity = getPlayerCity(player.opponent())
         val burnable = opponentCity.getBurnableBuildings(color)
-        return if (burnable.isEmpty)
-            null
+        if (burnable.isEmpty)
+            throw Exception("There are no $color buildings to burn")
         else {
             val actions = burnable.map { BurnOpponentCard(player, it) }
             val decision = Decision(player, Vector.ofAll(actions))
-            enqueue(decision)
+            return enqueue(decision)
         }
     }
 
@@ -427,6 +427,12 @@ data class GameState(
     fun addSelectWonderToBuildDecision(player: PlayerTurn): GameState {
         val playerCity = getPlayerCity(player)
         val opponentCity = getPlayerCity(player.opponent())
+        playerCity.unbuiltWonders
+                .filter { playerCity.canBuild(it, opponentCity) != null }
+                .forEach {
+                    val cost = playerCity.canBuild(it, opponentCity)
+                    println("Player $nextPlayer can afford $it, it will cost $cost")
+                }
         val options = playerCity.unbuiltWonders
                 .filter { playerCity.canBuild(it, opponentCity) != null }
                 .map { BuildWonder(player, it) }
