@@ -7,6 +7,7 @@ import com.aigamelabs.mcts.NodeType
 import com.aigamelabs.mcts.TreeNode
 import com.aigamelabs.mcts.actionselection.ActionSelector
 import com.aigamelabs.mcts.nodeevaluation.NodeEvaluator
+import com.aigamelabs.mcts.stateevaluation.StateEvaluator
 import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.utils.RandomWithTracker
 import java.text.SimpleDateFormat
@@ -19,13 +20,24 @@ import java.util.concurrent.TimeUnit
 class UctParallelizationManager(
         player: PlayerTurn,
         actionSelector: ActionSelector,
-        playerNodeEvaluator: NodeEvaluator,
-        opponentNodeEvaluator: NodeEvaluator,
+        playerNodeEvaluator: NodeEvaluator?,
+        opponentNodeEvaluator: NodeEvaluator?,
+        playerStateEvaluator: StateEvaluator,
+        opponentStateEvaluator: StateEvaluator,
         outPath: String?,
         private val exportTree: Boolean,
         private val gameId: String?,
         private val playerId: String?
-) : Manager(player, actionSelector, playerNodeEvaluator, opponentNodeEvaluator, outPath, playerId) {
+) : Manager(
+        player,
+        actionSelector,
+        playerNodeEvaluator,
+        opponentNodeEvaluator,
+        playerStateEvaluator,
+        opponentStateEvaluator,
+        outPath,
+        playerId
+) {
 
     private val generator = RandomWithTracker(Random().nextLong())
 

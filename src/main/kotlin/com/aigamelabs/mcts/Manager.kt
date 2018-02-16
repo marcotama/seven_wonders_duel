@@ -4,6 +4,7 @@ import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.actions.Action
 import com.aigamelabs.mcts.actionselection.ActionSelector
 import com.aigamelabs.mcts.nodeevaluation.NodeEvaluator
+import com.aigamelabs.mcts.stateevaluation.StateEvaluator
 import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.utils.MinimalFormatter
 import java.nio.file.Paths
@@ -16,8 +17,10 @@ import java.util.logging.Logger
 abstract class Manager(
         val player: PlayerTurn,
         val actionSelector: ActionSelector,
-        val playerNodeEvaluator: NodeEvaluator,
-        val opponentNodeEvaluator: NodeEvaluator,
+        val playerNodeEvaluator: NodeEvaluator?,
+        val opponentNodeEvaluator: NodeEvaluator?,
+        val playerStateEvaluator: StateEvaluator,
+        val opponentStateEvaluator: StateEvaluator,
         val outPath: String?,
         id: String?
 ) {

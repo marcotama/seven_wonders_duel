@@ -1,5 +1,6 @@
 package com.aigamelabs.mcts
 
+import com.aigamelabs.mcts.nodeevaluation.NodeEvaluator
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.actions.Action
 import com.aigamelabs.utils.RandomWithTracker
@@ -72,7 +73,13 @@ class TreeNode(
      * @return UCB1 score
      */
     fun calcUcb(): Double {
-        return score / games + UCB_C * Math.sqrt(2 * Math.log(parent!!.games.toDouble()) / games)
+        val remappedScore = when (nodeType) {
+            NodeType.PLAYER_NODE -> manager.playerNodeEvaluator?.remap(score) ?: score
+            NodeType.OPPONENT_NODE -> manager.playerNodeEvaluator?.remap(score) ?: score
+            NodeType.STOCHASTIC_NODE -> throw Exception("UCB was called on a stochastic node")
+            null -> throw Exception("Node type was not set on this node")
+        }
+        return remappedScore / games + UCB_C * Math.sqrt(2 * Math.log(parent!!.games.toDouble()) / games)
     }
 
     @Synchronized

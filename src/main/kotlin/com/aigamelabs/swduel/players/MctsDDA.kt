@@ -6,7 +6,7 @@ import com.aigamelabs.mcts.stateevaluation.GameVictory
 import com.aigamelabs.swduel.GameData
 import com.aigamelabs.swduel.enums.PlayerTurn
 
-class MctsHighestScore(
+class MctsDDA(
         player: PlayerTurn,
         playerId: String,
         gameId: String,
@@ -18,7 +18,7 @@ class MctsHighestScore(
         gameId,
         gameData,
         HighestScore(),
-        null,
+        DistanceFromHalfUnit(),
         null,
         GameVictory(player),
         GameVictory(player.opponent()),

@@ -1,13 +1,13 @@
-package com.aigamelabs.mcts.nodeevaluation
+package com.aigamelabs.mcts.stateevaluation
 
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.enums.GameOutcome
 import com.aigamelabs.swduel.enums.PlayerTurn
 
 /**
- * A NodeEvaluator that uses the outcome of the game as a measure.
+ * A StateEvaluator that uses the outcome of the game as a measure.
  */
-class GameVictory(playerNumber: PlayerTurn) : NodeEvaluator(playerNumber) {
+class GameVictory(playerNumber: PlayerTurn) : StateEvaluator(playerNumber) {
     override fun calcScore(gameState: GameState): Double {
         val (outcome, _, _) = gameState.calculateWinner()
         return when (playerNumber) {

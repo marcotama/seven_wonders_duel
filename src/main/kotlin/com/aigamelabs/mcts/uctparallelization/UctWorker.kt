@@ -36,7 +36,7 @@ class UctWorker(private var manager: UctParallelizationManager, private val work
      * @return The score of a node
      */
     private fun getPlayerScore(gameState: GameState): Double {
-        return manager.playerNodeEvaluator.calcScore(gameState)
+        return manager.playerStateEvaluator.calcScore(gameState)
     }
 
     /**
@@ -46,7 +46,7 @@ class UctWorker(private var manager: UctParallelizationManager, private val work
      * @return The score of a node
      */
     private fun getOpponentScore(gameState: GameState): Double {
-        return manager.opponentNodeEvaluator.calcScore(gameState)
+        return manager.opponentStateEvaluator.calcScore(gameState)
     }
 
 
