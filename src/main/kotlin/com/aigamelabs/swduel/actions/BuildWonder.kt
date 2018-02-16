@@ -59,6 +59,7 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
 
             Wonders.THE_COLOSSUS -> {
                 gameState.addMilitaryProgress(2, player)
+                        .checkMilitarySupremacy()
                         .addMainTurnDecision(generator, logger)
             }
 
@@ -70,13 +71,13 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
                 return if (noBuildingsToBurn)
                     gameState
                             .addMilitaryProgress(1, player)
-                            .addMainTurnDecision(generator, logger)
                             .checkMilitarySupremacy()
+                            .addMainTurnDecision(generator, logger)
                 else
                     gameState
                             .addMilitaryProgress(1, player)
-                            .addBurnOpponentBuildingDecision(player, CardColor.GRAY)
                             .checkMilitarySupremacy()
+                            .addBurnOpponentBuildingDecision(player, CardColor.GRAY)
             }
             Wonders.THE_STATUE_OF_ZEUS -> {
                 val noBuildingsToBurn = gameState.getPlayerCity(player.opponent())
