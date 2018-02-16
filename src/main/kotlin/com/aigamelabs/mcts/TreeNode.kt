@@ -9,6 +9,7 @@ import javax.json.stream.JsonGenerator
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import kotlin.math.roundToInt
 
 /**
  * Node used in MCTS
@@ -215,5 +216,19 @@ class TreeNode(
 
             generator.writeEnd()
         }
+    }
+
+    override fun toString(): String {
+        val builder = StringBuilder()
+        children!!
+                .toSortedMap(compareBy {
+                    val node = manager.rootNode!!.children!![it]!!
+                    -node.playerScore / node.games
+                })
+                .forEach {
+                    val score = (100 * it.value.playerScore / it.value.games).roundToInt()
+                    builder.append("Victory chance $score%: ${it.value.selectedAction!!}\n")
+                }
+        return builder.toString()
     }
 }

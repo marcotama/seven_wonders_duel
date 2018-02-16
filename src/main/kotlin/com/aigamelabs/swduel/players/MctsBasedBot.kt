@@ -154,6 +154,7 @@ abstract class MctsBasedBot(
 	 */
     override fun decide(gameState: GameState): Action {
         lastAction = manager.run(gameState)
+        println(manager.rootNode!!)
         logDecision()
         return lastAction!!
     }

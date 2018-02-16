@@ -13,7 +13,6 @@ import com.aigamelabs.swduel.enums.ResourcesAlternative
 import com.aigamelabs.utils.RandomWithTracker
 import java.util.*
 import kotlin.collections.HashMap
-import kotlin.math.roundToInt
 
 class KeyboardPlayer(
         player: PlayerTurn,
@@ -48,15 +47,7 @@ class KeyboardPlayer(
         if (choice == 0) {
             manager.run(gameState)
             println("MCTS analysis:")
-            manager.rootNode!!.children!!
-                    .toSortedMap(compareBy {
-                        val node = manager.rootNode!!.children!![it]!!
-                        -node.playerScore / node.games
-                    })
-                    .forEach {
-                        val score = (100 * it.value.playerScore / it.value.games).roundToInt()
-                        println("Victory chance $score%: ${it.value.selectedAction!!}")
-                    }
+            println(manager.rootNode!!)
             choice = readInt(1, options.size())
         }
         return options[choice - 1]
