@@ -91,7 +91,7 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
                 else
                     gameState
                             .addMilitaryProgress(1, player)
-                            .addBurnOpponentBuildingDecision(player, CardColor.GRAY)
+                            .addBurnOpponentBuildingDecision(player, CardColor.BROWN)
                             .checkMilitarySupremacy()
             }
             Wonders.THE_APPIAN_WAY -> {
