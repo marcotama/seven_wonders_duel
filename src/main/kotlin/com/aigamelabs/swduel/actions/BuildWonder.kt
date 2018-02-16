@@ -69,6 +69,7 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
                 return updatedGameState
                         .addMilitaryProgress(1, player)
                         .checkMilitarySupremacy()
+                        .addMainTurnDecision(generator, logger)
             }
             Wonders.THE_STATUE_OF_ZEUS -> {
                 val updatedGameState = gameState.addBurnOpponentBuildingDecision(player, CardColor.BROWN)
@@ -77,6 +78,7 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
                 return updatedGameState
                         .addMilitaryProgress(1, player)
                         .checkMilitarySupremacy()
+                        .addMainTurnDecision(generator, logger)
             }
             Wonders.THE_APPIAN_WAY -> {
                 val playerCity = gameState.getPlayerCity(player)
