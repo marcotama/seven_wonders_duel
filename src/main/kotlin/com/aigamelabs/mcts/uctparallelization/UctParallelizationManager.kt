@@ -37,7 +37,7 @@ class UctParallelizationManager(
 
     init {
         val processors = Runtime.getRuntime().availableProcessors()
-        workers = (0 until Math.max(1, processors - 1))
+        workers = (0 until processors)
                 .map { UctWorker(this, "#$it") }
                 .toTypedArray()
         logger.info("Setup ${workers.size} workers")
