@@ -220,14 +220,11 @@ class TreeNode(
 
     override fun toString(): String {
         val builder = StringBuilder()
-        children!!
-                .toSortedMap(compareBy {
-                    val node = manager.rootNode!!.children!![it]!!
-                    -node.playerScore / node.games
-                })
+        children!!.values
+                .sortedBy { -it.playerScore / it.games ; 1 }
                 .forEach {
-                    val score = (100 * it.value.playerScore / it.value.games).roundToInt()
-                    builder.append("Victory chance $score%: ${it.value.selectedAction!!}\n")
+                    val score = (100 * it.playerScore / it.games).roundToInt()
+                    builder.append("Victory chance $score%: ${it.selectedAction!!}\n")
                 }
         return builder.toString()
     }
