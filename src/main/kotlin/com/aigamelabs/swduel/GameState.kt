@@ -427,12 +427,6 @@ data class GameState(
     fun addSelectWonderToBuildDecision(player: PlayerTurn): GameState {
         val playerCity = getPlayerCity(player)
         val opponentCity = getPlayerCity(player.opponent())
-        playerCity.unbuiltWonders
-                .filter { playerCity.canBuild(it, opponentCity) != null }
-                .forEach {
-                    val cost = playerCity.canBuild(it, opponentCity)
-                    println("Player $nextPlayer can afford $it, it will cost $cost")
-                }
         val options = playerCity.unbuiltWonders
                 .filter { playerCity.canBuild(it, opponentCity) != null }
                 .map { BuildWonder(player, it) }
