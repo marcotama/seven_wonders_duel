@@ -43,6 +43,7 @@ class KeyboardPlayer(
             println("  ${idx+1}. ${getActionMessage(action, gameState, thisDecision.player)}")
         }
         println("Player info:\n${getHelpersMessage(gameState, thisDecision.player)}")
+        println("Opponent info:\n${getHelpersMessage(gameState, thisDecision.player.opponent())}")
         var choice = readInt(0, options.size())
         if (choice == 0) {
             manager.run(gameState)
