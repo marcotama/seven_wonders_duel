@@ -14,6 +14,14 @@ data class Decision(val player: PlayerTurn, val options: Vector<Action>) {
     /**
      * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
      */
+    override fun toString (): String {
+        return "Decision for player $player; options:" +
+                options.map { "  $it\n" }.fold("", {acc, s -> "$acc$s"})
+    }
+
+    /**
+     * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
+     */
     fun toJson (generator: JsonGenerator, name: String?) {
         if (name == null) generator.writeStartObject()
         else generator.writeStartObject(name)
