@@ -85,6 +85,7 @@ class KeyboardPlayer(
         }
 
         val ret = StringBuilder()
+        ret.append("Coins: ${playerCity.coins}\n")
 
         if (!production.isEmpty() || !altProduction.isEmpty()) {
             ret.append("Production:\n")
