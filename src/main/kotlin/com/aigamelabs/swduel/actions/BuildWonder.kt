@@ -86,13 +86,13 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
                 return if (noBuildingsToBurn)
                     gameState
                             .addMilitaryProgress(1, player)
-                            .addMainTurnDecision(generator, logger)
                             .checkMilitarySupremacy()
+                            .addMainTurnDecision(generator, logger)
                 else
                     gameState
                             .addMilitaryProgress(1, player)
-                            .addBurnOpponentBuildingDecision(player, CardColor.BROWN)
                             .checkMilitarySupremacy()
+                            .addBurnOpponentBuildingDecision(player, CardColor.BROWN)
             }
             Wonders.THE_APPIAN_WAY -> {
                 val playerCity = gameState.getPlayerCity(player)
