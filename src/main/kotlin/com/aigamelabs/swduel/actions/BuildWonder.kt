@@ -63,20 +63,36 @@ class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
             }
 
             Wonders.CIRCUS_MAXIMUS -> {
-                val updatedGameState = gameState.addBurnOpponentBuildingDecision(player, CardColor.GRAY)
-                        ?: gameState.addMainTurnDecision(generator, logger)
+                val noBuildingsToBurn = gameState.getPlayerCity(player.opponent())
+                        .getBurnableBuildings(CardColor.GRAY)
+                        .isEmpty
 
-                return updatedGameState
-                        .addMilitaryProgress(1, player)
-                        .checkMilitarySupremacy()
+                return if (noBuildingsToBurn)
+                    gameState
+                            .addMilitaryProgress(1, player)
+                            .addMainTurnDecision(generator, logger)
+                            .checkMilitarySupremacy()
+                else
+                    gameState
+                            .addMilitaryProgress(1, player)
+                            .addBurnOpponentBuildingDecision(player, CardColor.GRAY)
+                            .checkMilitarySupremacy()
             }
             Wonders.THE_STATUE_OF_ZEUS -> {
-                val updatedGameState = gameState.addBurnOpponentBuildingDecision(player, CardColor.BROWN)
-                        ?: gameState.addMainTurnDecision(generator, logger)
+                val noBuildingsToBurn = gameState.getPlayerCity(player.opponent())
+                        .getBurnableBuildings(CardColor.BROWN)
+                        .isEmpty
 
-                return updatedGameState
-                        .addMilitaryProgress(1, player)
-                        .checkMilitarySupremacy()
+                return if (noBuildingsToBurn)
+                    gameState
+                            .addMilitaryProgress(1, player)
+                            .addMainTurnDecision(generator, logger)
+                            .checkMilitarySupremacy()
+                else
+                    gameState
+                            .addMilitaryProgress(1, player)
+                            .addBurnOpponentBuildingDecision(player, CardColor.GRAY)
+                            .checkMilitarySupremacy()
             }
             Wonders.THE_APPIAN_WAY -> {
                 val playerCity = gameState.getPlayerCity(player)
