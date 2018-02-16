@@ -119,14 +119,23 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
         // Dequeue decision and enqueue the next one
         var (gameState_, thisDecision) = gameState.dequeAction()
 
-        // Query player for action
-        logger?.info("Querying ${thisDecision.player}; options:\n" +
-                thisDecision.options
-                        .map { "  $it\n" }
-                        .fold("", { a, b -> a + b } ) + "\n"
-        )
-        val action = players[thisDecision.player]!!.decide(gameState)
-
+        val action = if (thisDecision.options.size() > 1) {
+            // Query player for action
+            logger?.info("Querying ${thisDecision.player}; options:\n" +
+                    thisDecision.options
+                            .map { "  $it\n" }
+                            .fold("", { a, b -> a + b }) + "\n"
+            )
+            players[thisDecision.player]!!.decide(gameState)
+        }
+        else {
+            logger?.info("Skipping query for ${thisDecision.player} (only one option)\n" +
+                    thisDecision.options
+                            .map { "  $it\n" }
+                            .fold("", { a, b -> a + b }) + "\n"
+            )
+            thisDecision.options[0]
+        }
         logger?.info("${thisDecision.player} chose: $action\n\n")
 
 
