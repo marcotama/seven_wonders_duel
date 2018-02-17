@@ -1,7 +1,6 @@
 package com.aigamelabs.swduel.players
 
-import com.aigamelabs.mcts.actionselection.HighestScore
-import com.aigamelabs.mcts.stateevaluation.GameVictory
+import com.aigamelabs.mcts.*
 import com.aigamelabs.mcts.uctparallelization.UctParallelizationManager
 import com.aigamelabs.swduel.GameData
 import com.aigamelabs.swduel.actions.Action
@@ -25,11 +24,11 @@ class KeyboardPlayer(
     private val generator = RandomWithTracker(Random().nextLong())
     private var manager = UctParallelizationManager(
             player,
-            HighestScore(),
-            null,
-            null,
-            GameVictory(player),
-            GameVictory(player.opponent()),
+            ActionSelection.get(ActionSelector.HIGHEST_SCORE),
+            NodeScoreMapping.get(NodeScoreMapper.IDENTITY),
+            NodeScoreMapping.get(NodeScoreMapper.IDENTITY),
+            StateEvaluation.getVictoryEvaluator(player),
+            StateEvaluation.getVictoryEvaluator(player.opponent()),
             outPath,
             false,
             gameId,

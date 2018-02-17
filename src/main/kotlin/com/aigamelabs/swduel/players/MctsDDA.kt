@@ -1,8 +1,6 @@
 package com.aigamelabs.swduel.players
 
-import com.aigamelabs.mcts.actionselection.HighestScore
-import com.aigamelabs.mcts.nodeevaluation.DistanceFromHalfUnit
-import com.aigamelabs.mcts.stateevaluation.GameVictory
+import com.aigamelabs.mcts.*
 import com.aigamelabs.swduel.GameData
 import com.aigamelabs.swduel.enums.PlayerTurn
 
@@ -17,10 +15,10 @@ class MctsDDA(
         playerId,
         gameId,
         gameData,
-        HighestScore(),
-        DistanceFromHalfUnit(),
-        null,
-        GameVictory(player),
-        GameVictory(player.opponent()),
+        ActionSelection.get(ActionSelector.HIGHEST_SCORE),
+        NodeScoreMapping.get(NodeScoreMapper.DISTANCE_FROM_MIDPOINT),
+        NodeScoreMapping.get(NodeScoreMapper.IDENTITY),
+        StateEvaluation.getVictoryEvaluator(player),
+        StateEvaluation.getVictoryEvaluator(player.opponent()),
         logFileName
 )

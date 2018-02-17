@@ -1,11 +1,9 @@
 package com.aigamelabs.swduel.players
 
+import com.aigamelabs.mcts.ActionSelection
+import com.aigamelabs.mcts.TreeNode
 import com.aigamelabs.swduel.GameData
 import com.aigamelabs.swduel.Player
-import com.aigamelabs.mcts.actionselection.ActionSelector
-import com.aigamelabs.mcts.actionselection.actionevaluation.AverageScore
-import com.aigamelabs.mcts.nodeevaluation.NodeEvaluator
-import com.aigamelabs.mcts.stateevaluation.StateEvaluator
 import com.aigamelabs.mcts.uctparallelization.UctParallelizationManager
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.actions.Action
@@ -27,11 +25,11 @@ abstract class MctsBasedBot(
         private val playerId: String,
         private val gameId: String,
         gameData: GameData,
-        actionSelector: ActionSelector,
-        playerNodeEvaluator: NodeEvaluator?,
-        opponentNodeEvaluator: NodeEvaluator?,
-        playerStateEvaluator: StateEvaluator,
-        opponentStateEvaluator: StateEvaluator,
+        actionSelector: (Array<TreeNode>) -> Int,
+        playerNodeEvaluator: (Double) -> Double,
+        opponentNodeEvaluator: (Double) -> Double,
+        playerStateEvaluator: (GameState) -> Double,
+        opponentStateEvaluator: (GameState) -> Double,
         private val outPath: String? = null
 ) : Player(playerId, gameData) {
 
@@ -98,12 +96,12 @@ abstract class MctsBasedBot(
         // Open game object
         generator?.writeStartObject()
 
-        val scorer = AverageScore()
+        val scorer = ActionSelection.averageScore
         generator?.writeStartObject("children_values")
         manager.rootNode!!.children!!.entries
                 .forEach {
                     val actionName = it.value.selectedAction.toString()
-                    val value = scorer.getValue(it.value)
+                    val value = scorer(it.value)
                     if (java.lang.Double.isInfinite(value))
                         if (value > 0)
                             generator?.write(actionName, "+Infinity")
