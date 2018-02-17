@@ -36,7 +36,8 @@ class TreeNode(
         /**
          * The manager of all the UCT workers
          */
-        val manager: Manager) {
+        private val manager: Manager
+) {
 
     /** Children nodes  */
     var children: HashMap<List<Int>, TreeNode>? = null
@@ -227,7 +228,7 @@ class TreeNode(
     override fun toString(): String {
         val builder = StringBuilder()
         children!!.values
-                .sortedBy { -it.playerScore / it.games ; 1 }
+                .sortedBy { -it.playerScore / it.games }
                 .forEach {
                     val score = (100 * it.playerScore / it.games).roundToInt()
                     builder.append("Victory chance $score%: ${it.selectedAction!!}\n")
