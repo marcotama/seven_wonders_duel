@@ -96,7 +96,7 @@ class Main {
                 "MCTS" -> MctsHighestScore(player, "MCTS(HS)", gameId, gameData, logsPath)
                 "DDA" -> MctsDDA(player, "DDA(HS)", gameId, gameData, logsPath)
                 "Random" -> RandomPlayer("Random", gameData)
-                "Keyboard" -> KeyboardPlayer(player, "Keyboard", gameId, gameData, logsPath)
+                "Human" -> KeyboardPlayer(player, "Keyboard", gameId, gameData, logsPath)
                 else -> throw Exception("Unknown player controller " + playerClass)
             }
         }
