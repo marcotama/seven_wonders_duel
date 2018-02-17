@@ -1,4 +1,4 @@
-package com.aigamelabs.mcts
+package com.aigamelabs.utils
 
 import java.util.Random
 import java.util.Arrays

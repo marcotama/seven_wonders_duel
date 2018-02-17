@@ -3,7 +3,7 @@ package com.aigamelabs.mcts.uctparallelization
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.mcts.NodeType
-import com.aigamelabs.mcts.Util
+import com.aigamelabs.utils.Util
 import com.aigamelabs.swduel.enums.GamePhase
 import java.util.*
 import java.util.logging.Level
