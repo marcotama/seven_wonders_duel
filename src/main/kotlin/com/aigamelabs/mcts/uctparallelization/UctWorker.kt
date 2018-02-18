@@ -23,7 +23,6 @@ class UctWorker<T: IAbstractGameState<T>>(private var manager: UctParallelizatio
             }
             catch (e: Exception) {
                 manager.logger.log(Level.WARNING, "Exception in worker $workerId", e)
-                throw e
             }
         }
     }
