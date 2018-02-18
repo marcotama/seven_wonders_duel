@@ -28,7 +28,7 @@ data class GameState(
         val decisionQueue: Queue<Decision<GameState>>,
         val gamePhase: GamePhase,
         private val nextPlayer: PlayerTurn
-): IAbstractGameState<GameState>() {
+): AbstractGameState<GameState>() {
 
     fun update(
             activeScienceDeck_ : Deck? = null,

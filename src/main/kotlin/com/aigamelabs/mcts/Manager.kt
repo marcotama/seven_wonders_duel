@@ -1,7 +1,7 @@
 package com.aigamelabs.mcts
 
 import com.aigamelabs.game.Action
-import com.aigamelabs.game.IAbstractGameState
+import com.aigamelabs.game.AbstractGameState
 import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.utils.MinimalFormatter
 import java.nio.file.Paths
@@ -11,7 +11,7 @@ import java.util.logging.FileHandler
 import java.util.logging.Level
 import java.util.logging.Logger
 
-abstract class Manager<T: IAbstractGameState<T>>(
+abstract class Manager<T: AbstractGameState<T>>(
         val player: PlayerTurn,
         val actionSelector: (Array<TreeNode<T>>) -> Int,
         val playerNodeEvaluator: (Double) -> Double,

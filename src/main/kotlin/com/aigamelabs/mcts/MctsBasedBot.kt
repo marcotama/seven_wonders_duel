@@ -14,7 +14,7 @@ import javax.json.stream.JsonGenerator
  *
  * @author Marco Tamassia
  */
-abstract class MctsBasedBot<T: IAbstractGameState<T>>(
+abstract class MctsBasedBot<T: AbstractGameState<T>>(
         player: PlayerTurn,
         private val playerId: String,
         private val gameId: String,

@@ -1,12 +1,12 @@
 package com.aigamelabs.mcts
 
-import com.aigamelabs.game.IAbstractGameState
+import com.aigamelabs.game.AbstractGameState
 import com.aigamelabs.utils.Util
 
 class ActionSelection {
 
     companion object {
-        private fun <T: IAbstractGameState<T>> computeValues(evaluator: (TreeNode<T>) -> Double, nodes: Array<TreeNode<T>>): DoubleArray {
+        private fun <T: AbstractGameState<T>> computeValues(evaluator: (TreeNode<T>) -> Double, nodes: Array<TreeNode<T>>): DoubleArray {
             val values = DoubleArray(nodes.size)
             for (i in nodes.indices) {
                 values[i] = evaluator(nodes[i])
@@ -14,17 +14,17 @@ class ActionSelection {
             return values
         }
 
-        fun <T: IAbstractGameState<T>> averageScore(): (TreeNode<T>) -> Double {
+        fun <T: AbstractGameState<T>> averageScore(): (TreeNode<T>) -> Double {
             return {
                 it.score / it.games.toDouble()
             }
         }
-        private fun <T: IAbstractGameState<T>> numVisits(): (TreeNode<T>) -> Double {
+        private fun <T: AbstractGameState<T>> numVisits(): (TreeNode<T>) -> Double {
             return {
                 it.games.toDouble()
             }
         }
-        private fun <T: IAbstractGameState<T>> scoreDistanceToRange(rangeMin: Double, rangeMax: Double): (TreeNode<T>) -> Double {
+        private fun <T: AbstractGameState<T>> scoreDistanceToRange(rangeMin: Double, rangeMax: Double): (TreeNode<T>) -> Double {
             return {
                 val avgScore = Math.abs(it.score / it.games)
                 when {
@@ -35,7 +35,7 @@ class ActionSelection {
             }
         }
 
-        private fun <T: IAbstractGameState<T>> scoreDistanceToValue(value: Double): (TreeNode<T>) -> Double {
+        private fun <T: AbstractGameState<T>> scoreDistanceToValue(value: Double): (TreeNode<T>) -> Double {
             return {
                 val avgScore = Math.abs(it.score / it.games)
                 if (avgScore <= value) {
@@ -46,7 +46,7 @@ class ActionSelection {
             }
         }
 
-        fun <T: IAbstractGameState<T>> get(
+        fun <T: AbstractGameState<T>> get(
                 actionSelector: ActionSelector,
                 rankPercentile: Double? = null,
                 rangeMin: Double? = null,

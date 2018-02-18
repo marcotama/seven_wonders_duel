@@ -1,7 +1,7 @@
 package com.aigamelabs.mcts
 
 import com.aigamelabs.game.Action
-import com.aigamelabs.game.IAbstractGameState
+import com.aigamelabs.game.AbstractGameState
 import com.aigamelabs.utils.RandomWithTracker
 
 import javax.json.Json
@@ -16,7 +16,7 @@ import kotlin.math.roundToInt
  *
  * @author Marco Tamassia
  */
-class TreeNode<T: IAbstractGameState<T>>(
+class TreeNode<T: AbstractGameState<T>>(
         /**
          * The parent of this node
          */
@@ -200,7 +200,7 @@ class TreeNode<T: IAbstractGameState<T>>(
         private const val UCB_C = 3.0
 
         @Synchronized
-        private fun <T: IAbstractGameState<T>> exportNode(node: TreeNode<T>, generator: JsonGenerator) {
+        private fun <T: AbstractGameState<T>> exportNode(node: TreeNode<T>, generator: JsonGenerator) {
             generator.writeStartObject()
 
             generator.writeStartObject("attributes")

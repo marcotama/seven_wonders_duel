@@ -1,6 +1,6 @@
 package com.aigamelabs.mcts.uctparallelization
 
-import com.aigamelabs.game.IAbstractGameState
+import com.aigamelabs.game.AbstractGameState
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.mcts.NodeType
 import com.aigamelabs.utils.Util
@@ -10,7 +10,7 @@ import java.util.logging.Level
 /**
  * Executes UCT on the given node.
  */
-class UctWorker<T: IAbstractGameState<T>>(private var manager: UctParallelizationManager<T>, private val workerId: String) : Runnable {
+class UctWorker<T: AbstractGameState<T>>(private var manager: UctParallelizationManager<T>, private val workerId: String) : Runnable {
 
     var timeout: Long = 0
 

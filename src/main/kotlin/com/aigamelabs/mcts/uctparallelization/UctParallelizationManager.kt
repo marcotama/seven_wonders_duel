@@ -1,7 +1,7 @@
 package com.aigamelabs.mcts.uctparallelization
 
 import com.aigamelabs.game.Action
-import com.aigamelabs.game.IAbstractGameState
+import com.aigamelabs.game.AbstractGameState
 import com.aigamelabs.mcts.Manager
 import com.aigamelabs.mcts.NodeType
 import com.aigamelabs.mcts.TreeNode
@@ -14,7 +14,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 
-class UctParallelizationManager<T: IAbstractGameState<T>>(
+class UctParallelizationManager<T: AbstractGameState<T>>(
         player: PlayerTurn,
         actionSelector: (Array<TreeNode<T>>) -> Int,
         playerNodeEvaluator: (Double) -> Double,

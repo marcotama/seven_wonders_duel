@@ -3,7 +3,7 @@ package com.aigamelabs.game
 import com.aigamelabs.utils.RandomWithTracker
 import javax.json.stream.JsonGenerator
 
-abstract class IAbstractGameState<T: IAbstractGameState<T>> {
+abstract class AbstractGameState<T: AbstractGameState<T>> {
     abstract fun applyAction(action: Action<T>, generator: RandomWithTracker): T
     abstract fun isQueueEmpty(): Boolean
     abstract fun isGameOver(): Boolean
