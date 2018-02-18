@@ -1,6 +1,6 @@
 package com.aigamelabs.game
 
-abstract class Player<T: IAbstractGameState<T>>(
+abstract class Player<T: AbstractGameState<T>>(
         var name: String,
         val gameData: GameData
 ) {
