@@ -120,8 +120,10 @@ class TreeNode<T: AbstractGameState<T>>(
     @Synchronized
     fun createChildren(generator: RandomWithTracker) {
 
-        if (!generator.isEmpty())
+        if (!generator.isEmpty()) {
+            generator.clear()
             throw Exception("Generator is dirty")
+        }
 
         if (nodeType == NodeType.STOCHASTIC_NODE)
             throw Exception("Creating children of a stochastic node should be done via sampling")
