@@ -11,7 +11,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 
 class UctParallelizationManager<T: AbstractGameState<T>>(
@@ -70,13 +69,11 @@ class UctParallelizationManager<T: AbstractGameState<T>>(
         val timeout = System.nanoTime() + uctBudgetInNanoseconds
 
         // Run MCTS and wait
-        for (worker in workers) {
-            worker.timeout = timeout
-            executor.submit(worker)
+        val futures = workers.map {
+            it.timeout = timeout
+            executor.submit(it)
         }
-        try {
-            executor.awaitTermination(timeout - System.nanoTime(), TimeUnit.NANOSECONDS)
-        } catch (ignored: InterruptedException) {}
+        futures.forEach { it.get() } // Wait for threads to complete
 
         // Logging
         if (exportTree) {
