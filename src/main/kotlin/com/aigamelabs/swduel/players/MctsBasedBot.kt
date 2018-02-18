@@ -1,13 +1,9 @@
 package com.aigamelabs.swduel.players
 
+import com.aigamelabs.game.*
 import com.aigamelabs.mcts.ActionSelection
 import com.aigamelabs.mcts.TreeNode
-import com.aigamelabs.swduel.GameData
-import com.aigamelabs.swduel.Player
 import com.aigamelabs.mcts.uctparallelization.UctParallelizationManager
-import com.aigamelabs.swduel.GameState
-import com.aigamelabs.swduel.actions.Action
-import com.aigamelabs.swduel.enums.PlayerTurn
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -20,18 +16,18 @@ import javax.json.stream.JsonGenerator
  *
  * @author Marco Tamassia
  */
-abstract class MctsBasedBot(
+abstract class MctsBasedBot<T: IAbstractGameState<T>>(
         player: PlayerTurn,
         private val playerId: String,
         private val gameId: String,
         gameData: GameData,
-        actionSelector: (Array<TreeNode>) -> Int,
+        actionSelector: (Array<TreeNode<T>>) -> Int,
         playerNodeEvaluator: (Double) -> Double,
         opponentNodeEvaluator: (Double) -> Double,
-        playerStateEvaluator: (GameState) -> Double,
-        opponentStateEvaluator: (GameState) -> Double,
+        playerStateEvaluator: (T) -> Double,
+        opponentStateEvaluator: (T) -> Double,
         private val outPath: String? = null
-) : Player(playerId, gameData) {
+) : Player<T>(playerId, gameData) {
 
     /** JSON generator */
     private var generator: JsonGenerator? = null
@@ -39,7 +35,7 @@ abstract class MctsBasedBot(
     /** Flag indicating whether the JSON generator is open  */
     private var isJsonGeneratorOpen = false
 
-    private var lastAction : Action? = null
+    private var lastAction : Action<T>? = null
 
     private val exportTree = false
 
@@ -96,7 +92,7 @@ abstract class MctsBasedBot(
         // Open game object
         generator?.writeStartObject()
 
-        val scorer = ActionSelection.averageScore
+        val scorer = ActionSelection.averageScore<T>()
         generator?.writeStartObject("children_values")
         manager.rootNode!!.children!!.entries
                 .forEach {
@@ -149,7 +145,7 @@ abstract class MctsBasedBot(
         openLog(Paths.get(outPath, "${gameId}_player_${playerId}_mcts.json").toAbsolutePath().toString())
     }
 
-    override fun finalize(gameState: GameState) {
+    override fun finalize(gameState: T) {
 
         // Open new game object
         generator!!.writeStartArray("games")
@@ -163,7 +159,7 @@ abstract class MctsBasedBot(
     /**
 	 * This method processes the data from AI. It is executed in each frame.
 	 */
-    override fun decide(gameState: GameState): Action {
+    override fun decide(gameState: T): Action<T> {
         lastAction = manager.run(gameState)
         println(manager.rootNode!!)
         logDecision()

@@ -1,4 +1,4 @@
-package com.aigamelabs.swduel.enums
+package com.aigamelabs.game
 
 enum class PlayerTurn {
     PLAYER_1,

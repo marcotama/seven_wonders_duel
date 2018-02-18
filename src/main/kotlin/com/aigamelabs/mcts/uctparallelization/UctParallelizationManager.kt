@@ -1,11 +1,11 @@
 package com.aigamelabs.mcts.uctparallelization
 
-import com.aigamelabs.swduel.GameState
-import com.aigamelabs.swduel.actions.Action
+import com.aigamelabs.game.Action
+import com.aigamelabs.game.IAbstractGameState
 import com.aigamelabs.mcts.Manager
 import com.aigamelabs.mcts.NodeType
 import com.aigamelabs.mcts.TreeNode
-import com.aigamelabs.swduel.enums.PlayerTurn
+import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.utils.RandomWithTracker
 import java.text.SimpleDateFormat
 import java.util.*
@@ -14,18 +14,18 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 
-class UctParallelizationManager(
+class UctParallelizationManager<T: IAbstractGameState<T>>(
         player: PlayerTurn,
-        actionSelector: (Array<TreeNode>) -> Int,
+        actionSelector: (Array<TreeNode<T>>) -> Int,
         playerNodeEvaluator: (Double) -> Double,
         opponentNodeEvaluator: (Double) -> Double,
-        playerStateEvaluator: (GameState) -> Double,
-        opponentStateEvaluator: (GameState) -> Double,
+        playerStateEvaluator: (T) -> Double,
+        opponentStateEvaluator: (T) -> Double,
         outPath: String?,
         private val exportTree: Boolean,
         private val gameId: String?,
         private val playerId: String?
-) : Manager(
+) : Manager<T>(
         player,
         actionSelector,
         playerNodeEvaluator,
@@ -39,7 +39,7 @@ class UctParallelizationManager(
     private val generator = RandomWithTracker(Random().nextLong())
 
     /** Workers  */
-    private var workers: Array<UctWorker>
+    private var workers: Array<UctWorker<T>>
 
     /** Pool of workers  */
     private var executor: ExecutorService
@@ -62,7 +62,7 @@ class UctParallelizationManager(
      *
      * @return Action with the highest number of visits
      */
-    override fun run(gameState: GameState): Action {
+    override fun run(gameState: T): Action<T> {
         rootGameState = gameState
         rootNode = TreeNode(null, NodeType.PLAYER_NODE, null, rootGameState!!, this)
         rootNode!!.createChildren(generator)

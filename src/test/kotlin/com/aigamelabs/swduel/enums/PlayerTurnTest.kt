@@ -1,5 +1,6 @@
 package com.aigamelabs.swduel.enums
 
+import com.aigamelabs.game.PlayerTurn
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it

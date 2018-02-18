@@ -3,14 +3,15 @@ package com.aigamelabs.swduel
 import com.aigamelabs.swduel.actions.*
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.enums.GameOutcome
-import com.aigamelabs.swduel.enums.PlayerTurn
+import com.aigamelabs.game.*
 import com.aigamelabs.swduel.enums.*
+import io.vavr.collection.HashSet
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
+import org.json.JSONObject
 import java.util.logging.Level
 import java.util.logging.Logger
 import javax.json.stream.JsonGenerator
-import org.json.JSONObject
 
 
 
@@ -24,10 +25,10 @@ data class GameState(
         val militaryBoard: MilitaryBoard,
         val player1City : PlayerCity,
         val player2City : PlayerCity,
-        val decisionQueue: Queue<Decision>,
+        val decisionQueue: Queue<Decision<GameState>>,
         val gamePhase: GamePhase,
         private val nextPlayer: PlayerTurn
-) {
+): IAbstractGameState<GameState>() {
 
     fun update(
             activeScienceDeck_ : Deck? = null,
@@ -39,7 +40,7 @@ data class GameState(
             militaryBoard_ : MilitaryBoard? = null,
             player1City_ : PlayerCity? = null,
             player2City_ : PlayerCity? = null,
-            decisionQueue_ : Queue<Decision>? = null,
+            decisionQueue_ : Queue<Decision<GameState>>? = null,
             gamePhase_: GamePhase? = null,
             nextPlayer_: PlayerTurn? = null
     ) : GameState {
@@ -57,6 +58,11 @@ data class GameState(
                 gamePhase_ ?: gamePhase,
                 nextPlayer_ ?: nextPlayer
         )
+    }
+
+    override fun isGameOver(): Boolean {
+        val gameOverPhases = setOf(GamePhase.MILITARY_SUPREMACY, GamePhase.SCIENCE_SUPREMACY, GamePhase.CIVILIAN_VICTORY)
+        return gameOverPhases.contains(gamePhase)
     }
 
     fun getPlayerCity(playerTurn : PlayerTurn) : PlayerCity {
@@ -236,12 +242,19 @@ data class GameState(
      * Deques a decision and returns the updated game state (without the decision in the queue) and the extracted
      * decision.
      */
-    fun dequeAction() : Pair<GameState, Decision> {
+    override fun dequeAction() : Pair<GameState, Decision<GameState>> {
         val dequeueOutcome = decisionQueue.dequeue()
         val thisDecision = dequeueOutcome._1
         val updatedDecisionsQueue = dequeueOutcome._2
         val returnGameState = update(decisionQueue_ = updatedDecisionsQueue)
         return Pair(returnGameState, thisDecision)
+    }
+
+    /* Queue management functions */
+
+    private fun enqueue(decision: Decision<GameState>): GameState {
+        val updatedDecisionQueue = decisionQueue.insert(0, decision)
+        return update(decisionQueue_ = updatedDecisionQueue)
     }
 
     /**
@@ -345,16 +358,9 @@ data class GameState(
         }
     }
 
-    /* Queue management functions */
-
-    private fun enqueue(decision: Decision): GameState {
-        val updatedDecisionQueue = decisionQueue.insert(0, decision)
-        return update(decisionQueue_ = updatedDecisionQueue)
-    }
-
     fun addSelectStartingPlayerDecision(): GameState {
         val choosingPlayer = militaryBoard.getDisadvantagedPlayer() ?: nextPlayer.opponent() // Last player of the previous age
-        val actions = PlayerTurn.values().map { ChooseNextPlayer(choosingPlayer, it) }
+        val actions: List<Action<GameState>> = PlayerTurn.values().map { ChooseNextPlayer(choosingPlayer, it) }
         val decision = Decision(choosingPlayer, Vector.ofAll(actions))
         return enqueue(decision)
     }
@@ -377,7 +383,7 @@ data class GameState(
 
         val availCards = cardStructure!!.availableCards()
         // The player can always burn any uncovered card for money
-        var actions: Vector<Action> = availCards.map { BurnForMoney(nextPlayer, it) }
+        var actions: Vector<Action<GameState>> = availCards.map { BurnForMoney(nextPlayer, it) }
         // If the player can afford at least a wonder, then he can also sacrifice any uncovered card to build the wonder
         if (canBuildSomeWonders) {
             actions = actions.appendAll(availCards.map { BurnForWonder(nextPlayer, it) })
@@ -397,28 +403,28 @@ data class GameState(
         if (burnable.isEmpty)
             throw Exception("There are no $color buildings to burn")
         else {
-            val actions = burnable.map { BurnOpponentCard(player, it) }
+            val actions: HashSet<Action<GameState>> = burnable.map { BurnOpponentCard(player, it) }
             val decision = Decision(player, Vector.ofAll(actions))
             return enqueue(decision)
         }
     }
 
     fun addSelectProgressTokenDecision(player: PlayerTurn): GameState {
-        val actions = availableProgressTokens.cards
+        val actions: Vector<Action<GameState>> = availableProgressTokens.cards
                 .map { ChooseProgressToken(player, it) }
         val decision = Decision(player, Vector.ofAll(actions))
         return enqueue(decision)
     }
 
     fun addSelectDiscardedProgressTokenDecision(player: PlayerTurn): GameState {
-        val actions = discardedProgressTokens.cards
+        val actions: Vector<Action<GameState>> = discardedProgressTokens.cards
                 .map { ChooseUnusedProgressToken(player, it) }
         val decision = Decision(player, Vector.ofAll(actions))
         return enqueue(decision)
     }
 
     fun addSelectBurnedBuildingToBuildDecision(player: PlayerTurn): GameState {
-        val actions = burnedCards.cards
+        val actions: Vector<Action<GameState>> = burnedCards.cards
                 .map { BuildBurned(player, it) }
         val decision = Decision(player, Vector.ofAll(actions))
         return enqueue(decision)
@@ -427,7 +433,7 @@ data class GameState(
     fun addSelectWonderToBuildDecision(player: PlayerTurn): GameState {
         val playerCity = getPlayerCity(player)
         val opponentCity = getPlayerCity(player.opponent())
-        val options = playerCity.unbuiltWonders
+        val options: HashSet<Action<GameState>> = playerCity.unbuiltWonders
                 .filter { playerCity.canBuild(it, opponentCity) != null }
                 .map { BuildWonder(player, it) }
         val decision = Decision(player, Vector.ofAll(options))
@@ -443,14 +449,18 @@ data class GameState(
      * Advances the game by one step by applying the given action to the next decision in the queue. Does not detect
      * cheating.
      */
-    fun applyAction(action: Action, generator: RandomWithTracker): GameState {
+    override fun applyAction(action: Action<GameState>, generator: RandomWithTracker): GameState {
         return action.process(this, generator)
+    }
+
+    override fun isQueueEmpty(): Boolean {
+        return decisionQueue.isEmpty
     }
 
     /**
      * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
      */
-    fun toJson(generator: JsonGenerator, name: String? = null) {
+    override fun toJson(generator: JsonGenerator, name: String?) {
         if (name == null) generator.writeStartObject()
         else generator.writeStartObject(name)
         availableProgressTokens.toJson(generator, "available_progress_tokens")
@@ -536,7 +546,7 @@ data class GameState(
             val chooseProgressTokenPattern = Regex("Choose progress token ([A-Za-z ]+)")
             val chooseUnusedProgressTokenPattern = Regex("Choose unused progress token ([A-Za-z ]+)")
 
-            val decisionQueue = Queue.ofAll<Decision>(obj.getJSONArray("decision_queue").map { decisionObj ->
+            val decisionQueue = Queue.ofAll<Decision<GameState>>(obj.getJSONArray("decision_queue").map { decisionObj ->
                 decisionObj as JSONObject
                 val player = when (decisionObj.getString("player")) {
                     "PLAYER_1" -> PlayerTurn.PLAYER_1

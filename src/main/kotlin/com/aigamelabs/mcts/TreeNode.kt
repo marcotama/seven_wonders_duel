@@ -1,7 +1,7 @@
 package com.aigamelabs.mcts
 
-import com.aigamelabs.swduel.GameState
-import com.aigamelabs.swduel.actions.Action
+import com.aigamelabs.game.Action
+import com.aigamelabs.game.IAbstractGameState
 import com.aigamelabs.utils.RandomWithTracker
 
 import javax.json.Json
@@ -16,11 +16,11 @@ import kotlin.math.roundToInt
  *
  * @author Marco Tamassia
  */
-class TreeNode(
+class TreeNode<T: IAbstractGameState<T>>(
         /**
          * The parent of this node
          */
-        val parent: TreeNode?,
+        val parent: TreeNode<T>?,
         /**
          * A flag signaling whether this node represents a decision of a player or an imaginary game (stochastic) decision
          */
@@ -28,19 +28,19 @@ class TreeNode(
         /**
          * The action that needs to be taken at the parent's game state to get to this node's game state (null for the root)
          */
-        val selectedAction: Action?,
+        val selectedAction: Action<T>?,
         /**
          * The game state represented by this node; the state should *include* the decision that its children represent
          */
-        val gameState: GameState?,
+        val gameState: T?,
         /**
          * The manager of all the UCT workers
          */
-        private val manager: Manager
+        private val manager: Manager<T>
 ) {
 
     /** Children nodes  */
-    var children: HashMap<List<Int>, TreeNode>? = null
+    var children: HashMap<List<Int>, TreeNode<T>>? = null
 
     /** Depth of the node  */
     val depth: Int = if (parent == null) 0 else parent.depth + 1
@@ -128,7 +128,7 @@ class TreeNode(
 
         if (children == null) {
             // If this is a final game state, do not create children (there are no actions to pick from)
-            if (!gameState!!.decisionQueue.isEmpty) {
+            if (!gameState!!.isQueueEmpty()) {
                 val (unqueuedGameState, decision) = gameState.dequeAction() // Non-stochastic nodes always have a game state
 
                 children = HashMap()
@@ -136,7 +136,7 @@ class TreeNode(
                 decision.options.forEachIndexed { index, action ->
                     val updatedGameState =  unqueuedGameState.applyAction(action, generator)
 
-                    val childType = if (!updatedGameState.decisionQueue.isEmpty) {
+                    val childType = if (!updatedGameState.isQueueEmpty()) {
                         val childGameStatePlayer = updatedGameState.dequeAction().second.player
                         when (childGameStatePlayer) {
                             manager.player -> NodeType.PLAYER_NODE
@@ -167,7 +167,7 @@ class TreeNode(
     }
 
     @Synchronized
-    fun sampleChild(generator: RandomWithTracker): Pair<List<Int>,TreeNode?> {
+    fun sampleChild(generator: RandomWithTracker): Pair<List<Int>,TreeNode<T>?> {
 
         if (nodeType != NodeType.STOCHASTIC_NODE)
             throw Exception("Sampling of children can only be done on stochastic nodes")
@@ -200,7 +200,7 @@ class TreeNode(
         private const val UCB_C = 3.0
 
         @Synchronized
-        private fun exportNode(node: TreeNode, generator: JsonGenerator) {
+        private fun <T: IAbstractGameState<T>> exportNode(node: TreeNode<T>, generator: JsonGenerator) {
             generator.writeStartObject()
 
             generator.writeStartObject("attributes")

@@ -1,12 +1,14 @@
 package com.aigamelabs.swduel.actions
 
+import com.aigamelabs.game.Action
+import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.*
 import com.aigamelabs.swduel.enums.*
 import java.util.logging.Logger
 
 
-class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action(playerTurn) {
+class BuildWonder(playerTurn: PlayerTurn, val card: Card) : Action<GameState>(playerTurn) {
 
     override fun process(gameState: GameState, generator : RandomWithTracker, logger: Logger?): GameState {
 

@@ -1,8 +1,6 @@
-package com.aigamelabs.swduel
+package com.aigamelabs.game
 
-import com.aigamelabs.swduel.actions.Action
-
-abstract class Player(
+abstract class Player<T: IAbstractGameState<T>>(
         var name: String,
         val gameData: GameData
 ) {
@@ -11,7 +9,7 @@ abstract class Player(
      * Decide an action to undertake. The action is one of the options contained in the first decision in the decision
      * queue of the game state.
      */
-    abstract fun decide(gameState: GameState) : Action
-    abstract fun finalize(gameState: GameState)
+    abstract fun decide(gameState: T) : Action<T>
+    abstract fun finalize(gameState: T)
     abstract fun close()
 }

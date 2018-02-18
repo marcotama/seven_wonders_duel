@@ -1,11 +1,12 @@
 package com.aigamelabs.mcts
 
+import com.aigamelabs.game.IAbstractGameState
 import com.aigamelabs.utils.Util
 
 class ActionSelection {
 
     companion object {
-        private fun computeValues(evaluator: (TreeNode) -> Double, nodes: Array<TreeNode>): DoubleArray {
+        private fun <T: IAbstractGameState<T>> computeValues(evaluator: (TreeNode<T>) -> Double, nodes: Array<TreeNode<T>>): DoubleArray {
             val values = DoubleArray(nodes.size)
             for (i in nodes.indices) {
                 values[i] = evaluator(nodes[i])
@@ -13,11 +14,19 @@ class ActionSelection {
             return values
         }
 
-        val averageScore = { n: TreeNode -> n.score / n.games.toDouble() }
-        private val numVisits = { n: TreeNode -> n.games.toDouble() }
-        private fun scoreDistanceToRange(rangeMin: Double, rangeMax: Double): (TreeNode) -> Double {
-            return { n ->
-                val avgScore = Math.abs(n.score / n.games)
+        fun <T: IAbstractGameState<T>> averageScore(): (TreeNode<T>) -> Double {
+            return {
+                it.score / it.games.toDouble()
+            }
+        }
+        private fun <T: IAbstractGameState<T>> numVisits(): (TreeNode<T>) -> Double {
+            return {
+                it.games.toDouble()
+            }
+        }
+        private fun <T: IAbstractGameState<T>> scoreDistanceToRange(rangeMin: Double, rangeMax: Double): (TreeNode<T>) -> Double {
+            return {
+                val avgScore = Math.abs(it.score / it.games)
                 when {
                     avgScore < rangeMin -> rangeMin - avgScore
                     avgScore > rangeMax -> avgScore - rangeMax
@@ -26,9 +35,9 @@ class ActionSelection {
             }
         }
 
-        private fun scoreDistanceToValue(value: Double): (TreeNode) -> Double {
-            return { n ->
-                val avgScore = Math.abs(n.score / n.games)
+        private fun <T: IAbstractGameState<T>> scoreDistanceToValue(value: Double): (TreeNode<T>) -> Double {
+            return {
+                val avgScore = Math.abs(it.score / it.games)
                 if (avgScore <= value) {
                     value - avgScore
                 } else {
@@ -37,24 +46,24 @@ class ActionSelection {
             }
         }
 
-        fun get(
+        fun <T: IAbstractGameState<T>> get(
                 actionSelector: ActionSelector,
                 rankPercentile: Double? = null,
                 rangeMin: Double? = null,
                 rangeMax: Double? = null,
                 target: Double? = null
-        ): (Array<TreeNode>) -> Int {
+        ): (Array<TreeNode<T>>) -> Int {
             when (actionSelector) {
                 ActionSelector.HIGHEST_SCORE -> return { nodes ->
-                    val values = computeValues(averageScore, nodes)
+                    val values = computeValues(averageScore(), nodes)
                     Util.indexOfMax(values)
                 }
                 ActionSelector.MEDIAN_SCORE -> return { nodes ->
-                    val values = computeValues(averageScore, nodes)
+                    val values = computeValues(averageScore(), nodes)
                     Util.indexOfMedian(values)
                 }
                 ActionSelector.MOST_VISITS -> return { nodes ->
-                    val values = computeValues(numVisits, nodes)
+                    val values = computeValues(numVisits(), nodes)
                     Util.indexOfMax(values)
                 }
                 ActionSelector.SCORE_BY_PERCENTILE -> return { nodes ->
@@ -64,7 +73,7 @@ class ActionSelection {
                         rankPercentile < 0 -> 0
                         else -> (rankPercentile * nodes.size).toInt()
                     }
-                    val values = computeValues(averageScore, nodes)
+                    val values = computeValues(averageScore(), nodes)
                     Util.indexOfRank(values, rank)
                 }
                 ActionSelector.SCORE_CLOSEST_TO_RANGE -> return { nodes ->

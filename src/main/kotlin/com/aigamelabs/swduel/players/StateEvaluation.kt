@@ -1,8 +1,8 @@
-package com.aigamelabs.mcts
+package com.aigamelabs.swduel.players
 
-import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.enums.GameOutcome
-import com.aigamelabs.swduel.enums.PlayerTurn
+import com.aigamelabs.game.PlayerTurn
+import com.aigamelabs.swduel.GameState
 
 class StateEvaluation {
 

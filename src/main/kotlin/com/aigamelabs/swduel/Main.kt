@@ -1,6 +1,8 @@
 package com.aigamelabs.swduel
 
-import com.aigamelabs.swduel.enums.PlayerTurn
+import com.aigamelabs.game.GameData
+import com.aigamelabs.game.Player
+import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.swduel.players.KeyboardPlayer
 import com.aigamelabs.swduel.players.MctsDDA
 import com.aigamelabs.swduel.players.MctsHighestScore
@@ -91,7 +93,7 @@ class Main {
             return String(encoded, encoding)
         }
 
-        private fun getPlayer(player: PlayerTurn, playerClass: String, gameData: GameData, gameId: String, logsPath: String): Player {
+        private fun getPlayer(player: PlayerTurn, playerClass: String, gameData: GameData, gameId: String, logsPath: String): Player<GameState> {
             return when (playerClass) {
                 "MCTS" -> MctsHighestScore(player, "MCTS(HS)", gameId, gameData, logsPath)
                 "DDA" -> MctsDDA(player, "DDA(HS)", gameId, gameData, logsPath)
