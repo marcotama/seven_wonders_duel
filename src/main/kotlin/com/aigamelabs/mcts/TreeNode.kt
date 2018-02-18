@@ -73,13 +73,13 @@ class TreeNode(
      * @return UCB1 score
      */
     fun calcUcb(): Double {
-        val remappedScore = when (nodeType) {
+        val remappedScore = when (parent!!.nodeType) {
             NodeType.PLAYER_NODE -> manager.playerNodeEvaluator(score)
             NodeType.OPPONENT_NODE -> manager.opponentNodeEvaluator(score)
             NodeType.STOCHASTIC_NODE -> throw Exception("UCB was called on a stochastic node")
             null -> throw Exception("Node type was not set on this node")
         }
-        return remappedScore / games + UCB_C * Math.sqrt(2 * Math.log(parent!!.games.toDouble()) / games)
+        return remappedScore / games + UCB_C * Math.sqrt(2 * Math.log(parent.games.toDouble()) / games)
     }
 
     @Synchronized
