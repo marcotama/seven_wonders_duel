@@ -46,7 +46,7 @@ class UctParallelizationManager<T: IAbstractGameState<T>>(
 
     init {
         val processors = Runtime.getRuntime().availableProcessors()
-        workers = (0 until processors)
+        workers = (0 until Math.min(4, processors))
                 .map { UctWorker(this, "#$it") }
                 .toTypedArray()
         logger.info("Setup ${workers.size} workers")
