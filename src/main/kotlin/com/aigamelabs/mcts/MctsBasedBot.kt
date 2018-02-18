@@ -1,8 +1,6 @@
-package com.aigamelabs.swduel.players
+package com.aigamelabs.mcts
 
 import com.aigamelabs.game.*
-import com.aigamelabs.mcts.ActionSelection
-import com.aigamelabs.mcts.TreeNode
 import com.aigamelabs.mcts.uctparallelization.UctParallelizationManager
 import java.io.File
 import java.io.FileOutputStream
