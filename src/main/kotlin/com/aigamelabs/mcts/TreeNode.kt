@@ -232,8 +232,12 @@ class TreeNode<T: AbstractGameState<T>>(
         children!!.values
                 .sortedBy { -it.playerScore / it.games }
                 .forEach {
-                    val score = (100 * it.playerScore / it.games).roundToInt()
-                    builder.append("Victory chance $score%: ${it.selectedAction!!}\n")
+                    if (it.games > 0) {
+                        val score = (100 * it.playerScore / it.games).roundToInt()
+                        builder.append("Victory chance $score%: ${it.selectedAction!!}\n")
+                    }
+                    else
+                        builder.append("Victory chance NaN: ${it.selectedAction!!}\n")
                 }
         return builder.toString()
     }
