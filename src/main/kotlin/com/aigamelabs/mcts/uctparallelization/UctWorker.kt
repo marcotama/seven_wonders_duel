@@ -130,7 +130,7 @@ class UctWorker<T: AbstractGameState<T>>(private var manager: UctParallelization
             val options = decision.options
             val choice = rnd.nextInt(options.size())
             gameState = gameState.applyAction(options[choice], generator)
-            generator.popAll()
+            generator.clear()
             manager.logger.log(Level.FINE, "Worker $workerId: randomly choosing \"$choice\" in playout")
             manager.logger.log(Level.FINEST, "Worker $workerId: new state is $gameState")
         }

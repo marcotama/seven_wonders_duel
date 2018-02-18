@@ -43,6 +43,10 @@ class RandomWithTracker(seed: Long, private val disableTracking: Boolean = false
         return ret
     }
 
+    fun clear() {
+        memory.clear()
+    }
+
     fun isEmpty(): Boolean {
         return memory.isEmpty()
     }
