@@ -139,14 +139,14 @@ data class GameState(
 
     fun checkScienceSupremacy(playerTurn: PlayerTurn) : GameState {
         return if (testScienceSupremacy(playerTurn))
-            update(gamePhase_ = GamePhase.SCIENCE_SUPREMACY, decisionQueue_ = Queue.empty())
+            update(gamePhase_ = GamePhase.SCIENCE_SUPREMACY)
         else
             this
     }
 
     fun checkMilitarySupremacy() : GameState {
         return if (militaryBoard.isMilitarySupremacy()) {
-            update(gamePhase_ = GamePhase.MILITARY_SUPREMACY, decisionQueue_ = Queue.empty())
+            update(gamePhase_ = GamePhase.MILITARY_SUPREMACY)
         }
         else this
     }
@@ -252,7 +252,7 @@ data class GameState(
 
     /* Queue management functions */
 
-    private fun enqueue(decision: Decision<GameState>): GameState {
+    fun enqueue(decision: Decision<GameState>): GameState {
         val updatedDecisionQueue = decisionQueue.insert(0, decision)
         return update(decisionQueue_ = updatedDecisionQueue)
     }
