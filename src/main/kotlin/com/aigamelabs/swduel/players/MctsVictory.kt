@@ -5,7 +5,7 @@ import com.aigamelabs.game.GameData
 import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.swduel.GameState
 
-class MctsHighestScore(
+class MctsVictory(
         player: PlayerTurn,
         playerId: String,
         gameId: String,
