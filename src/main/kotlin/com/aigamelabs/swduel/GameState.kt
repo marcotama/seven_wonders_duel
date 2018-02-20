@@ -124,8 +124,10 @@ data class GameState(
         }
     }
 
-
-    private fun testScienceSupremacy(playerTurn: PlayerTurn) : Boolean {
+    /**
+     * Checks whether the current state should be flagged for science supremacy.
+     */
+    fun testScienceSupremacy(playerTurn: PlayerTurn) : Boolean {
         val playerCity = getPlayerCity(playerTurn)
         val hasLawToken = !playerCity.progressTokens.filter { it.enhancement == Enhancement.LAW }.isEmpty
         val symbolsFromGreenCards = playerCity.buildings
@@ -137,14 +139,29 @@ data class GameState(
         return distinctScienceSymbols >= 6
     }
 
-    fun checkScienceSupremacy(playerTurn: PlayerTurn) : GameState {
+    /**
+     * Checks whether the current state should be flagged for military supremacy.
+     */
+    fun testMilitarySupremacy(player: PlayerTurn): Boolean {
+        return militaryBoard.isMilitarySupremacy() && militaryBoard.getDisadvantagedPlayer() == player.opponent()
+    }
+
+    /**
+     * Checks whether the current state should be flagged for science supremacy and it returns an accordingly updated
+     * state.
+     */
+    fun checkScienceSupremacy(playerTurn: PlayerTurn): GameState {
         return if (testScienceSupremacy(playerTurn))
             update(gamePhase_ = GamePhase.SCIENCE_SUPREMACY)
         else
             this
     }
 
-    fun checkMilitarySupremacy() : GameState {
+    /**
+     * Checks whether the current state should be flagged for military supremacy and it returns an accordingly updated
+     * state.
+     */
+    fun checkMilitarySupremacy(): GameState {
         return if (militaryBoard.isMilitarySupremacy()) {
             update(gamePhase_ = GamePhase.MILITARY_SUPREMACY)
         }
@@ -250,8 +267,9 @@ data class GameState(
         return Pair(returnGameState, thisDecision)
     }
 
-    /* Queue management functions */
-
+    /**
+     * Enqueues a decision and returns the updated game state (with the decision in the queue).
+     */
     fun enqueue(decision: Decision<GameState>): GameState {
         val updatedDecisionQueue = decisionQueue.insert(0, decision)
         return update(decisionQueue_ = updatedDecisionQueue)
