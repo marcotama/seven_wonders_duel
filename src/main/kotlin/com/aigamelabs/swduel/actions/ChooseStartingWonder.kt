@@ -30,11 +30,11 @@ class ChooseStartingWonder(player: PlayerTurn, val card : Card) : Action<GameSta
             8 -> when (numForPick) {
                 3, 2 -> {
                     val decision = createDecision(PlayerTurn.PLAYER_2, updatedGameState.wondersForPick)
-                    return updatedGameState.update(decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
+                    return updatedGameState.enqueue(decision)
                 }
                 1 -> {
                     val decision = createDecision(PlayerTurn.PLAYER_1, updatedGameState.wondersForPick)
-                    return updatedGameState.update(decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
+                    return updatedGameState.enqueue(decision)
                 }
                 0 -> {
                     // Draw another 4 wonders for pick
@@ -44,9 +44,8 @@ class ChooseStartingWonder(player: PlayerTurn, val card : Card) : Action<GameSta
                     val decision = createDecision(PlayerTurn.PLAYER_2, updatedWondersForPickDeck)
                     return updatedGameState.update(
                             unusedWondersDeck_ = updatedDiscardedWondersDeck,
-                            wondersForPickDeck_ = updatedWondersForPickDeck,
-                            decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision)
-                    )
+                            wondersForPickDeck_ = updatedWondersForPickDeck
+                    ).enqueue(decision)
                 }
                 else -> throw Exception("This should not happen")
             }
@@ -55,11 +54,11 @@ class ChooseStartingWonder(player: PlayerTurn, val card : Card) : Action<GameSta
             4 -> when (numForPick) {
                 3, 2 -> {
                     val decision = createDecision(PlayerTurn.PLAYER_1, updatedGameState.wondersForPick)
-                    return updatedGameState.update(decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
+                    return updatedGameState.enqueue(decision)
                 }
                 1 -> {
                     val decision = createDecision(PlayerTurn.PLAYER_2, updatedGameState.wondersForPick)
-                    return updatedGameState.update(decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
+                    return updatedGameState.enqueue(decision)
                 }
                 0 -> {
                     // Update game phase
