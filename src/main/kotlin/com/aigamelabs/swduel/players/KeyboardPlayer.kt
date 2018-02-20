@@ -2,11 +2,11 @@ package com.aigamelabs.swduel.players
 
 import com.aigamelabs.mcts.*
 import com.aigamelabs.mcts.uctparallelization.UctParallelizationManager
-import com.aigamelabs.swduel.GameData
-import com.aigamelabs.swduel.actions.Action
-import com.aigamelabs.swduel.Player
+import com.aigamelabs.game.GameData
+import com.aigamelabs.game.Action
+import com.aigamelabs.game.Player
+import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.swduel.GameState
-import com.aigamelabs.swduel.enums.PlayerTurn
 import com.aigamelabs.swduel.enums.Resource
 import com.aigamelabs.swduel.enums.ResourcesAlternative
 import com.aigamelabs.utils.RandomWithTracker
@@ -19,7 +19,7 @@ class KeyboardPlayer(
         gameId: String,
         gameData: GameData,
         outPath: String? = null
-) : Player(playerId, gameData) {
+) : Player<GameState>(playerId, gameData) {
     private val scanner = Scanner(System.`in`)
     private val generator = RandomWithTracker(Random().nextLong())
     private var manager = UctParallelizationManager(
@@ -35,7 +35,7 @@ class KeyboardPlayer(
             playerId
     )
 
-    override fun decide(gameState: GameState): Action {
+    override fun decide(gameState: GameState): Action<GameState> {
         val (_, thisDecision) = gameState.dequeAction()
         val options = thisDecision.options
         println("Decide one of the following options:")
@@ -141,7 +141,7 @@ class KeyboardPlayer(
         return ret.toString()
     }
 
-    private fun getActionMessage(action: Action, gameState: GameState, player: PlayerTurn): String {
+    private fun getActionMessage(action: Action<GameState>, gameState: GameState, player: PlayerTurn): String {
         val origCoins = gameState.getPlayerCity(player).coins
         val updatedGameState = gameState.applyAction(action, generator)
         val newCoins = updatedGameState.getPlayerCity(player).coins

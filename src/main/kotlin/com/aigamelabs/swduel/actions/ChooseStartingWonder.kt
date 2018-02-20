@@ -1,13 +1,14 @@
 package com.aigamelabs.swduel.actions
 
-import com.aigamelabs.swduel.Decision
+import com.aigamelabs.game.Action
+import com.aigamelabs.game.Decision
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.*
-import com.aigamelabs.swduel.enums.PlayerTurn
+import com.aigamelabs.game.PlayerTurn
 import io.vavr.collection.Vector
 import java.util.logging.Logger
 
-class ChooseStartingWonder(player: PlayerTurn, val card : Card) : Action(player) {
+class ChooseStartingWonder(player: PlayerTurn, val card : Card) : Action<GameState>(player) {
     override fun process(gameState: GameState, generator : RandomWithTracker, logger: Logger?) : GameState {
         // Remove wonder from for-pick deck
         var updatedWondersForPickDeck = gameState.wondersForPick.removeCard(card)
@@ -29,11 +30,11 @@ class ChooseStartingWonder(player: PlayerTurn, val card : Card) : Action(player)
             8 -> when (numForPick) {
                 3, 2 -> {
                     val decision = createDecision(PlayerTurn.PLAYER_2, updatedGameState.wondersForPick)
-                    return updatedGameState.update(decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
+                    return updatedGameState.enqueue(decision)
                 }
                 1 -> {
                     val decision = createDecision(PlayerTurn.PLAYER_1, updatedGameState.wondersForPick)
-                    return updatedGameState.update(decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
+                    return updatedGameState.enqueue(decision)
                 }
                 0 -> {
                     // Draw another 4 wonders for pick
@@ -43,9 +44,8 @@ class ChooseStartingWonder(player: PlayerTurn, val card : Card) : Action(player)
                     val decision = createDecision(PlayerTurn.PLAYER_2, updatedWondersForPickDeck)
                     return updatedGameState.update(
                             unusedWondersDeck_ = updatedDiscardedWondersDeck,
-                            wondersForPickDeck_ = updatedWondersForPickDeck,
-                            decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision)
-                    )
+                            wondersForPickDeck_ = updatedWondersForPickDeck
+                    ).enqueue(decision)
                 }
                 else -> throw Exception("This should not happen")
             }
@@ -54,11 +54,11 @@ class ChooseStartingWonder(player: PlayerTurn, val card : Card) : Action(player)
             4 -> when (numForPick) {
                 3, 2 -> {
                     val decision = createDecision(PlayerTurn.PLAYER_1, updatedGameState.wondersForPick)
-                    return updatedGameState.update(decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
+                    return updatedGameState.enqueue(decision)
                 }
                 1 -> {
                     val decision = createDecision(PlayerTurn.PLAYER_2, updatedGameState.wondersForPick)
-                    return updatedGameState.update(decisionQueue_ = updatedGameState.decisionQueue.enqueue(decision))
+                    return updatedGameState.enqueue(decision)
                 }
                 0 -> {
                     // Update game phase
@@ -74,9 +74,9 @@ class ChooseStartingWonder(player: PlayerTurn, val card : Card) : Action(player)
 
     }
 
-    private fun createDecision(playerTurn: PlayerTurn, wondersForPickDeck : Deck) : Decision {
+    private fun createDecision(playerTurn: PlayerTurn, wondersForPickDeck : Deck) : Decision<GameState> {
         // Create decision
-        val options : Vector<Action> = wondersForPickDeck.cards
+        val options : Vector<Action<GameState>> = wondersForPickDeck.cards
                 .map { ChooseStartingWonder(playerTurn, it) }
         return Decision(playerTurn, options)
     }

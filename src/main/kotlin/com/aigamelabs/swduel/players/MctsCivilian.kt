@@ -5,7 +5,7 @@ import com.aigamelabs.game.GameData
 import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.swduel.GameState
 
-class MctsDDA(
+class MctsCivilian(
         player: PlayerTurn,
         playerId: String,
         gameId: String,
@@ -17,9 +17,9 @@ class MctsDDA(
         gameId,
         gameData,
         ActionSelection.get(ActionSelector.HIGHEST_SCORE),
-        NodeScoreMapping.get(NodeScoreMapper.DISTANCE_FROM_MIDPOINT),
         NodeScoreMapping.get(NodeScoreMapper.IDENTITY),
-        StateEvaluation.getVictoryEvaluator(player),
-        StateEvaluation.getVictoryEvaluator(player.opponent()),
+        NodeScoreMapping.get(NodeScoreMapper.IDENTITY),
+        StateEvaluation.getCivilianVictoryEvaluator(player),
+        StateEvaluation.getCivilianVictoryEvaluator(player.opponent()),
         logFileName
 )

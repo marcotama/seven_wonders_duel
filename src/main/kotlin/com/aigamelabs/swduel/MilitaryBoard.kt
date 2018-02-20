@@ -1,6 +1,6 @@
 package com.aigamelabs.swduel
 
-import com.aigamelabs.swduel.enums.PlayerTurn
+import com.aigamelabs.game.PlayerTurn
 import org.json.JSONObject
 import javax.json.stream.JsonGenerator
 

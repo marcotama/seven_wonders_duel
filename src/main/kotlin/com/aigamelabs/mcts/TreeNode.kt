@@ -1,7 +1,7 @@
 package com.aigamelabs.mcts
 
-import com.aigamelabs.swduel.GameState
-import com.aigamelabs.swduel.actions.Action
+import com.aigamelabs.game.Action
+import com.aigamelabs.game.AbstractGameState
 import com.aigamelabs.utils.RandomWithTracker
 
 import javax.json.Json
@@ -16,11 +16,11 @@ import kotlin.math.roundToInt
  *
  * @author Marco Tamassia
  */
-class TreeNode(
+class TreeNode<T: AbstractGameState<T>>(
         /**
          * The parent of this node
          */
-        val parent: TreeNode?,
+        val parent: TreeNode<T>?,
         /**
          * A flag signaling whether this node represents a decision of a player or an imaginary game (stochastic) decision
          */
@@ -28,19 +28,19 @@ class TreeNode(
         /**
          * The action that needs to be taken at the parent's game state to get to this node's game state (null for the root)
          */
-        val selectedAction: Action?,
+        val selectedAction: Action<T>?,
         /**
          * The game state represented by this node; the state should *include* the decision that its children represent
          */
-        val gameState: GameState?,
+        val gameState: T?,
         /**
          * The manager of all the UCT workers
          */
-        private val manager: Manager
+        private val manager: Manager<T>
 ) {
 
     /** Children nodes  */
-    var children: HashMap<List<Int>, TreeNode>? = null
+    var children: HashMap<List<Int>, TreeNode<T>>? = null
 
     /** Depth of the node  */
     val depth: Int = if (parent == null) 0 else parent.depth + 1
@@ -76,7 +76,8 @@ class TreeNode(
         val remappedScore = when (parent!!.nodeType) {
             NodeType.PLAYER_NODE -> manager.playerNodeEvaluator(score)
             NodeType.OPPONENT_NODE -> manager.opponentNodeEvaluator(score)
-            NodeType.STOCHASTIC_NODE -> throw Exception("UCB was called on a stochastic node")
+            NodeType.STOCHASTIC_NODE -> throw Exception("UCB was called on the child of a stochastic node")
+            NodeType.TERMINAL_NODE -> throw Exception("UCB was called on the child of a leaf node... what?!")
             null -> throw Exception("Node type was not set on this node")
         }
         return remappedScore / games + UCB_C * Math.sqrt(2 * Math.log(parent.games.toDouble()) / games)
@@ -120,54 +121,60 @@ class TreeNode(
     @Synchronized
     fun createChildren(generator: RandomWithTracker) {
 
-        if (!generator.isEmpty())
+        if (!generator.isEmpty()) {
+            generator.clear()
             throw Exception("Generator is dirty")
+        }
 
         if (nodeType == NodeType.STOCHASTIC_NODE)
             throw Exception("Creating children of a stochastic node should be done via sampling")
 
-        if (children == null) {
-            // If this is a final game state, do not create children (there are no actions to pick from)
-            if (!gameState!!.decisionQueue.isEmpty) {
-                val (unqueuedGameState, decision) = gameState.dequeAction() // Non-stochastic nodes always have a game state
+        if (nodeType == NodeType.TERMINAL_NODE)
+            return
 
-                children = HashMap()
+        if (children != null)
+            return
 
-                decision.options.forEachIndexed { index, action ->
-                    val updatedGameState =  unqueuedGameState.applyAction(action, generator)
+        if (gameState!!.isQueueEmpty())
+            return
 
-                    val childType = if (!updatedGameState.decisionQueue.isEmpty) {
-                        val childGameStatePlayer = updatedGameState.dequeAction().second.player
-                        when (childGameStatePlayer) {
-                            manager.player -> NodeType.PLAYER_NODE
-                            else -> NodeType.OPPONENT_NODE
-                        }
-                    }
-                    else
-                        null
+        val (unqueuedGameState, decision) = gameState.dequeAction() // Non-stochastic nodes always have a game state
 
-                    // If new game state was generated deterministically
-                    if (generator.isEmpty()) {
-                        val child = TreeNode(this, childType, action, updatedGameState, manager)
-                        children!![listOf(index)] = child
-                    }
-                    // Otherwise, add a stochastic node to model non-determinism
-                    else {
-                        val child = TreeNode(this, NodeType.STOCHASTIC_NODE, action, null, manager)
-                        children!![listOf(index)] = child
-                        child.children = HashMap()
-                        val grandchildId = generator.popAll() // The random integers identify the child
-                        // Save the outcome as the first child of the stochastic node
-                        val grandChild = TreeNode(child, childType, null, updatedGameState, manager)
-                        child.children!![grandchildId] = grandChild
-                    }
+        children = HashMap()
+
+        decision.options.forEachIndexed { index, action ->
+            val updatedGameState =  unqueuedGameState.applyAction(action, generator)
+
+            val childType = if (!updatedGameState.isGameOver()) {
+                val childGameStatePlayer = updatedGameState.dequeAction().second.player
+                when (childGameStatePlayer) {
+                    manager.player -> NodeType.PLAYER_NODE
+                    else -> NodeType.OPPONENT_NODE
                 }
+            }
+            else
+                NodeType.TERMINAL_NODE
+
+            // If new game state was generated deterministically
+            if (generator.isEmpty()) {
+                val child = TreeNode(this, childType, action, updatedGameState, manager)
+                children!![listOf(index)] = child
+            }
+            // Otherwise, add a stochastic node to model non-determinism
+            else {
+                val child = TreeNode(this, NodeType.STOCHASTIC_NODE, action, null, manager)
+                children!![listOf(index)] = child
+                child.children = HashMap()
+                val grandchildId = generator.popAll() // The random integers identify the child
+                // Save the outcome as the first child of the stochastic node
+                val grandChild = TreeNode(child, childType, null, updatedGameState, manager)
+                child.children!![grandchildId] = grandChild
             }
         }
     }
 
     @Synchronized
-    fun sampleChild(generator: RandomWithTracker): Pair<List<Int>,TreeNode?> {
+    fun sampleChild(generator: RandomWithTracker): Pair<List<Int>,TreeNode<T>?> {
 
         if (nodeType != NodeType.STOCHASTIC_NODE)
             throw Exception("Sampling of children can only be done on stochastic nodes")
@@ -185,10 +192,14 @@ class TreeNode(
             Pair(childId, null)
         }
         else {
-            val childGameStatePlayer = updatedGameState.dequeAction().second.player
-            val childType = when (childGameStatePlayer) {
-                manager.player -> NodeType.PLAYER_NODE
-                else -> NodeType.OPPONENT_NODE
+            val childType = if (updatedGameState.isGameOver())
+                NodeType.TERMINAL_NODE
+            else {
+                val childGameStatePlayer = updatedGameState.dequeAction().second.player
+                when (childGameStatePlayer) {
+                    manager.player -> NodeType.PLAYER_NODE
+                    else -> NodeType.OPPONENT_NODE
+                }
             }
             Pair(childId, TreeNode(this, childType, null, updatedGameState, manager))
         }
@@ -200,7 +211,7 @@ class TreeNode(
         private const val UCB_C = 3.0
 
         @Synchronized
-        private fun exportNode(node: TreeNode, generator: JsonGenerator) {
+        private fun <T: AbstractGameState<T>> exportNode(node: TreeNode<T>, generator: JsonGenerator) {
             generator.writeStartObject()
 
             generator.writeStartObject("attributes")
@@ -230,8 +241,12 @@ class TreeNode(
         children!!.values
                 .sortedBy { -it.playerScore / it.games }
                 .forEach {
-                    val score = (100 * it.playerScore / it.games).roundToInt()
-                    builder.append("Victory chance $score%: ${it.selectedAction!!}\n")
+                    if (it.games > 0) {
+                        val score = (100 * it.playerScore / it.games).roundToInt()
+                        builder.append("Victory chance $score%: ${it.selectedAction!!}\n")
+                    }
+                    else
+                        builder.append("Victory chance NaN: ${it.selectedAction!!}\n")
                 }
         return builder.toString()
     }

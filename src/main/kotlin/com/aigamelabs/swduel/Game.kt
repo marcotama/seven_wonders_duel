@@ -1,9 +1,10 @@
 package com.aigamelabs.swduel
 
+import com.aigamelabs.game.Player
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.enums.GameOutcome
 import com.aigamelabs.swduel.enums.GamePhase
-import com.aigamelabs.swduel.enums.PlayerTurn
+import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.utils.MinimalFormatter
 import java.io.File
 import java.io.FileOutputStream
@@ -29,7 +30,7 @@ import javax.json.stream.JsonGenerator
  *    The `process` method also takes care of adding new decisions to the queue, if any.
  *  - Repeat
  */
-class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPath: String) {
+class Game(gameId: String, private val players : Map<PlayerTurn, Player<GameState>>, logPath: String) {
 
     private val logger = Logger.getLogger("SevenWondersDuel_Messages")
 
@@ -69,8 +70,7 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player>, logPat
 
             // Play the game
             var gameState = startingGameState
-            val endPhases = setOf(GamePhase.MILITARY_SUPREMACY, GamePhase.SCIENCE_SUPREMACY, GamePhase.CIVILIAN_VICTORY)
-            while (!endPhases.contains(gameState.gamePhase)) {
+            while (!gameState.isGameOver()) {
                 gameState = iterate(gameState, generator)
                 //logger.log(Level.INFO, gameState.toString())
             }

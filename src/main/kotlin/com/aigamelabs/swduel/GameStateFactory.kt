@@ -1,10 +1,11 @@
 package com.aigamelabs.swduel
 
-import com.aigamelabs.swduel.actions.Action
+import com.aigamelabs.game.Action
+import com.aigamelabs.game.Decision
 import com.aigamelabs.utils.RandomWithTracker
-import com.aigamelabs.swduel.actions.ChooseStartingWonder
 import com.aigamelabs.swduel.enums.GamePhase
-import com.aigamelabs.swduel.enums.PlayerTurn
+import com.aigamelabs.game.PlayerTurn
+import com.aigamelabs.swduel.actions.*
 import com.aigamelabs.swduel.enums.ProgressToken
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
@@ -31,7 +32,7 @@ object GameStateFactory {
         val burnedDeck = Deck("Burned")
 
         // Create decision
-        val actions : Vector<Action> = wondersForPickDeck.cards
+        val actions : Vector<Action<GameState>> = wondersForPickDeck.cards
                 .map { ChooseStartingWonder(PlayerTurn.PLAYER_1, it) }
         val decision = Decision(PlayerTurn.PLAYER_1, actions)
 

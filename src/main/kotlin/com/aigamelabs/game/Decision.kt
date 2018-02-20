@@ -1,7 +1,5 @@
-package com.aigamelabs.swduel
+package com.aigamelabs.game
 
-import com.aigamelabs.swduel.enums.PlayerTurn
-import com.aigamelabs.swduel.actions.Action
 import io.vavr.collection.Vector
 import javax.json.stream.JsonGenerator
 
@@ -9,7 +7,7 @@ import javax.json.stream.JsonGenerator
  * Represents a decision to be made. It includes a list of actions to choose from and the player who will make the
  * decision.
  */
-data class Decision(val player: PlayerTurn, val options: Vector<Action>) {
+data class Decision<T: AbstractGameState<T>>(val player: PlayerTurn, val options: Vector<Action<T>>) {
 
     /**
      * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.

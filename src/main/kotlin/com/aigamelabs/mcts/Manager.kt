@@ -1,8 +1,8 @@
 package com.aigamelabs.mcts
 
-import com.aigamelabs.swduel.GameState
-import com.aigamelabs.swduel.actions.Action
-import com.aigamelabs.swduel.enums.PlayerTurn
+import com.aigamelabs.game.Action
+import com.aigamelabs.game.AbstractGameState
+import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.utils.MinimalFormatter
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
@@ -11,19 +11,19 @@ import java.util.logging.FileHandler
 import java.util.logging.Level
 import java.util.logging.Logger
 
-abstract class Manager(
+abstract class Manager<T: AbstractGameState<T>>(
         val player: PlayerTurn,
-        val actionSelector: (Array<TreeNode>) -> Int,
+        val actionSelector: (Array<TreeNode<T>>) -> Int,
         val playerNodeEvaluator: (Double) -> Double,
         val opponentNodeEvaluator: (Double) -> Double,
-        val playerStateEvaluator: (GameState) -> Double,
-        val opponentStateEvaluator: (GameState) -> Double,
+        val playerStateEvaluator: (T) -> Double,
+        val opponentStateEvaluator: (T) -> Double,
         val outPath: String?,
         id: String?
 ) {
 
-    var rootNode: TreeNode? = null
-    var rootGameState: GameState? = null
+    var rootNode: TreeNode<T>? = null
+    var rootGameState: T? = null
 
     /** Number of games to be played on a node before it is expanded  */
     val uctNodeCreateThreshold = 10
@@ -32,7 +32,7 @@ abstract class Manager(
     var maxUctTreeDepth: Int = 100
 
     /** UCT execution time budget (in frames)  */
-    var uctBudgetInNanoseconds: Long = 3_000_000_000
+    var uctBudgetInNanoseconds: Long = 10_000_000_000
 
     internal val logger = Logger.getLogger("SevenWondersDuel_$id")
     init {
@@ -54,6 +54,6 @@ abstract class Manager(
     /** Whether to output additional information  */
     protected var verbose = true
 
-    abstract fun run(gameState: GameState) : Action
+    abstract fun run(gameState: T) : Action<T>
     abstract fun shutdown()
 }

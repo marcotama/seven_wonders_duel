@@ -3,7 +3,7 @@ package com.aigamelabs.swduel
 import com.aigamelabs.swduel.actions.BuildBuilding
 import com.aigamelabs.swduel.actions.BurnForMoney
 import com.aigamelabs.swduel.actions.ChooseProgressToken
-import com.aigamelabs.swduel.enums.PlayerTurn
+import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.utils.RandomWithTracker
 import io.vavr.collection.HashSet
 import org.jetbrains.spek.api.Spek

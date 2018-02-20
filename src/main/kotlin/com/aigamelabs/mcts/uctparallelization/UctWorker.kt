@@ -1,17 +1,16 @@
 package com.aigamelabs.mcts.uctparallelization
 
-import com.aigamelabs.swduel.GameState
+import com.aigamelabs.game.AbstractGameState
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.mcts.NodeType
 import com.aigamelabs.utils.Util
-import com.aigamelabs.swduel.enums.GamePhase
 import java.util.*
 import java.util.logging.Level
 
 /**
  * Executes UCT on the given node.
  */
-class UctWorker(private var manager: UctParallelizationManager, private val workerId: String) : Runnable {
+class UctWorker<T: AbstractGameState<T>>(private var manager: UctParallelizationManager<T>, private val workerId: String) : Runnable {
 
     var timeout: Long = 0
 
@@ -24,7 +23,6 @@ class UctWorker(private var manager: UctParallelizationManager, private val work
             }
             catch (e: Exception) {
                 manager.logger.log(Level.WARNING, "Exception in worker $workerId", e)
-                throw e
             }
         }
     }
@@ -35,7 +33,7 @@ class UctWorker(private var manager: UctParallelizationManager, private val work
      * @param gameState used for evaluation
      * @return The score of a node
      */
-    private fun getPlayerScore(gameState: GameState): Double {
+    private fun getPlayerScore(gameState: T): Double {
         return manager.playerStateEvaluator(gameState)
     }
 
@@ -45,7 +43,7 @@ class UctWorker(private var manager: UctParallelizationManager, private val work
      * @param gameState FrameData used for evaluation
      * @return The score of a node
      */
-    private fun getOpponentScore(gameState: GameState): Double {
+    private fun getOpponentScore(gameState: T): Double {
         return manager.opponentStateEvaluator(gameState)
     }
 
@@ -106,7 +104,6 @@ class UctWorker(private var manager: UctParallelizationManager, private val work
         // Calculate score for end game
         val playerScore = getPlayerScore(endGameState)
         val opponentScore = getOpponentScore(endGameState)
-        manager.logger.log(Level.FINE, "Worker $workerId: playout ended with ${endGameState.gamePhase}, scores are P1: $playerScore and P2: $opponentScore")
         // Backpropagate
         while (true) {
             currentNode.updateScore(playerScore, opponentScore)
@@ -121,20 +118,19 @@ class UctWorker(private var manager: UctParallelizationManager, private val work
      *
      * @return Result of the playout
      */
-    private fun playout(gameState_: GameState): GameState {
+    private fun playout(gameState_: T): T {
 
         var gameState = gameState_
 
         // Apply random actions to the playout
-        val activeGamePhases = setOf(GamePhase.FIRST_AGE, GamePhase.SECOND_AGE, GamePhase.THIRD_AGE, GamePhase.WONDERS_SELECTION)
-        while (activeGamePhases.contains(gameState.gamePhase)) {
+        while (!gameState.isGameOver()) {
             val dequeueOutcome = gameState.dequeAction()
             gameState = dequeueOutcome.first
             val decision = dequeueOutcome.second
             val options = decision.options
             val choice = rnd.nextInt(options.size())
             gameState = gameState.applyAction(options[choice], generator)
-            generator.popAll()
+            generator.clear()
             manager.logger.log(Level.FINE, "Worker $workerId: randomly choosing \"$choice\" in playout")
             manager.logger.log(Level.FINEST, "Worker $workerId: new state is $gameState")
         }
