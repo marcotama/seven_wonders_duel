@@ -70,8 +70,7 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player<GameStat
 
             // Play the game
             var gameState = startingGameState
-            val endPhases = setOf(GamePhase.MILITARY_SUPREMACY, GamePhase.SCIENCE_SUPREMACY, GamePhase.CIVILIAN_VICTORY)
-            while (!endPhases.contains(gameState.gamePhase)) {
+            while (!gameState.isGameOver()) {
                 gameState = iterate(gameState, generator)
                 //logger.log(Level.INFO, gameState.toString())
             }
