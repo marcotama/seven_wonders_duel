@@ -48,7 +48,6 @@ References
 *   S. Demediuk, M. Tamassia, W. L. Raffe, F. Zambetta, X. Li, and F. F. Mueller.
 Monte carlo tree search based algorithms for dynamic difficulty adjustment. In
 Computational Intelligence and Games (CIG), 2017 IEEE Conference on. IEEE, 2017.
-
 *   M. Tamassia. Artificial intelligence techniques towards adaptive digital games, 2017.
 
 
