@@ -6,7 +6,7 @@ The repository contains the complete mechanics of the game, to our best understa
 
 Motivation
 ---
-This is part of a research project in the context of Dynamic Difficulty Adjustment. One of the bots, in fact, implements a technique recently proposed by us in a [CIG paper][cig_paper] and more extensively described in this [thesis][marco_thesis].
+This is part of a research project in the context of Dynamic Difficulty Adjustment. One of the bots, in fact, implements a technique recently proposed by us in a [CIG paper][1] and more extensively described in this [thesis][2].
 We wished to study this technique in different domains, so we turned to board games, which differ from the fighting game originally used.
 
 Playability
@@ -45,10 +45,11 @@ To create a JSON file to load as a starting game state, the best way is to open 
 
 References
 ---
-[cig_paper]: http://www.cig2017.com/wp-content/uploads/2017/08/paper_73.pdf S. Demediuk, M. Tamassia, W. L. Raffe, F. Zambetta, X. Li, and F. F. Mueller.
+[1]: http://www.cig2017.com/wp-content/uploads/2017/08/paper_73.pdf S. Demediuk, M. Tamassia, W. L. Raffe, F. Zambetta, X. Li, and F. F. Mueller.
 Monte carlo tree search based algorithms for dynamic difficulty adjustment. In
 Computational Intelligence and Games (CIG), 2017 IEEE Conference on. IEEE, 2017.
-[marco_thesis]: https://researchbank.rmit.edu.au/view/rmit:162286 M. Tamassia. Artificial intelligence techniques towards adaptive digital games, 2017.
+
+[2]: https://researchbank.rmit.edu.au/view/rmit:162286 M. Tamassia. Artificial intelligence techniques towards adaptive digital games, 2017.
 
 
 TODOs
