@@ -1,9 +1,10 @@
 package com.aigamelabs.swduel.players
 
-import com.aigamelabs.mcts.*
 import com.aigamelabs.game.GameData
 import com.aigamelabs.game.PlayerTurn
+import com.aigamelabs.mcts.*
 import com.aigamelabs.swduel.GameState
+import com.aigamelabs.swduel.opponent
 
 class MctsCivilian(
         player: PlayerTurn,

@@ -92,6 +92,7 @@ data class MilitaryBoard(
             PlayerTurn.PLAYER_2 -> {
                 addPointsToPlayer2(n)
             }
+            else -> throw Exception("This game only allows 2 players; $playerTurn does not exist.")
         }
     }
 
@@ -151,26 +152,32 @@ data class MilitaryBoard(
             +1, +2 -> when (player) {
                 PlayerTurn.PLAYER_1 -> 2
                 PlayerTurn.PLAYER_2 -> 0
+                else -> throw Exception("This game only allows 2 players; $player does not exist.")
             }
             -1, -2 -> when (player) {
                 PlayerTurn.PLAYER_1 -> 0
                 PlayerTurn.PLAYER_2 -> 2
+                else -> throw Exception("This game only allows 2 players; $player does not exist.")
             }
             +3, +4, +5 -> when (player) {
                 PlayerTurn.PLAYER_1 -> 5
                 PlayerTurn.PLAYER_2 -> 0
+                else -> throw Exception("This game only allows 2 players; $player does not exist.")
             }
             -3, -4, -5 -> when (player) {
                 PlayerTurn.PLAYER_1 -> 0
                 PlayerTurn.PLAYER_2 -> 5
+                else -> throw Exception("This game only allows 2 players; $player does not exist.")
             }
             +6, +7, +8 -> when (player) {
                 PlayerTurn.PLAYER_1 -> 10
                 PlayerTurn.PLAYER_2 -> 0
+                else -> throw Exception("This game only allows 2 players; $player does not exist.")
             }
             -6, -7, -8 -> when (player) {
                 PlayerTurn.PLAYER_1 -> 0
                 PlayerTurn.PLAYER_2 -> 10
+                else -> throw Exception("This game only allows 2 players; $player does not exist.")
             }
             +9, -9 -> throw Exception("Conflict pawn is far enough to grant military supremacy; why is this function being called: : $conflictPawnPosition")
             else -> throw Exception("Conflict pawn in an invalid position: $conflictPawnPosition")

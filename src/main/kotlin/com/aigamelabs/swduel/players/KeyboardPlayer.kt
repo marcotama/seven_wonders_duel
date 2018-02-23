@@ -1,14 +1,18 @@
 package com.aigamelabs.swduel.players
 
-import com.aigamelabs.mcts.*
-import com.aigamelabs.mcts.uctparallelization.UctParallelizationManager
-import com.aigamelabs.game.GameData
 import com.aigamelabs.game.Action
+import com.aigamelabs.game.GameData
 import com.aigamelabs.game.Player
 import com.aigamelabs.game.PlayerTurn
+import com.aigamelabs.mcts.ActionSelection
+import com.aigamelabs.mcts.ActionSelector
+import com.aigamelabs.mcts.NodeScoreMapper
+import com.aigamelabs.mcts.NodeScoreMapping
+import com.aigamelabs.mcts.uctparallelization.UctParallelizationManager
 import com.aigamelabs.swduel.GameState
 import com.aigamelabs.swduel.enums.Resource
 import com.aigamelabs.swduel.enums.ResourcesAlternative
+import com.aigamelabs.swduel.opponent
 import com.aigamelabs.utils.RandomWithTracker
 import java.util.*
 import kotlin.collections.HashMap

@@ -1,10 +1,11 @@
 package com.aigamelabs.swduel.actions
 
 import com.aigamelabs.game.Action
-import com.aigamelabs.swduel.Card
-import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.game.PlayerTurn
+import com.aigamelabs.swduel.Card
 import com.aigamelabs.swduel.GameState
+import com.aigamelabs.swduel.opponent
+import com.aigamelabs.utils.RandomWithTracker
 import java.util.logging.Logger
 
 class ChooseUnusedProgressToken(playerTurn: PlayerTurn, val card : Card) : Action<GameState>(playerTurn) {

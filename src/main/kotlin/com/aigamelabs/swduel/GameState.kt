@@ -69,6 +69,7 @@ data class GameState(
         return when (playerTurn) {
             PlayerTurn.PLAYER_1 -> player1City
             PlayerTurn.PLAYER_2 -> player2City
+            else -> throw Exception("This game only allows 2 players; $playerTurn does not exist.")
         }
     }
 
@@ -652,4 +653,12 @@ data class GameState(
         }
     }
 
+}
+
+/**
+ * Determines the opponent of the given player.
+ */
+// This function is not in the PlayerTurn class because it assumes a 2-players game
+fun PlayerTurn.opponent() : PlayerTurn {
+    return if (this == PlayerTurn.PLAYER_1) PlayerTurn.PLAYER_2 else PlayerTurn.PLAYER_1
 }

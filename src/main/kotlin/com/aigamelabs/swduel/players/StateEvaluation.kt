@@ -84,6 +84,7 @@ class StateEvaluation {
             return when (player) {
                 PlayerTurn.PLAYER_1 -> get(StateEvaluator.PLAYER_1_VICTORY)
                 PlayerTurn.PLAYER_2 -> get(StateEvaluator.PLAYER_2_VICTORY)
+                else -> throw Exception("This game only allows 2 players; $player does not exist.")
             }
         }
 
@@ -91,6 +92,7 @@ class StateEvaluation {
             return when (player) {
                 PlayerTurn.PLAYER_1 -> get(StateEvaluator.PLAYER_1_CIVILIAN_VICTORY)
                 PlayerTurn.PLAYER_2 -> get(StateEvaluator.PLAYER_2_CIVILIAN_VICTORY)
+                else -> throw Exception("This game only allows 2 players; $player does not exist.")
             }
         }
 
@@ -98,6 +100,7 @@ class StateEvaluation {
             return when (player) {
                 PlayerTurn.PLAYER_1 -> get(StateEvaluator.PLAYER_1_SCIENCE_SUPREMACY)
                 PlayerTurn.PLAYER_2 -> get(StateEvaluator.PLAYER_2_SCIENCE_SUPREMACY)
+                else -> throw Exception("This game only allows 2 players; $player does not exist.")
             }
         }
 
@@ -105,6 +108,7 @@ class StateEvaluation {
             return when (player) {
                 PlayerTurn.PLAYER_1 -> get(StateEvaluator.PLAYER_1_MILITARY_SUPREMACY)
                 PlayerTurn.PLAYER_2 -> get(StateEvaluator.PLAYER_2_MILITARY_SUPREMACY)
+                else -> throw Exception("This game only allows 2 players; $player does not exist.")
             }
         }
 
