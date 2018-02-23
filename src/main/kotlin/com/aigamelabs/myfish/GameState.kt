@@ -105,8 +105,19 @@ data class GameState(
     }
 
     fun canPenguinMove(location: Triple<Int, Int, Int>): Boolean {
-        // TODO
-        return true
+        val directions = Vector.of(
+                Triple(+1,0,0),
+                Triple(-1,0,0),
+                Triple(0,-1,0),
+                Triple(0,-1,0),
+                Triple(0,0,+1),
+                Triple(0,0,-1)
+        )
+        return directions.map {
+            val newLoc = location + it
+            val tileContent = board[newLoc].getOrElse(BoardTile.EATEN_TILE)
+            tileContent != BoardTile.EATEN_TILE
+        }.any()
     }
 
     fun calculateWinner(logger: Logger? = null): Tuple5<HashSet<PlayerTurn>, Int, Int, Int, Int> {
@@ -150,6 +161,14 @@ data class GameState(
         */
     }
 
+}
+
+operator fun Triple<Int, Int, Int>.plus(other: Triple<Int,Int,Int>): Triple<Int,Int,Int> {
+    return Triple(
+            first + other.first,
+            second + other.second,
+            third + other.third
+    )
 }
 
 /**
