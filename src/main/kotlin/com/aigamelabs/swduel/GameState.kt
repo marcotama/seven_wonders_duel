@@ -8,6 +8,7 @@ import com.aigamelabs.swduel.enums.*
 import com.aigamelabs.utils.Deck
 import io.vavr.collection.HashSet
 import io.vavr.collection.Queue
+import io.vavr.collection.Stream
 import io.vavr.collection.Vector
 import org.json.JSONObject
 import java.util.logging.Level
@@ -380,7 +381,9 @@ data class GameState(
 
     fun addSelectStartingPlayerDecision(): GameState {
         val choosingPlayer = militaryBoard.getDisadvantagedPlayer() ?: nextPlayer.opponent() // Last player of the previous age
-        val actions: List<Action<GameState>> = PlayerTurn.values().map { ChooseNextPlayer(choosingPlayer, it) }
+        val actions: List<Action<GameState>> = Stream.of(PlayerTurn.PLAYER_1, PlayerTurn.PLAYER_2)
+                .map { ChooseNextPlayer(choosingPlayer, it) }
+                .toMutableList()
         val decision = Decision(choosingPlayer, Vector.ofAll(actions))
         return enqueue(decision)
     }
