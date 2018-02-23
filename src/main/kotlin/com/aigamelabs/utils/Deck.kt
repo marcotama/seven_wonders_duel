@@ -1,8 +1,6 @@
-package com.aigamelabs.swduel
+package com.aigamelabs.utils
 
-import com.aigamelabs.utils.RandomWithTracker
 import io.vavr.collection.Vector
-import org.json.JSONObject
 import javax.json.stream.JsonGenerator
 
 /**
@@ -10,11 +8,11 @@ import javax.json.stream.JsonGenerator
  * cards can be specified. This models game decks where some cards are discarded, without actually storing such
  * information. This prevents players from extracting such information from the object.
  */
-data class Deck(val name: String, private val groups: Vector<Pair<Vector<Card>,Int>>) {
+data class Deck<T>(val name: String, private val groups: Vector<Pair<Vector<T>,Int>>) {
 
-    val cards: Vector<Card>
+    val cards: Vector<T>
     get() {
-        return groups.fold(Vector.empty<Card>(), { acc, d -> acc.appendAll(d.first) })
+        return groups.fold(Vector.empty<T>(), { acc, d -> acc.appendAll(d.first) })
     }
 
     private val numCards = groups.map { it.first.size() - it.second }.sum().toInt()
@@ -23,25 +21,25 @@ data class Deck(val name: String, private val groups: Vector<Pair<Vector<Card>,I
 
     fun update(
             name_ : String? = null,
-            groups_: Vector<Pair<Vector<Card>,Int>>? = null
-    ) : Deck {
+            groups_: Vector<Pair<Vector<T>,Int>>? = null
+    ) : Deck<T> {
         return Deck(
                 name_ ?: name,
                 groups_ ?: groups
         )
     }
 
-    fun removeCard(card : Card) : Deck {
+    fun removeCard(card : T) : Deck<T> {
         groups.forEachIndexed { groupIdx, group ->
             val cardIdx = group.first.indexOf(card)
             if (cardIdx != -1) {
                 return update(groups_ = groups.update(groupIdx, Pair(group.first.removeAt(cardIdx), group.second)))
             }
         }
-        throw Exception("Card \"${card.name}\" not present in deck \"$name\" (contents: ${toString()})")
+        throw Exception("Card \"$card\" not present in deck \"$name\" (contents: ${toString()})")
     }
 
-    fun drawCard(generator : RandomWithTracker) : Pair<Card, Deck> {
+    fun drawCard(generator : RandomWithTracker) : Pair<T, Deck<T>> {
         return if (numCards > 0) {
             val groupIdx = generator.nextInt(groups.map { it.first.size() - it.second } )
             val group = groups[groupIdx]
@@ -56,7 +54,7 @@ data class Deck(val name: String, private val groups: Vector<Pair<Vector<Card>,I
         }
     }
 
-    fun drawCards(n : Int = 1, generator : RandomWithTracker) : Pair<Vector<Card>, Deck> {
+    fun drawCards(n : Int = 1, generator : RandomWithTracker) : Pair<Vector<T>, Deck<T>> {
         var deck = this
         val drawnCards = (0 until n).map {
             val (card, updatedDeck) = deck.drawCard(generator)
@@ -66,11 +64,11 @@ data class Deck(val name: String, private val groups: Vector<Pair<Vector<Card>,I
         return Pair(Vector.ofAll(drawnCards), deck)
     }
 
-    fun add(card: Card) : Deck {
+    fun add(card: T) : Deck<T> {
         return Deck(name, groups.update(0, Pair(groups[0].first.append(card), groups[0].second)))
     }
 
-    fun addAll(cards: Vector<Card>) : Deck {
+    fun addAll(cards: Vector<T>) : Deck<T> {
         return Deck(name, groups.update(0, Pair(groups[0].first.appendAll(cards), groups[0].second)))
     }
 
@@ -92,7 +90,7 @@ data class Deck(val name: String, private val groups: Vector<Pair<Vector<Card>,I
             generator.write("discarded", group.second)
             generator.writeStartArray("cards") // array of cards
             group.first.forEach {
-                generator.write(it.name)
+                generator.write(it.toString())
             }
             generator.writeEnd() // array of cards
             generator.writeEnd() // group
@@ -106,25 +104,8 @@ data class Deck(val name: String, private val groups: Vector<Pair<Vector<Card>,I
         return if (cards.isEmpty)
             "<Empty>"
         else {
-            val tmp = cards.map { it.name }.foldLeft("", { acc, el -> "$acc$el, " })
+            val tmp = cards.map { it }.foldLeft("", { acc, el -> "$acc$el, " })
             tmp.substring(0, tmp.length - 2)
-        }
-    }
-
-    companion object {
-        fun loadFromJson(obj: JSONObject): Deck {
-            val name = obj.getString("name")
-            val groupsObj = obj.getJSONArray("groups")
-            val groups = Vector.ofAll(groupsObj.map { groupObj ->
-                groupObj as JSONObject
-                val discarded = groupObj.getInt("discarded")
-                val cardsObj = groupObj.getJSONArray("cards")
-                val cards = Vector.ofAll(cardsObj.map {
-                    CardFactory.getByName(it as String)
-                })
-                Pair(cards, discarded)
-            })
-            return Deck(name, groups)
         }
     }
 }

@@ -7,6 +7,7 @@ import com.aigamelabs.swduel.enums.GamePhase
 import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.swduel.actions.*
 import com.aigamelabs.swduel.enums.ProgressToken
+import com.aigamelabs.utils.Deck
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
 
@@ -29,7 +30,7 @@ object GameStateFactory {
         val wondersForPickDeck = Deck("Wonders For Pick", Vector.of(Pair(wondersForPick, 0)))
 
         // Initialize burned cards deck
-        val burnedDeck = Deck("Burned")
+        val burnedDeck = Deck<Card>("Burned")
 
         // Create decision
         val actions : Vector<Action<GameState>> = wondersForPickDeck.cards

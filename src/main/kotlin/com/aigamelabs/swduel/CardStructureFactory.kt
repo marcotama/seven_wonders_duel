@@ -2,6 +2,7 @@ package com.aigamelabs.swduel
 
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.enums.CardGroup
+import com.aigamelabs.utils.Deck
 import com.aigamelabs.utils.Graph
 import io.vavr.collection.HashSet
 import io.vavr.collection.Vector
@@ -9,7 +10,7 @@ import io.vavr.collection.Vector
 object CardStructureFactory {
 
 
-    private fun makeCardStructure(origDeck : Deck, faceUpCardsIdx: HashSet<Int>, connections: HashSet<Pair<Int,Int>>,
+    private fun makeCardStructure(origDeck : Deck<Card>, faceUpCardsIdx: HashSet<Int>, connections: HashSet<Pair<Int,Int>>,
                                   faceDownCard: FaceDownCard, generator : RandomWithTracker) : CardStructure {
 
         val numVertices = origDeck.size()

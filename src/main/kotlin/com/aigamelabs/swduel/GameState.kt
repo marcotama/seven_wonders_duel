@@ -5,6 +5,7 @@ import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.enums.GameOutcome
 import com.aigamelabs.game.*
 import com.aigamelabs.swduel.enums.*
+import com.aigamelabs.utils.Deck
 import io.vavr.collection.HashSet
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
@@ -16,11 +17,11 @@ import javax.json.stream.JsonGenerator
 
 
 data class GameState(
-        val availableProgressTokens: Deck,
-        val discardedProgressTokens: Deck,
-        val wondersForPick: Deck,
-        val discardedWonders: Deck,
-        val burnedCards: Deck,
+        val availableProgressTokens: Deck<Card>,
+        val discardedProgressTokens: Deck<Card>,
+        val wondersForPick: Deck<Card>,
+        val discardedWonders: Deck<Card>,
+        val burnedCards: Deck<Card>,
         val cardStructure : CardStructure?,
         val militaryBoard: MilitaryBoard,
         val player1City : PlayerCity,
@@ -31,11 +32,11 @@ data class GameState(
 ): AbstractGameState<GameState>() {
 
     fun update(
-            activeScienceDeck_ : Deck? = null,
-            unusedScienceDeck_ : Deck? = null,
-            wondersForPickDeck_ : Deck? = null,
-            unusedWondersDeck_ : Deck? = null,
-            burnedDeck_ : Deck? = null,
+            activeScienceDeck_ : Deck<Card>? = null,
+            unusedScienceDeck_ : Deck<Card>? = null,
+            wondersForPickDeck_ : Deck<Card>? = null,
+            unusedWondersDeck_ : Deck<Card>? = null,
+            burnedDeck_ : Deck<Card>? = null,
             cardStructure_ : CardStructure? = null,
             militaryBoard_ : MilitaryBoard? = null,
             player1City_ : PlayerCity? = null,
@@ -179,7 +180,7 @@ data class GameState(
             val multiplier = getMultiplier(it.victoryPointsFormula, it.victoryPointsReferenceCity, playerCity, opponentCity)
             val contribution = it.victoryPoints * multiplier
             if (contribution > 0)
-                logMsg.append("  $contribution pts from ${it.name}\n")
+                logMsg.append("  $contribution pts from $it\n")
             total += contribution
         }
 
@@ -187,7 +188,7 @@ data class GameState(
             val multiplier = getMultiplier(it.victoryPointsFormula, it.victoryPointsReferenceCity, playerCity, opponentCity)
             val contribution = it.victoryPoints * multiplier
             if (contribution > 0)
-                logMsg.append("  $contribution pts from ${it.name}\n")
+                logMsg.append("  $contribution pts from $it\n")
             total += contribution
         }
 
@@ -195,7 +196,7 @@ data class GameState(
             val multiplier = getMultiplier(it.victoryPointsFormula, it.victoryPointsReferenceCity, playerCity, opponentCity)
             val contribution = it.victoryPoints * multiplier
             if (contribution > 0)
-                logMsg.append("  $contribution pts from ${it.name}\n")
+                logMsg.append("  $contribution pts from $it\n")
             total += contribution
         }
 
@@ -514,15 +515,15 @@ data class GameState(
                 "Player 2 city:\n\n  ${getPlayerCity(PlayerTurn.PLAYER_2).toString()
                         .replace("\n", "\n  ")}\n",
                 "Available progress tokens:\n",
-                availableProgressTokens.cards.fold("", { acc, s -> "$acc  ${s.name}\n"}) + "\n",
+                availableProgressTokens.cards.fold("", { acc, s -> "$acc  $s\n"}) + "\n",
                 "Discarded progress tokens:\n",
-                discardedProgressTokens.cards.fold("", { acc, s -> "$acc  ${s.name}\n"}) + "\n",
+                discardedProgressTokens.cards.fold("", { acc, s -> "$acc  $s\n"}) + "\n",
                 "Wonders for picking:\n",
-                wondersForPick.cards.fold("", { acc, s -> "$acc  ${s.name}\n"}) + "\n",
+                wondersForPick.cards.fold("", { acc, s -> "$acc  $s\n"}) + "\n",
                 "Discarded wonders:\n",
-                discardedWonders.cards.fold("", { acc, s -> "$acc  ${s.name}\n"}) + "\n",
+                discardedWonders.cards.fold("", { acc, s -> "$acc  $s\n"}) + "\n",
                 "Burned cards:\n",
-                burnedCards.cards.fold("", { acc, s -> "$acc  ${s.name}\n"}) + "\n",
+                burnedCards.cards.fold("", { acc, s -> "$acc  $s\n"}) + "\n",
                 "Military board:\n${militaryBoard.toString().replace("\n", "\n  ")}\n\n",
                 "Next player: $nextPlayer\n",
                 "Decision queue:\n" +
@@ -538,11 +539,11 @@ data class GameState(
         operator fun Regex.contains(text: CharSequence): Boolean = this.matches(text)
 
         fun loadFromJson(obj: JSONObject): GameState {
-            val availableProgressTokens = Deck.loadFromJson(obj.getJSONObject("available_progress_tokens"))
-            val discardedProgressTokens = Deck.loadFromJson(obj.getJSONObject("discarded_progress_tokens"))
-            val wondersForPick = Deck.loadFromJson(obj.getJSONObject("wonders_for_pick"))
-            val discardedWonders = Deck.loadFromJson(obj.getJSONObject("unused_wonders"))
-            val burnedCards = Deck.loadFromJson(obj.getJSONObject("burned_cards"))
+            val availableProgressTokens = loadDeckFromJson(obj.getJSONObject("available_progress_tokens"))
+            val discardedProgressTokens = loadDeckFromJson(obj.getJSONObject("discarded_progress_tokens"))
+            val wondersForPick = loadDeckFromJson(obj.getJSONObject("wonders_for_pick"))
+            val discardedWonders = loadDeckFromJson(obj.getJSONObject("unused_wonders"))
+            val burnedCards = loadDeckFromJson(obj.getJSONObject("burned_cards"))
             val militaryBoard = MilitaryBoard.loadFromJson(obj.getJSONObject("military_board"))
             val cardStructure = CardStructure.loadFromJson(obj.getJSONObject("card_structure"))
             val player1City = PlayerCity.loadFromJson(obj.getJSONObject("player_1_city"))
@@ -653,6 +654,21 @@ data class GameState(
         }
     }
 
+}
+
+fun loadDeckFromJson(obj: JSONObject): Deck<Card> {
+    val name = obj.getString("name")
+    val groupsObj = obj.getJSONArray("groups")
+    val groups = Vector.ofAll(groupsObj.map { groupObj ->
+        groupObj as JSONObject
+        val discarded = groupObj.getInt("discarded")
+        val cardsObj = groupObj.getJSONArray("cards")
+        val cards = Vector.ofAll(cardsObj.map {
+            CardFactory.getByName(it as String)
+        })
+        Pair(cards, discarded)
+    })
+    return Deck(name, groups)
 }
 
 /**

@@ -1,6 +1,7 @@
 package com.aigamelabs.swduel
 
 import com.aigamelabs.swduel.enums.CardGroup
+import com.aigamelabs.utils.Deck
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.utils.Graph
 import io.vavr.collection.Vector
@@ -8,7 +9,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import javax.json.stream.JsonGenerator
 
-class CardStructure(var graph: Graph<CardPlaceholder>, var faceDownPool: Deck) {
+class CardStructure(var graph: Graph<CardPlaceholder>, var faceDownPool: Deck<Card>) {
     fun pickUpCard(card: Card, generator : RandomWithTracker) : CardStructure{
         val i = graph.vertices.indexOf(card)
         if (i == -1) {
@@ -81,7 +82,7 @@ class CardStructure(var graph: Graph<CardPlaceholder>, var faceDownPool: Deck) {
 
     companion object {
         fun loadFromJson(obj: JSONObject): CardStructure {
-            val faceDownPool = Deck.loadFromJson(obj.getJSONObject("face_down_pool"))
+            val faceDownPool = loadDeckFromJson(obj.getJSONObject("face_down_pool"))
 
             val graphObj = obj.getJSONObject("graph")
             val verticesObj = graphObj.getJSONArray("vertices")

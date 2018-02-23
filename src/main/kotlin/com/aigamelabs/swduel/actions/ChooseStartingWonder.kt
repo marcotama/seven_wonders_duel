@@ -5,6 +5,7 @@ import com.aigamelabs.game.Decision
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.swduel.*
 import com.aigamelabs.game.PlayerTurn
+import com.aigamelabs.utils.Deck
 import io.vavr.collection.Vector
 import java.util.logging.Logger
 
@@ -74,7 +75,7 @@ class ChooseStartingWonder(player: PlayerTurn, val card : Card) : Action<GameSta
 
     }
 
-    private fun createDecision(playerTurn: PlayerTurn, wondersForPickDeck : Deck) : Decision<GameState> {
+    private fun createDecision(playerTurn: PlayerTurn, wondersForPickDeck : Deck<Card>) : Decision<GameState> {
         // Create decision
         val options : Vector<Action<GameState>> = wondersForPickDeck.cards
                 .map { ChooseStartingWonder(playerTurn, it) }
