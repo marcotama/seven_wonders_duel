@@ -124,7 +124,7 @@ class UctWorker<T: AbstractGameState<T>>(private var manager: UctParallelization
 
         // Apply random actions to the playout
         while (!gameState.isGameOver()) {
-            val dequeueOutcome = gameState.dequeAction()
+            val dequeueOutcome = gameState.dequeDecision()
             gameState = dequeueOutcome.first
             val decision = dequeueOutcome.second
             val options = decision.options

@@ -138,7 +138,7 @@ class TreeNode<T: AbstractGameState<T>>(
         if (gameState!!.isQueueEmpty())
             return
 
-        val (unqueuedGameState, decision) = gameState.dequeAction() // Non-stochastic nodes always have a game state
+        val (unqueuedGameState, decision) = gameState.dequeDecision() // Non-stochastic nodes always have a game state
 
         children = HashMap()
 
@@ -146,7 +146,7 @@ class TreeNode<T: AbstractGameState<T>>(
             val updatedGameState =  unqueuedGameState.applyAction(action, generator)
 
             val childType = if (!updatedGameState.isGameOver()) {
-                val childGameStatePlayer = updatedGameState.dequeAction().second.player
+                val childGameStatePlayer = updatedGameState.dequeDecision().second.player
                 when (childGameStatePlayer) {
                     manager.player -> NodeType.PLAYER_NODE
                     else -> NodeType.OPPONENT_NODE
@@ -181,7 +181,7 @@ class TreeNode<T: AbstractGameState<T>>(
 
         // Re-apply parent action to parent game state to sample another game state for the child
         val parent = parent!! // Root is never stochastic, so all stochastic nodes have a parent
-        val unqueuedParentGameState = parent.gameState!!.dequeAction().first // Stochastic nodes have non-stochastic parents, which always have a game state
+        val unqueuedParentGameState = parent.gameState!!.dequeDecision().first // Stochastic nodes have non-stochastic parents, which always have a game state
         val updatedGameState = unqueuedParentGameState.applyAction(selectedAction!!, generator)
 
         // The random integers identify the child
@@ -195,7 +195,7 @@ class TreeNode<T: AbstractGameState<T>>(
             val childType = if (updatedGameState.isGameOver())
                 NodeType.TERMINAL_NODE
             else {
-                val childGameStatePlayer = updatedGameState.dequeAction().second.player
+                val childGameStatePlayer = updatedGameState.dequeDecision().second.player
                 when (childGameStatePlayer) {
                     manager.player -> NodeType.PLAYER_NODE
                     else -> NodeType.OPPONENT_NODE

@@ -6,10 +6,11 @@ import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.myfish.GameState
 import java.util.logging.Logger
 
-class MoveTo(playerTurn: PlayerTurn, private val penguinId: Int, private val location: Triple<Int, Int, Int>) : Action<GameState>(playerTurn) {
+class MovePenguin(player: PlayerTurn, private val penguinId: Int, private val location: Triple<Int, Int, Int>) : Action<GameState>(player) {
     override fun process(gameState: GameState, generator : RandomWithTracker, logger: Logger?) : GameState {
-        // TODO
         return gameState
+                .movePenguin(player, penguinId, location)
+                .addChoosePenguinDecision(player)
     }
 
     override fun toString(): String {

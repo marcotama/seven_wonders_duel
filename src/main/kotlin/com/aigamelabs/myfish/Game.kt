@@ -30,7 +30,7 @@ import javax.json.stream.JsonGenerator
  */
 class Game(gameId: String, private val players : Map<PlayerTurn, Player<GameState>>, logPath: String) {
 
-    private val logger = Logger.getLogger("SevenWondersDuel_Messages")
+    private val logger = Logger.getLogger("ThatsMyFish_Messages")
 
     init {
 
@@ -78,7 +78,7 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player<GameStat
             jsonGen.writeEnd()
 
             // Determine winner
-            val gameOutcome = gameState.calculateWinner(logger)
+            val gameOutcome = gameState.calcWinner(logger)
             val winners = gameOutcome._1
             val p1Score = gameOutcome._2
             val p2Score = gameOutcome._3
@@ -107,7 +107,7 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player<GameStat
     private fun iterate(gameState: GameState, generator: RandomWithTracker): GameState {
 
         // Dequeue decision and enqueue the next one
-        var (gameState_, thisDecision) = gameState.dequeAction()
+        var (gameState_, thisDecision) = gameState.dequeDecision()
 
         val action = if (thisDecision.options.size() > 1) {
             // Query player for action

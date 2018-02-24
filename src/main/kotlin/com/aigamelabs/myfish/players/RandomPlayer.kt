@@ -10,7 +10,7 @@ class RandomPlayer(name: String, gameData: GameData) : Player<GameState>(name, g
     private val generator = Random()
 
     override fun decide(gameState: GameState): Action<GameState> {
-        val (_, thisDecision) = gameState.dequeAction()
+        val (_, thisDecision) = gameState.dequeDecision()
         val options = thisDecision.options
         return options[generator.nextInt(options.size())]
     }

@@ -6,13 +6,17 @@ import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.myfish.GameState
 import java.util.logging.Logger
 
-class PlacePenguin(playerTurn: PlayerTurn, private val penguinId: Int, private val location: Triple<Int, Int, Int>) : Action<GameState>(playerTurn) {
+class PlacePenguin(player: PlayerTurn, private val location: Triple<Int, Int, Int>) : Action<GameState>(player) {
     override fun process(gameState: GameState, generator : RandomWithTracker, logger: Logger?) : GameState {
-        // TODO
+        val penguinId = gameState.penguins
+                .get(player)
+                .getOrElseThrow { Exception("There is no such player: $player") }
+                .size()
         return gameState
+                .placePenguin(player, penguinId, location)
     }
 
     override fun toString(): String {
-        return "Move penguin $penguinId to location $location"
+        return "Place penguin to location $location"
     }
 }

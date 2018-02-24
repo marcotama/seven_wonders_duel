@@ -40,7 +40,7 @@ class KeyboardPlayer(
     )
 
     override fun decide(gameState: GameState): Action<GameState> {
-        val (_, thisDecision) = gameState.dequeAction()
+        val (_, thisDecision) = gameState.dequeDecision()
         val options = thisDecision.options
         println("Decide one of the following options:")
         println("  0. Run MCTS and print analysis")

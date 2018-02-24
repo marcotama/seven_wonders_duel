@@ -262,7 +262,7 @@ data class GameState(
      * Deques a decision and returns the updated game state (without the decision in the queue) and the extracted
      * decision.
      */
-    override fun dequeAction() : Pair<GameState, Decision<GameState>> {
+    override fun dequeDecision() : Pair<GameState, Decision<GameState>> {
         val dequeueOutcome = decisionQueue.dequeue()
         val thisDecision = dequeueOutcome._1
         val updatedDecisionsQueue = dequeueOutcome._2
@@ -456,7 +456,7 @@ data class GameState(
     fun addSelectWonderToBuildDecision(player: PlayerTurn): GameState {
         val playerCity = getPlayerCity(player)
         val opponentCity = getPlayerCity(player.opponent())
-        val options: HashSet<Action<GameState>> = playerCity.unbuiltWonders
+        val options = playerCity.unbuiltWonders
                 .filter { playerCity.canBuild(it, opponentCity) != null }
                 .map { BuildWonder(player, it) }
         val decision = Decision(player, Vector.ofAll(options))

@@ -117,7 +117,7 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player<GameStat
     private fun iterate(gameState: GameState, generator: RandomWithTracker): GameState {
 
         // Dequeue decision and enqueue the next one
-        var (gameState_, thisDecision) = gameState.dequeAction()
+        var (gameState_, thisDecision) = gameState.dequeDecision()
 
         val action = if (thisDecision.options.size() > 1) {
             // Query player for action
