@@ -23,6 +23,7 @@ import java.util.*
 import java.util.logging.Level
 import java.util.logging.Logger
 import javax.json.stream.JsonGenerator
+import kotlin.collections.ArrayList
 
 
 data class GameState(
@@ -158,28 +159,37 @@ data class GameState(
     }
 
     private fun canPenguinMove(location: Triple<Int, Int, Int>): Boolean {
+        val allPenguinLocations = Stream.concat(penguins.values().map { it.values() }).toSet()
         return directions
                 .toStream()
-                .map { board[location + it].getOrElse(BoardTile.EATEN_TILE) }
-                .any { it != BoardTile.EATEN_TILE}
+                .any {
+                    val loc = location + it
+                    when {
+                        !board.containsKey(loc) -> false // off the board
+                        board[loc].getOrElse(BoardTile.EATEN_TILE) == BoardTile.EATEN_TILE -> false // previously eaten
+                        allPenguinLocations.contains(loc) -> false // other penguin on the tile
+                        else -> true
+                    }
+                }
     }
 
     private fun getAvailableDestinations(location: Triple<Int, Int, Int>): List<Triple<Int,Int,Int>> {
+        val allPenguinLocations = Stream.concat(penguins.values().map { it.values() }).toSet()
+
         return Stream.concat(
                 directions.map { dir ->
                     val firstMissing =
                             (1 until 8)
                                     .find {
                                         val loc =  location + dir * it
-                                        val onTheBoard = board.containsKey(loc)
-                                        if (onTheBoard)
-                                            false
-                                        else {
-                                            val tile = board[loc].getOrElse(BoardTile.EATEN_TILE)
-                                            tile == BoardTile.EATEN_TILE
+                                        when {
+                                            !board.containsKey(loc) -> true // off the board
+                                            board[loc].getOrElse(BoardTile.EATEN_TILE) == BoardTile.EATEN_TILE -> true // previously eaten
+                                            allPenguinLocations.contains(loc) -> true // other penguin on the tile
+                                            else -> false
                                         }
                                     }
-                    (1 until (firstMissing ?: 8) - 1)
+                    (1 until (firstMissing ?: 8))
                             .map { location + dir * it }
                 }
         ).toList()
@@ -195,8 +205,10 @@ data class GameState(
 
     fun addPlacePenguinDecision(curPlayer: PlayerTurn): GameState {
         val player = curPlayer.next(numPlayers)
+        val allPenguinLocations = Stream.concat(penguins.values().map { it.values() }).toSet()
         val options = getAvailableTiles()
                 .toStream()
+                .filter { !allPenguinLocations.contains(it) }
                 .map { PlacePenguin(player, it) }
                 .toVector()
             val decision = Decision(player, options)
@@ -208,8 +220,10 @@ data class GameState(
         return if (player == null)
             update(gamePhase_ = GamePhase.GAME_OVER)
         else {
+            val playerPenguins = penguins[player].getOrElseThrow { Exception("No such player: $player") }
             val options = getPlayerPenguinsId(player)
                     .toStream()
+                    .filter { canPenguinMove(playerPenguins[it].getOrElseThrow { Exception("No such penguin: $it")}) }
                     .map { ChoosePenguin(player, it) }
                     .toVector()
             val decision = Decision(player, options)
@@ -366,9 +380,9 @@ data class GameState(
                             .map {
                                 (it as JSONObject)
                                 val coords = it.getJSONArray("coords")
-                                val x = (coords[0] as String).toInt()
-                                val y = (coords[1] as String).toInt()
-                                val z = (coords[2] as String).toInt()
+                                val x = coords[0] as Int
+                                val y = coords[1] as Int
+                                val z = coords[2] as Int
                                 val tile = when (it.getString("tile")) {
                                     "TILE_WITH_1_FISH" -> BoardTile.TILE_WITH_1_FISH
                                     "TILE_WITH_2_FISHES" -> BoardTile.TILE_WITH_2_FISHES
@@ -383,12 +397,12 @@ data class GameState(
             val penguins = HashMap.ofAll(penguinsObj.toMap()
                     .map { playerPenguins ->
                         val player = getPlayerFromString(playerPenguins.key)
-                        val penguinsCoords = HashMap.ofAll((playerPenguins.value as JSONArray)
+                        val penguinsCoords = HashMap.ofAll((playerPenguins.value as ArrayList<*>)
                                 .mapIndexed { i, it ->
-                                    val coords = it as JSONArray
-                                    val x = (coords[0] as String).toInt()
-                                    val y = (coords[1] as String).toInt()
-                                    val z = (coords[2] as String).toInt()
+                                    it as ArrayList<*>
+                                    val x = it[0] as Int
+                                    val y = it[1] as Int
+                                    val z = it[2] as Int
                                     Pair(i, Triple(x, y, z))
                                 }.toMap())
 
@@ -399,13 +413,13 @@ data class GameState(
 
             val scoreObj = obj.getJSONObject("score")
             val score = HashMap.ofAll(scoreObj.toMap()
-                    .map { Pair(getPlayerFromString(it.key), (it.value as String).toInt()) }
+                    .map { Pair(getPlayerFromString(it.key), (it.value as Int)) }
                     .toMap()
             )
 
-            val placePenguinPattern = Regex("Place penguin to location \\((\\d+), (\\d+), (\\d+)\\)")
+            val placePenguinPattern = Regex("Place penguin to location \\(([-0-9]+), ([-0-9]+), ([-0-9]+)\\)")
             val choosePenguinPattern = Regex("Choose penguin (\\d+) for next move")
-            val movePenguinPattern = Regex("Move penguin (\\d+) to location \\((\\d+), (\\d+), (\\d+)\\)")
+            val movePenguinPattern = Regex("Move penguin (\\d+) to location \\(([-0-9]+), ([-0-9]+), ([-0-9]+)\\)")
 
             val decisionQueue = Queue.ofAll<Decision<GameState>>(obj.getJSONArray("decision_queue").map { decisionObj ->
                 decisionObj as JSONObject
@@ -424,10 +438,10 @@ data class GameState(
                             ChoosePenguin(player, penguinId)
                         }
                         in movePenguinPattern -> {
-                            val penguinId = choosePenguinPattern.matchEntire(option)!!.groupValues[1].toInt()
-                            val x = placePenguinPattern.matchEntire(option)!!.groupValues[2].toInt()
-                            val y = placePenguinPattern.matchEntire(option)!!.groupValues[3].toInt()
-                            val z = placePenguinPattern.matchEntire(option)!!.groupValues[4].toInt()
+                            val penguinId = movePenguinPattern.matchEntire(option)!!.groupValues[1].toInt()
+                            val x = movePenguinPattern.matchEntire(option)!!.groupValues[2].toInt()
+                            val y = movePenguinPattern.matchEntire(option)!!.groupValues[3].toInt()
+                            val z = movePenguinPattern.matchEntire(option)!!.groupValues[4].toInt()
                             MovePenguin(player, penguinId, Triple(x, y, z))
                         }
                         else -> throw Exception("Action $option not found")

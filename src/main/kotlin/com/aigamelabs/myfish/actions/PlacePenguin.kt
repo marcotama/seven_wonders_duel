@@ -4,6 +4,7 @@ import com.aigamelabs.game.Action
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.myfish.GameState
+import com.aigamelabs.myfish.next
 import java.util.logging.Logger
 
 class PlacePenguin(player: PlayerTurn, private val location: Triple<Int, Int, Int>) : Action<GameState>(player) {
@@ -15,15 +16,12 @@ class PlacePenguin(player: PlayerTurn, private val location: Triple<Int, Int, In
             4 -> 2
             else -> throw Exception("Number of players not allowed: ${gameState.numPlayers}")
         }
-        val placementDone = gameState.penguins.keySet()
-                .all {
-                    val playerPenguins = gameState.penguins
-                            .get(it)
-                            .getOrElseThrow { Exception("There is no such player: $player") }
-                            .size()
-                    playerPenguins == targetNumPenguins
-                }
-
+        val nextPlayer = player.next(gameState.numPlayers)
+        val nextPlayerNumPenguins = gameState.penguins
+                .get(nextPlayer)
+                .getOrElseThrow { Exception("There is no such player: $player") }
+                .size()
+        val placementDone = nextPlayerNumPenguins == targetNumPenguins
 
         val penguinId = gameState.penguins
                 .get(player)

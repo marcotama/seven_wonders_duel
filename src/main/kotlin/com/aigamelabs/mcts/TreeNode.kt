@@ -147,13 +147,10 @@ class TreeNode<T: AbstractGameState<T>>(
         decision.options.forEachIndexed { index, action ->
             val updatedGameState =  unqueuedGameState.applyAction(action, generator)
 
-            val childPlayer = updatedGameState.dequeDecision().second.player
-
-            val childType = if (!updatedGameState.isGameOver()) {
-                NodeType.PLAYER_NODE
-            }
+            val (childType, childPlayer) = if (updatedGameState.isGameOver())
+                Pair(NodeType.TERMINAL_NODE, null)
             else
-                NodeType.TERMINAL_NODE
+                Pair(NodeType.PLAYER_NODE, updatedGameState.dequeDecision().second.player)
 
             // If new game state was generated deterministically
             if (generator.isEmpty()) {
@@ -192,11 +189,11 @@ class TreeNode<T: AbstractGameState<T>>(
             Pair(childId, null)
         }
         else {
-            val childType = if (updatedGameState.isGameOver())
-                NodeType.TERMINAL_NODE
+
+            val (childType, childPlayer) = if (updatedGameState.isGameOver())
+                Pair(NodeType.TERMINAL_NODE, null)
             else
-                NodeType.PLAYER_NODE
-            val childPlayer = updatedGameState.dequeDecision().second.player
+                Pair(NodeType.PLAYER_NODE, updatedGameState.dequeDecision().second.player)
 
             Pair(childId, TreeNode(this, childType, childPlayer, null, updatedGameState, manager))
         }
