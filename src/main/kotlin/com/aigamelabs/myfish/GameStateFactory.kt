@@ -26,19 +26,14 @@ object GameStateFactory {
                 .map { PlacePenguin(PlayerTurn.PLAYER_1, it) })
         val decision = Decision(PlayerTurn.PLAYER_1, actions)
 
-        val players = when (numberOfPlayers) {
-            2 -> HashSet.of(PlayerTurn.PLAYER_1, PlayerTurn.PLAYER_2)
-            3 -> HashSet.of(PlayerTurn.PLAYER_1, PlayerTurn.PLAYER_2, PlayerTurn.PLAYER_3)
-            4 -> HashSet.of(PlayerTurn.PLAYER_1, PlayerTurn.PLAYER_2, PlayerTurn.PLAYER_3, PlayerTurn.PLAYER_4)
-            else -> throw Exception("This game cannot have $numberOfPlayers players")
-        }
+        val players = HashSet.ofAll(PlayerTurn.getPlayers(numberOfPlayers))
 
         return GameState(
                 board = board,
                 decisionQueue = Queue.of(decision),
                 gamePhase = GamePhase.PENGUINS_PLACEMENT,
                 nextPlayer = PlayerTurn.PLAYER_1,
-                penguins = HashMap.empty<PlayerTurn,HashMap<Int,Triple<Int,Int,Int>>>(),
+                penguins = HashMap.ofAll(players.map { Pair(it, HashMap.empty<Int,Triple<Int,Int,Int>>()) }.toMap() ),
                 score = HashMap.ofAll(players.map { Pair(it, 0) }.toMap())
         )
     }

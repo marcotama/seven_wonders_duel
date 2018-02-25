@@ -20,10 +20,8 @@ abstract class MctsBasedBot<T: AbstractGameState<T>>(
         private val gameId: String,
         gameData: GameData,
         actionSelector: (Array<TreeNode<T>>) -> Int,
-        playerNodeEvaluator: (Double) -> Double,
-        opponentNodeEvaluator: (Double) -> Double,
-        playerStateEvaluator: (T) -> Double,
-        opponentStateEvaluator: (T) -> Double,
+        nodeEvaluators: Map<PlayerTurn, (Double) -> Double>,
+        stateEvaluators: Map<PlayerTurn, (T) -> Double>,
         private val outPath: String? = null
 ) : Player<T>(playerId, gameData) {
 
@@ -41,10 +39,8 @@ abstract class MctsBasedBot<T: AbstractGameState<T>>(
     private var manager = UctParallelizationManager(
             player,
             actionSelector,
-            playerNodeEvaluator,
-            opponentNodeEvaluator,
-            playerStateEvaluator,
-            opponentStateEvaluator,
+            nodeEvaluators,
+            stateEvaluators,
             outPath,
             exportTree,
             gameId,
@@ -74,8 +70,9 @@ abstract class MctsBasedBot<T: AbstractGameState<T>>(
         // Open root object
         generator?.writeStartObject()
 
-        generator?.write("player_1_controller", gameData.player1Controller)
-        generator?.write("player_2_controller", gameData.player2Controller)
+        generator?.writeStartArray("controllers")
+        gameData.controllers.forEach { generator?.write(it) }
+        generator?.writeEnd()
 
         // Open games array
         generator?.writeStartArray("games")

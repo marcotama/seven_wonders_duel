@@ -8,24 +8,7 @@ import java.util.logging.Logger
 
 class ChoosePenguin(player: PlayerTurn, private val penguinId: Int) : Action<GameState>(player) {
     override fun process(gameState: GameState, generator : RandomWithTracker, logger: Logger?) : GameState {
-        val targetNumPenguins = when (gameState.numPlayers) {
-            2 -> 4
-            3 -> 3
-            4 -> 2
-            else -> throw Exception("Number of players not allowed: ${gameState.numPlayers}")
-        }
-        val placementDone = gameState.penguins.keySet()
-                .all {
-                    val playerPenguins = gameState.penguins
-                            .get(it)
-                            .getOrElseThrow { Exception("There is no such player: $player") }
-                            .size()
-                    playerPenguins == targetNumPenguins
-                }
-        return if (placementDone)
-            gameState.addMovePenguinDecision(player, penguinId)
-        else
-            gameState.addPlacePenguinDecision(player)
+        return gameState.addMovePenguinDecision(player, penguinId)
     }
 
     override fun toString(): String {

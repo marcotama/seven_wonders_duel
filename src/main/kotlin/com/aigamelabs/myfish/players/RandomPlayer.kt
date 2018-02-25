@@ -3,7 +3,7 @@ package com.aigamelabs.myfish.players
 import com.aigamelabs.game.Action
 import com.aigamelabs.game.GameData
 import com.aigamelabs.game.Player
-import com.aigamelabs.swduel.GameState
+import com.aigamelabs.myfish.GameState
 import java.util.*
 
 class RandomPlayer(name: String, gameData: GameData) : Player<GameState>(name, gameData) {

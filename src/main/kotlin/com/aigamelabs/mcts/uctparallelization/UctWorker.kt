@@ -1,6 +1,7 @@
 package com.aigamelabs.mcts.uctparallelization
 
 import com.aigamelabs.game.AbstractGameState
+import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.mcts.NodeType
 import com.aigamelabs.utils.Util
@@ -30,21 +31,13 @@ class UctWorker<T: AbstractGameState<T>>(private var manager: UctParallelization
     /**
      * Returns the score of a node.
      *
-     * @param gameState used for evaluation
-     * @return The score of a node
-     */
-    private fun getPlayerScore(gameState: T): Double {
-        return manager.playerStateEvaluator(gameState)
-    }
-
-    /**
-     * Returns the score of a node.
-     *
      * @param gameState FrameData used for evaluation
      * @return The score of a node
      */
-    private fun getOpponentScore(gameState: T): Double {
-        return manager.opponentStateEvaluator(gameState)
+    private fun getScores(gameState: T): Map<PlayerTurn,Double> {
+        return manager.stateEvaluators.map {
+            Pair(it.key, it.value(gameState))
+        }.toMap()
     }
 
 
@@ -102,11 +95,10 @@ class UctWorker<T: AbstractGameState<T>>(private var manager: UctParallelization
         // Run a playout
         val endGameState = playout(currentNode.gameState!!) // The while loop never quits on a stochastic node, and non-stochastic nodes have a game state
         // Calculate score for end game
-        val playerScore = getPlayerScore(endGameState)
-        val opponentScore = getOpponentScore(endGameState)
+        val newScores = getScores(endGameState)
         // Backpropagate
         while (true) {
-            currentNode.updateScore(playerScore, opponentScore)
+            currentNode.updateScores(newScores)
             if (currentNode.parent == null)
                 break
             currentNode = currentNode.parent!!

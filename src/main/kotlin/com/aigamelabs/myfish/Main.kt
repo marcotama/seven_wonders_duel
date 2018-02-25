@@ -1,9 +1,9 @@
-package com.aigamelabs.swduel
+package com.aigamelabs.myfish
 
 import com.aigamelabs.game.GameData
 import com.aigamelabs.game.Player
 import com.aigamelabs.game.PlayerTurn
-import com.aigamelabs.swduel.players.*
+import com.aigamelabs.myfish.players.*
 import com.aigamelabs.utils.RandomWithTracker
 import org.json.JSONObject
 import java.io.IOException
@@ -93,9 +93,6 @@ class Main {
         private fun getPlayer(player: PlayerTurn, playerClass: String, gameData: GameData, gameId: String, logsPath: String): Player<GameState> {
             return when (playerClass) {
                 "MCTS" -> MctsVictory(player, "MCTS", gameId, gameData, logsPath)
-                "MCTS_Civilian" -> MctsCivilian(player, "MCTS_CIV", gameId, gameData, logsPath)
-                "MCTS_Science" -> MctsScience(player, "MCTS_SCI", gameId, gameData, logsPath)
-                "MCTS_Military" -> MctsMilitary(player, "MCTS_MIL", gameId, gameData, logsPath)
                 "DDA" -> MctsDDA(player, "DDA(HS)", gameId, gameData, logsPath)
                 "Random" -> RandomPlayer("Random", gameData)
                 "Human" -> KeyboardPlayer(player, "Keyboard", gameId, gameData, logsPath)

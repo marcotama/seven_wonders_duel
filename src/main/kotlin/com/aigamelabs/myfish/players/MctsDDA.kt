@@ -1,9 +1,9 @@
-package com.aigamelabs.swduel.players
+package com.aigamelabs.myfish.players
 
 import com.aigamelabs.game.GameData
 import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.mcts.*
-import com.aigamelabs.swduel.GameState
+import com.aigamelabs.myfish.GameState
 
 class MctsDDA(
         player: PlayerTurn,

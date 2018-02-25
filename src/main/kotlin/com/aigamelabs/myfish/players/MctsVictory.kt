@@ -1,11 +1,11 @@
-package com.aigamelabs.swduel.players
+package com.aigamelabs.myfish.players
 
 import com.aigamelabs.game.GameData
 import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.mcts.*
-import com.aigamelabs.swduel.GameState
+import com.aigamelabs.myfish.GameState
 
-class MctsDDA(
+class MctsVictory(
         player: PlayerTurn,
         playerId: String,
         gameId: String,
@@ -18,12 +18,7 @@ class MctsDDA(
         gameData,
         ActionSelection.get(ActionSelector.HIGHEST_SCORE),
         PlayerTurn.getPlayers(gameData.controllers.size)
-                .map {
-                    if (player == it)
-                        Pair(it, NodeScoreMapping.get(NodeScoreMapper.DISTANCE_FROM_MIDPOINT))
-                    else
-                        Pair(it, NodeScoreMapping.get(NodeScoreMapper.IDENTITY))
-                }
+                .map { Pair(it, NodeScoreMapping.get(NodeScoreMapper.IDENTITY)) }
                 .toMap(),
         PlayerTurn.getPlayers(gameData.controllers.size)
                 .map { Pair(it, StateEvaluation.getVictoryEvaluator(it)) }

@@ -14,10 +14,8 @@ import java.util.logging.Logger
 abstract class Manager<T: AbstractGameState<T>>(
         val player: PlayerTurn,
         val actionSelector: (Array<TreeNode<T>>) -> Int,
-        val playerNodeEvaluator: (Double) -> Double,
-        val opponentNodeEvaluator: (Double) -> Double,
-        val playerStateEvaluator: (T) -> Double,
-        val opponentStateEvaluator: (T) -> Double,
+        val nodeEvaluators: Map<PlayerTurn, (Double) -> Double>,
+        val stateEvaluators: Map<PlayerTurn, (T) -> Double>,
         val outPath: String?,
         id: String?
 ) {

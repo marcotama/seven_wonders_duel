@@ -16,10 +16,8 @@ import java.util.concurrent.Executors
 class UctParallelizationManager<T: AbstractGameState<T>>(
         player: PlayerTurn,
         actionSelector: (Array<TreeNode<T>>) -> Int,
-        playerNodeEvaluator: (Double) -> Double,
-        opponentNodeEvaluator: (Double) -> Double,
-        playerStateEvaluator: (T) -> Double,
-        opponentStateEvaluator: (T) -> Double,
+        nodeEvaluators: Map<PlayerTurn, (Double) -> Double>,
+        stateEvaluators: Map<PlayerTurn, (T) -> Double>,
         outPath: String?,
         private val exportTree: Boolean,
         private val gameId: String?,
@@ -27,10 +25,8 @@ class UctParallelizationManager<T: AbstractGameState<T>>(
 ) : Manager<T>(
         player,
         actionSelector,
-        playerNodeEvaluator,
-        opponentNodeEvaluator,
-        playerStateEvaluator,
-        opponentStateEvaluator,
+        nodeEvaluators,
+        stateEvaluators,
         outPath,
         playerId
 ) {
@@ -63,7 +59,7 @@ class UctParallelizationManager<T: AbstractGameState<T>>(
      */
     override fun run(gameState: T): Action<T> {
         rootGameState = gameState
-        rootNode = TreeNode(null, NodeType.PLAYER_NODE, null, rootGameState!!, this)
+        rootNode = TreeNode(null, NodeType.PLAYER_NODE, player,null, rootGameState!!, this)
         rootNode!!.createChildren(generator)
 
         val timeout = System.nanoTime() + uctBudgetInNanoseconds

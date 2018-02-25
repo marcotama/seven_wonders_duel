@@ -29,10 +29,12 @@ class KeyboardPlayer(
     private var manager = UctParallelizationManager(
             player,
             ActionSelection.get(ActionSelector.HIGHEST_SCORE),
-            NodeScoreMapping.get(NodeScoreMapper.IDENTITY),
-            NodeScoreMapping.get(NodeScoreMapper.IDENTITY),
-            StateEvaluation.getVictoryEvaluator(player),
-            StateEvaluation.getVictoryEvaluator(player.opponent()),
+            PlayerTurn.getPlayers(gameData.controllers.size)
+                    .map { Pair(it, NodeScoreMapping.get(NodeScoreMapper.IDENTITY)) }
+                    .toMap(),
+            PlayerTurn.getPlayers(gameData.controllers.size)
+                    .map { Pair(it, StateEvaluation.getVictoryEvaluator(it)) }
+                    .toMap(),
             outPath,
             false,
             gameId,

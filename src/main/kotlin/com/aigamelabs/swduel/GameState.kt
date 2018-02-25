@@ -638,7 +638,7 @@ data class GameState(
                 "SCIENCE_SUPREMACY" -> GamePhase.SCIENCE_SUPREMACY
                 "MILITARY_SUPREMACY" -> GamePhase.MILITARY_SUPREMACY
                 "CIVILIAN_VICTORY" -> GamePhase.CIVILIAN_VICTORY
-                else -> throw Exception("Player unknown ${obj.getString("next_player")}")
+                else -> throw Exception("Game phase unknown ${obj.getString("game_phase")}")
             }
             return GameState(
                     availableProgressTokens = availableProgressTokens,

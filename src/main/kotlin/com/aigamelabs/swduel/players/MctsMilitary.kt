@@ -4,7 +4,6 @@ import com.aigamelabs.game.GameData
 import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.mcts.*
 import com.aigamelabs.swduel.GameState
-import com.aigamelabs.swduel.opponent
 
 class MctsMilitary(
         player: PlayerTurn,
@@ -18,9 +17,16 @@ class MctsMilitary(
         gameId,
         gameData,
         ActionSelection.get(ActionSelector.HIGHEST_SCORE),
-        NodeScoreMapping.get(NodeScoreMapper.IDENTITY),
-        NodeScoreMapping.get(NodeScoreMapper.IDENTITY),
-        StateEvaluation.getMilitarySupremacyEvaluator(player),
-        StateEvaluation.getMilitarySupremacyEvaluator(player.opponent()),
+        PlayerTurn.getPlayers(gameData.controllers.size)
+                .map { Pair(it, NodeScoreMapping.get(NodeScoreMapper.IDENTITY)) }
+                .toMap(),
+        PlayerTurn.getPlayers(gameData.controllers.size)
+                .map {
+                    if (player == it)
+                        Pair(it, StateEvaluation.getMilitarySupremacyEvaluator(it))
+                    else
+                        Pair(it, StateEvaluation.getVictoryEvaluator(it))
+                }
+                .toMap(),
         logFileName
 )

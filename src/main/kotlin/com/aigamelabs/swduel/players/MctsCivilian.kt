@@ -4,7 +4,6 @@ import com.aigamelabs.game.GameData
 import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.mcts.*
 import com.aigamelabs.swduel.GameState
-import com.aigamelabs.swduel.opponent
 
 class MctsCivilian(
         player: PlayerTurn,
@@ -18,9 +17,16 @@ class MctsCivilian(
         gameId,
         gameData,
         ActionSelection.get(ActionSelector.HIGHEST_SCORE),
-        NodeScoreMapping.get(NodeScoreMapper.IDENTITY),
-        NodeScoreMapping.get(NodeScoreMapper.IDENTITY),
-        StateEvaluation.getCivilianVictoryEvaluator(player),
-        StateEvaluation.getCivilianVictoryEvaluator(player.opponent()),
+        PlayerTurn.getPlayers(gameData.controllers.size)
+                .map { Pair(it, NodeScoreMapping.get(NodeScoreMapper.IDENTITY)) }
+                .toMap(),
+        PlayerTurn.getPlayers(gameData.controllers.size)
+                .map {
+                    if (player == it)
+                        Pair(it, StateEvaluation.getCivilianVictoryEvaluator(it))
+                    else
+                        Pair(it, StateEvaluation.getVictoryEvaluator(it))
+                }
+                .toMap(),
         logFileName
 )

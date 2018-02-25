@@ -17,6 +17,8 @@ import io.vavr.collection.HashSet
 import io.vavr.collection.List
 import io.vavr.collection.Queue
 import io.vavr.collection.Vector
+import org.json.JSONArray
+import org.json.JSONObject
 import java.util.*
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -166,18 +168,18 @@ data class GameState(
         return Stream.concat(
                 directions.map { dir ->
                     val firstMissing =
-                            (0 until 8)
+                            (1 until 8)
                                     .find {
                                         val loc =  location + dir * it
                                         val onTheBoard = board.containsKey(loc)
                                         if (onTheBoard)
                                             false
                                         else {
-                                            val tile = board[loc].getOrElse { throw Exception("No such tile") }
+                                            val tile = board[loc].getOrElse(BoardTile.EATEN_TILE)
                                             tile == BoardTile.EATEN_TILE
                                         }
                                     }
-                    (0 until firstMissing!! - 1)
+                    (1 until (firstMissing ?: 8) - 1)
                             .map { location + dir * it }
                 }
         ).toList()
@@ -265,22 +267,194 @@ data class GameState(
      * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
      */
     override fun toJson(generator: JsonGenerator, name: String?) {
-        // TODO
+        /*
+        val board: HashMap<Triple<Int, Int, Int>, BoardTile>,
+        */
+        if (name == null) generator.writeStartObject()
+        else generator.writeStartObject(name)
+
+        generator.writeStartArray("board")
+        board.forEach {
+            val coords = it._1
+            val tile = it._2
+            generator.writeStartObject()
+            generator.writeStartArray("coords")
+            generator.write(coords.first)
+            generator.write(coords.second)
+            generator.write(coords.third)
+            generator.writeEnd()
+            generator.write("tile", tile.toString())
+            generator.writeEnd()
+
+        }
+        generator.writeEnd()
+
+        generator.writeStartObject("penguins")
+        penguins.forEach { playerPenguins ->
+            generator.writeStartArray(playerPenguins._1.toString())
+            playerPenguins._2.forEach {
+                val penguinCoords = it._2
+                generator.writeStartArray()
+                generator.write(penguinCoords.first)
+                generator.write(penguinCoords.second)
+                generator.write(penguinCoords.third)
+                generator.writeEnd()
+            }
+            generator.writeEnd()
+        }
+        generator.writeEnd()
+
+        generator.writeStartObject("score")
+        score.forEach { generator.write(it._1.toString(), it._2) }
+        generator.writeEnd()
+
+        generator.writeStartArray("decision_queue")
+        decisionQueue.forEach { it.toJson(generator, null) }
+        generator.writeEnd()
+
+        generator.write("game_phase", gamePhase.toString())
+        generator.write("next_player", nextPlayer.toString())
+
+        generator.writeEnd()
     }
 
     override fun toString(): String {
-        // TODO
-        return ""
+
+        val ret = StringBuilder()
+        ret.append(
+                "Board:\n",
+                board.fold("", { acc, it ->
+                    val coords = it._1
+                    val tile = it._2
+                    "$acc\n  $coords: $tile"
+                }),
+                "Penguins:\n",
+                penguins.fold("", { acc, playerPenguins ->
+                    val player = playerPenguins._1
+                    val coords = playerPenguins._2
+                    val s = coords.fold("  $player>:\n", { acc2, it ->
+                        val penguinId = it._1
+                        val penguinCoords = it._2
+                        "$acc2    $penguinId: $penguinCoords"
+                    })
+                    "$acc$s"
+                }),
+                "Score:\n",
+                score.fold("", { acc, it ->
+                    val player = it._1
+                    val score = it._2
+                    "$acc\n  $player: $score"
+                }),
+                "Decision queue:\n",
+                decisionQueue.mapIndexed { index, decision -> "  #$index (${decision.player}) options:\n" +
+                        decision.options.fold("", { acc, s -> "$acc    $s\n"}) + "\n"
+                },
+                "Next player: $nextPlayer\n",
+                "Game phase: $gamePhase\n\n"
+        )
+        return ret.toString()
     }
 
     companion object {
         operator fun Regex.contains(text: CharSequence): Boolean = this.matches(text)
 
-        /*
+
         fun loadFromJson(obj: JSONObject): GameState {
-            // TODO
+
+            val boardObj = obj.getJSONArray("board")
+            val board = HashMap.ofAll((boardObj as JSONArray)
+                            .map {
+                                (it as JSONObject)
+                                val coords = it.getJSONArray("coords")
+                                val x = (coords[0] as String).toInt()
+                                val y = (coords[1] as String).toInt()
+                                val z = (coords[2] as String).toInt()
+                                val tile = when (it.getString("tile")) {
+                                    "TILE_WITH_1_FISH" -> BoardTile.TILE_WITH_1_FISH
+                                    "TILE_WITH_2_FISHES" -> BoardTile.TILE_WITH_2_FISHES
+                                    "TILE_WITH_3_FISHES" -> BoardTile.TILE_WITH_3_FISHES
+                                    "EATEN_TILE" -> BoardTile.EATEN_TILE
+                                    else -> throw Exception("Unknown tile")
+                                }
+                                Pair(Triple(x, y, z), tile)
+                            }.toMap())
+
+            val penguinsObj = obj.getJSONObject("penguins")
+            val penguins = HashMap.ofAll(penguinsObj.toMap()
+                    .map { playerPenguins ->
+                        val player = getPlayerFromString(playerPenguins.key)
+                        val penguinsCoords = HashMap.ofAll((playerPenguins.value as JSONArray)
+                                .mapIndexed { i, it ->
+                                    val coords = it as JSONArray
+                                    val x = (coords[0] as String).toInt()
+                                    val y = (coords[1] as String).toInt()
+                                    val z = (coords[2] as String).toInt()
+                                    Pair(i, Triple(x, y, z))
+                                }.toMap())
+
+                        Pair(player, penguinsCoords)
+                    }
+                    .toMap()
+            )
+
+            val scoreObj = obj.getJSONObject("score")
+            val score = HashMap.ofAll(scoreObj.toMap()
+                    .map { Pair(getPlayerFromString(it.key), (it.value as String).toInt()) }
+                    .toMap()
+            )
+
+            val placePenguinPattern = Regex("Place penguin to location \\((\\d+), (\\d+), (\\d+)\\)")
+            val choosePenguinPattern = Regex("Choose penguin (\\d+) for next move")
+            val movePenguinPattern = Regex("Move penguin (\\d+) to location \\((\\d+), (\\d+), (\\d+)\\)")
+
+            val decisionQueue = Queue.ofAll<Decision<GameState>>(obj.getJSONArray("decision_queue").map { decisionObj ->
+                decisionObj as JSONObject
+                val player = getPlayerFromString(decisionObj.getString("player"))
+                val options = Vector.ofAll(decisionObj.getJSONArray("options").map { option ->
+                    option as String
+                    when (option) {
+                        in placePenguinPattern -> {
+                            val x = placePenguinPattern.matchEntire(option)!!.groupValues[1].toInt()
+                            val y = placePenguinPattern.matchEntire(option)!!.groupValues[2].toInt()
+                            val z = placePenguinPattern.matchEntire(option)!!.groupValues[3].toInt()
+                            PlacePenguin(player, Triple(x, y, z))
+                        }
+                        in choosePenguinPattern -> {
+                            val penguinId = choosePenguinPattern.matchEntire(option)!!.groupValues[1].toInt()
+                            ChoosePenguin(player, penguinId)
+                        }
+                        in movePenguinPattern -> {
+                            val penguinId = choosePenguinPattern.matchEntire(option)!!.groupValues[1].toInt()
+                            val x = placePenguinPattern.matchEntire(option)!!.groupValues[2].toInt()
+                            val y = placePenguinPattern.matchEntire(option)!!.groupValues[3].toInt()
+                            val z = placePenguinPattern.matchEntire(option)!!.groupValues[4].toInt()
+                            MovePenguin(player, penguinId, Triple(x, y, z))
+                        }
+                        else -> throw Exception("Action $option not found")
+                    }
+                })
+                Decision(player, options)
+            })
+
+            val nextPlayer = getPlayerFromString(obj.getString("next_player"))
+
+            val gamePhase = when (obj.getString("game_phase")) {
+                "PENGUINS_PLACEMENT" -> GamePhase.PENGUINS_PLACEMENT
+                "FISHES_EATING" -> GamePhase.FISHES_EATING
+                "GAME_OVER" -> GamePhase.GAME_OVER
+                else -> throw Exception("Game phase unknown ${obj.getString("game_phase")}")
+            }
+
+            return GameState(
+                    board = board,
+                    penguins = penguins,
+                    score = score,
+                    decisionQueue = decisionQueue,
+                    gamePhase = gamePhase,
+                    nextPlayer = nextPlayer
+            )
         }
-        */
+
 
         fun generateBoard(generator: RandomWithTracker): HashMap<Triple<Int,Int,Int>,BoardTile> {
             val tokens = Stream.concat(
@@ -353,5 +527,16 @@ fun PlayerTurn.next(numPlayers: Int) : PlayerTurn {
             PlayerTurn.PLAYER_4 -> PlayerTurn.PLAYER_1
         }
         else -> throw Exception("Cannot have less than 2 or more than 4 players")
+    }
+}
+
+
+fun getPlayerFromString(s: String): PlayerTurn {
+    return when (s) {
+        "PLAYER_1" -> PlayerTurn.PLAYER_1
+        "PLAYER_2" -> PlayerTurn.PLAYER_2
+        "PLAYER_3" -> PlayerTurn.PLAYER_3
+        "PLAYER_4" -> PlayerTurn.PLAYER_4
+        else -> throw Exception("Player unknown $s")
     }
 }
