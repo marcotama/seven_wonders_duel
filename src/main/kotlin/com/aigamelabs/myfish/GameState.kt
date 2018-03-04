@@ -9,6 +9,7 @@ import com.aigamelabs.myfish.actions.MovePenguin
 import com.aigamelabs.myfish.actions.PlacePenguin
 import com.aigamelabs.myfish.enums.BoardTile
 import com.aigamelabs.myfish.enums.GamePhase
+import com.aigamelabs.myfish.enums.PenguinId
 import com.aigamelabs.utils.RandomWithTracker
 import io.vavr.Tuple5
 import io.vavr.collection.*
@@ -28,7 +29,7 @@ import kotlin.collections.ArrayList
 
 data class GameState(
         val board: HashMap<Triple<Int, Int, Int>, BoardTile>,
-        val penguins: HashMap<PlayerTurn,HashMap<Int,Triple<Int,Int,Int>>>,
+        val penguins: HashMap<PlayerTurn,HashMap<PenguinId,Triple<Int,Int,Int>>>,
         val score: HashMap<PlayerTurn,Int>,
         val decisionQueue: Queue<Decision<GameState>>,
         val gamePhase: GamePhase,
@@ -48,7 +49,7 @@ data class GameState(
 
     fun update(
             board_ : HashMap<Triple<Int, Int, Int>, BoardTile>? = null,
-            penguins_ : HashMap<PlayerTurn,HashMap<Int,Triple<Int,Int,Int>>>? = null,
+            penguins_ : HashMap<PlayerTurn,HashMap<PenguinId,Triple<Int,Int,Int>>>? = null,
             score_ : HashMap<PlayerTurn,Int>? = null,
             decisionQueue_ : Queue<Decision<GameState>>? = null,
             gamePhase_: GamePhase? = null,
@@ -79,7 +80,7 @@ data class GameState(
     /**
      * Enqueues a decision and returns the updated game state (with the decision in the queue).
      */
-    private fun enqueueDecision(decision: Decision<GameState>): GameState {
+    fun enqueueDecision(decision: Decision<GameState>): GameState {
         val updatedDecisionQueue = decisionQueue.insert(0, decision)
         return update(decisionQueue_ = updatedDecisionQueue)
     }
@@ -104,13 +105,13 @@ data class GameState(
         val boardTile = board[location].getOrElseThrow({Exception("Location $location does not exist")})!!
         return when (boardTile) {
             BoardTile.TILE_WITH_1_FISH -> 1
-            BoardTile.TILE_WITH_2_FISHES -> 2
-            BoardTile.TILE_WITH_3_FISHES -> 3
+            BoardTile.TILE_WITH_2_FISH -> 2
+            BoardTile.TILE_WITH_3_FISH -> 3
             BoardTile.EATEN_TILE -> throw Exception("The tile $location has been previously eaten")
         }
     }
 
-    fun placePenguin(player: PlayerTurn, penguinId: Int, location: Triple<Int,Int,Int>): GameState {
+    fun placePenguin(player: PlayerTurn, penguinId: PenguinId, location: Triple<Int,Int,Int>): GameState {
         val updatedPlayerPenguins = penguins
                 .get(player)
                 .getOrElseThrow { Exception("There is no such player: $player") }
@@ -119,7 +120,7 @@ data class GameState(
         return update(penguins_ = updatedPenguins)
     }
 
-    fun movePenguin(player: PlayerTurn, penguinId: Int, location: Triple<Int,Int,Int>): GameState {
+    fun movePenguin(player: PlayerTurn, penguinId: PenguinId, location: Triple<Int,Int,Int>): GameState {
         val oldPenguinLocation = penguins
                 .get(player)
                 .getOrElseThrow { Exception("There is no such player: $player") }
@@ -137,7 +138,7 @@ data class GameState(
         return update(board_ = updatedBoard, penguins_ = updatedPenguins, score_ = updatedScore)
     }
 
-    private fun getPlayerPenguinsId(player: PlayerTurn): List<Int> {
+    private fun getPlayerPenguinsId(player: PlayerTurn): List<PenguinId> {
         return penguins
                 .get(player)
                 .getOrElseThrow { Exception("There is no such player: $player") }
@@ -173,7 +174,7 @@ data class GameState(
                 }
     }
 
-    private fun getAvailableDestinations(location: Triple<Int, Int, Int>): List<Triple<Int,Int,Int>> {
+    fun getAvailableDestinations(location: Triple<Int, Int, Int>): List<Triple<Int,Int,Int>> {
         val allPenguinLocations = Stream.concat(penguins.values().map { it.values() }).toSet()
 
         return Stream.concat(
@@ -231,16 +232,13 @@ data class GameState(
         }
     }
 
-    fun addMovePenguinDecision(player: PlayerTurn, penguinId: Int): GameState {
+    fun addMovePenguinDecision(player: PlayerTurn, penguinId: PenguinId): GameState {
         val penguinLocation = penguins
                 .get(player)
                 .getOrElseThrow { Exception("There is no such player: $player") }
                 .get(penguinId)
                 .getOrElseThrow { Exception("There is no such penguin: $penguinId") }
-        val options = getAvailableDestinations(penguinLocation)
-                .toStream()
-                .map { MovePenguin(player, penguinId, it)}
-                .toVector()
+        val options = getAvailableDestinations(penguinLocation).toStream().map { MovePenguin(player, penguinId, it)}.toVector()
         val decision = Decision(player, options)
         return enqueueDecision(decision)
     }
@@ -274,6 +272,22 @@ data class GameState(
             logger?.log(Level.INFO, "Player 4 ate $p4Score fishes")
             return Tuple5(HashSet.ofAll(winners), p1Score, p2Score, p3Score, p4Score)
         }
+    }
+
+
+    fun isAnyPenguinOnTile(location: Triple<Int, Int, Int>): Boolean {
+        val allPenguinLocations = Stream.concat(penguins.values().map { it.values() }).toSet()
+        return allPenguinLocations.contains(location)
+    }
+
+    fun findPenguinOnTile(location: Triple<Int, Int, Int>):Pair<PlayerTurn, PenguinId>? {
+        penguins.forEach { playerPenguins ->
+            playerPenguins._2.forEach { penguinLocation ->
+                if (penguinLocation._2 == location)
+                    return Pair(playerPenguins._1, penguinLocation._1)
+            }
+        }
+        return null
     }
 
 
@@ -385,8 +399,8 @@ data class GameState(
                                 val z = coords[2] as Int
                                 val tile = when (it.getString("tile")) {
                                     "TILE_WITH_1_FISH" -> BoardTile.TILE_WITH_1_FISH
-                                    "TILE_WITH_2_FISHES" -> BoardTile.TILE_WITH_2_FISHES
-                                    "TILE_WITH_3_FISHES" -> BoardTile.TILE_WITH_3_FISHES
+                                    "TILE_WITH_2_FISH" -> BoardTile.TILE_WITH_2_FISH
+                                    "TILE_WITH_3_FISH" -> BoardTile.TILE_WITH_3_FISH
                                     "EATEN_TILE" -> BoardTile.EATEN_TILE
                                     else -> throw Exception("Unknown tile")
                                 }
@@ -400,10 +414,17 @@ data class GameState(
                         val penguinsCoords = HashMap.ofAll((playerPenguins.value as ArrayList<*>)
                                 .mapIndexed { i, it ->
                                     it as ArrayList<*>
+                                    val penguinId = when (i) {
+                                        0 -> PenguinId.A
+                                        1 -> PenguinId.B
+                                        2 -> PenguinId.C
+                                        3 -> PenguinId.D
+                                        else -> throw Exception("No such penguin: $i")
+                                    }
                                     val x = it[0] as Int
                                     val y = it[1] as Int
                                     val z = it[2] as Int
-                                    Pair(i, Triple(x, y, z))
+                                    Pair(penguinId, Triple(x, y, z))
                                 }.toMap())
 
                         Pair(player, penguinsCoords)
@@ -434,11 +455,25 @@ data class GameState(
                             PlacePenguin(player, Triple(x, y, z))
                         }
                         in choosePenguinPattern -> {
-                            val penguinId = choosePenguinPattern.matchEntire(option)!!.groupValues[1].toInt()
+                            val penguinStr = choosePenguinPattern.matchEntire(option)!!.groupValues[1]
+                            val penguinId = when (penguinStr) {
+                                "A" -> PenguinId.A
+                                "B" -> PenguinId.B
+                                "C" -> PenguinId.C
+                                "D" -> PenguinId.D
+                                else -> throw Exception("No such penguin: $penguinStr")
+                            }
                             ChoosePenguin(player, penguinId)
                         }
                         in movePenguinPattern -> {
-                            val penguinId = movePenguinPattern.matchEntire(option)!!.groupValues[1].toInt()
+                            val penguinStr = choosePenguinPattern.matchEntire(option)!!.groupValues[1]
+                            val penguinId = when (penguinStr) {
+                                "A" -> PenguinId.A
+                                "B" -> PenguinId.B
+                                "C" -> PenguinId.C
+                                "D" -> PenguinId.D
+                                else -> throw Exception("No such penguin: $penguinStr")
+                            }
                             val x = movePenguinPattern.matchEntire(option)!!.groupValues[2].toInt()
                             val y = movePenguinPattern.matchEntire(option)!!.groupValues[3].toInt()
                             val z = movePenguinPattern.matchEntire(option)!!.groupValues[4].toInt()
@@ -473,8 +508,8 @@ data class GameState(
         fun generateBoard(generator: RandomWithTracker): HashMap<Triple<Int,Int,Int>,BoardTile> {
             val tokens = Stream.concat(
                     (0 until 30).map { BoardTile.TILE_WITH_1_FISH },
-                    (0 until 20).map { BoardTile.TILE_WITH_2_FISHES },
-                    (0 until 20).map { BoardTile.TILE_WITH_2_FISHES }
+                    (0 until 20).map { BoardTile.TILE_WITH_2_FISH },
+                    (0 until 10).map { BoardTile.TILE_WITH_3_FISH }
             ).toMutableList()
 
             val entries = LinkedList<Pair<Triple<Int,Int,Int>,BoardTile>>()

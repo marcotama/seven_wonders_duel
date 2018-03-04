@@ -5,6 +5,7 @@ import com.aigamelabs.game.Decision
 import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.myfish.actions.PlacePenguin
 import com.aigamelabs.myfish.enums.GamePhase
+import com.aigamelabs.myfish.enums.PenguinId
 import com.aigamelabs.utils.RandomWithTracker
 import io.vavr.collection.HashSet
 import io.vavr.collection.HashMap
@@ -33,7 +34,7 @@ object GameStateFactory {
                 decisionQueue = Queue.of(decision),
                 gamePhase = GamePhase.PENGUINS_PLACEMENT,
                 nextPlayer = PlayerTurn.PLAYER_1,
-                penguins = HashMap.ofAll(players.map { Pair(it, HashMap.empty<Int,Triple<Int,Int,Int>>()) }.toMap() ),
+                penguins = HashMap.ofAll(players.map { Pair(it, HashMap.empty<PenguinId,Triple<Int,Int,Int>>()) }.toMap() ),
                 score = HashMap.ofAll(players.map { Pair(it, 0) }.toMap())
         )
     }
