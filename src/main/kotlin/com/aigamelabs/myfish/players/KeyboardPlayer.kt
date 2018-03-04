@@ -219,7 +219,7 @@ class KeyboardPlayer(
             board.printHex(lineOne, lineTwo, penguin, fill, col, row)
 
         }
-        System.out.print(board.prettPrint(false))
+        System.out.print(board.prettyPrint(false))
 
     }
 

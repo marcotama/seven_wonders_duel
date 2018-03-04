@@ -47,18 +47,12 @@ class AsciiBoard
  */
 (minQ: Int, maxQ: Int, minR: Int, maxR: Int, private val printer: AsciiHexPrinter) {
 
-    private val width: Int
-    private val height: Int
-    private val grid: CharGrid
-
-    init {
-        this.width = maxQ - minQ + 1
-        this.height = maxR - minR + 1
-        this.grid = createGrid()
-    }
+    private val width= maxQ - minQ + 1
+    private val height= maxR - minR + 1
+    private val grid = createGrid()
 
     private fun createGrid(): CharGrid {
-        // This potentially creates the grid ½ a hexagon to heigh or wide, as we do not now given the max coordinates
+        // This potentially creates the grid ½ a hexagon to height or wide, as we do not now given the max coordinates
         // (0,0,1,1) if both (0,1) or (1,1) is filled. This is OK, as we can fix it when outputting the grid.
         val gridSize = printer.getMapSizeInChars(width, height)
         return CharGrid(gridSize[0], gridSize[1])
@@ -76,7 +70,7 @@ class AsciiBoard
 
         val hex = printer.getHex(line1, line2, line3, fillerChar)
         val charCoordinates = printer.mapHexCoordsToCharCoords(hexQ, hexR)
-        val lines = hex.toString().split("\n".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()
+        val lines = hex.split("\n".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()
 
         for (i in lines.indices) {
             val content = lines[i]
@@ -85,8 +79,8 @@ class AsciiBoard
                 val y = charCoordinates[1] + i
 
                 // Only override empty spaces
-                if (grid.getChar(x, y) === ' ') {
-                    grid.addChar(x, y, content.get(j))
+                if (grid.getChar(x, y) == ' ') {
+                    grid.addChar(x, y, content[j])
                 }
             }
         }
@@ -97,7 +91,7 @@ class AsciiBoard
      *
      * @param wrapInBox If true, output is wrapped in a Ascii drawn box.
      */
-    fun prettPrint(wrapInBox: Boolean): String {
+    fun prettyPrint(wrapInBox: Boolean): String {
         return printBoard(wrapInBox)
     }
 
@@ -113,7 +107,7 @@ class AsciiBoard
 
             // Get content
             val lines = grid.print(true).split("\n")
-            val contentLength = if (lines.size > 0) lines[0].length else 0
+            val contentLength = if (lines.isNotEmpty()) lines[0].length else 0
             val verticalLine = getVerticalLine('=', contentLength)
             val spacerLine = getVerticalLine(' ', contentLength)
 

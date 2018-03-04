@@ -6,10 +6,9 @@ package com.aigamelabs.myfish.utils
  * (Top,Left) has coordinates (0,0).
  */
 class CharGrid(private val width: Int, private val height: Int) {
-    private val grid: Array<CharArray>
+    private val grid: Array<CharArray> = Array(this.height) { CharArray(this.width) }
 
     init {
-        grid = Array(this.height) { CharArray(this.width) }
         prefillGrid()
     }
 
@@ -21,20 +20,6 @@ class CharGrid(private val width: Int, private val height: Int) {
             for (j in 0 until width) {
                 addChar(j, i, ' ')
             }
-        }
-    }
-
-    /**
-     * Add a string to the grid.
-     *
-     * @param x Starting x coordinate.
-     * @param y Starting y coordinate.
-     * @param input String put input. String will not wrap, but throws IndexOutOfBounds if to long.
-     */
-    fun addString(x: Int, y: Int, input: String?) {
-        if (input == null || input == "") return
-        for (i in 0 until input.length) {
-            addChar(x + i, y, input[i])
         }
     }
 
