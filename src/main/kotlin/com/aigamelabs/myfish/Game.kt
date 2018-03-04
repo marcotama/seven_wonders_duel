@@ -45,11 +45,12 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player<GameStat
         fileHandler.level = level
         logger.addHandler(fileHandler)
 
+        /*
         val consoleHandler = ConsoleHandler()
         consoleHandler.formatter = MinimalFormatter()
         consoleHandler.level = level
         logger.addHandler(consoleHandler)
-
+        */
     }
 
     private val file = File(Paths.get(logPath, "${gameId}_game.json").toAbsolutePath().toString())
