@@ -10,7 +10,16 @@ import javax.json.Json
 import javax.json.stream.JsonGenerator
 
 /**
- * AI implementing MCTS (Monte Carlo tree search)
+ * An AI implementing MCTS (Monte Carlo tree search)
+ *
+ * @param player the player slot
+ * @param playerId an identifier for the player (used in the name of log files)
+ * @param gameId an identifier for the game (used in the name of log files)
+ * @param gameData information about the game
+ * @param actionSelector a function that chooses an action from a set
+ * @param nodeEvaluators functions that map a score to a value, one per player
+ * @param stateEvaluators function that map a node to a score, one per player
+ * @param outPath the path of a directory where logs will be stored
  *
  * @author Marco Tamassia
  */
@@ -31,6 +40,7 @@ abstract class MctsBasedBot<T: AbstractGameState<T>>(
     /** Flag indicating whether the JSON generator is open  */
     private var isJsonGeneratorOpen = false
 
+    /** The last action */
     private var lastAction : Action<T>? = null
 
     private val exportTree = false

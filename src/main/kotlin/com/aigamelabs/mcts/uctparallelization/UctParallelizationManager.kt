@@ -12,7 +12,19 @@ import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-
+/**
+ * Runs instances of MCTS using UCT parallelization. This consists in running more than one UCT iteration at a time.
+ * All UCT iterations work on the same tree, but their operations are synchronized.
+ *
+ * @param player the player that is running the tree
+ * @param actionSelector a function that chooses an action from a set
+ * @param nodeEvaluators functions that map a score to a value, one per player
+ * @param stateEvaluators function that map a node to a score, one per player
+ * @param outPath the path of a directory where logs will be stored
+ * @param exportTree if true, the tree will be exported in JSON format (for debug purposes)
+ * @param gameId an identifier for the game (used in the name of log files)
+ * @param playerId an identifier for the player (used in the name of log files)
+ */
 class UctParallelizationManager<T: AbstractGameState<T>>(
         player: PlayerTurn,
         actionSelector: (Array<TreeNode<T>>) -> Int,
@@ -30,7 +42,7 @@ class UctParallelizationManager<T: AbstractGameState<T>>(
         outPath,
         playerId
 ) {
-
+    /** A random generator */
     private val generator = RandomWithTracker(Random().nextLong())
 
     /** Workers  */
@@ -52,11 +64,6 @@ class UctParallelizationManager<T: AbstractGameState<T>>(
         executor.shutdown()
     }
 
-    /**
-     * Performs MCTS on this node.
-     *
-     * @return Action with the highest number of visits
-     */
     override fun run(gameState: T): Action<T> {
         rootGameState = gameState
         rootNode = TreeNode(null, NodeType.PLAYER_NODE, player,null, rootGameState!!, this)

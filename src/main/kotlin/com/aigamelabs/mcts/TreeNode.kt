@@ -13,7 +13,7 @@ import java.io.IOException
 import kotlin.math.roundToInt
 
 /**
- * Node used in MCTS
+ * Nodes used in MCTS trees.
  *
  * @author Marco Tamassia
  */
@@ -53,10 +53,11 @@ class TreeNode<T: AbstractGameState<T>>(
     /** Number of times this node was searched  */
     var games: Int = 0
 
-
+    /** A map containing the score of every player at this node */
     val playersScore = HashMap<PlayerTurn, Double>()
 
     // If this a player node, the parent is an opponent node and is trying to maximize the opponent score
+    /** Returns the score of `player` */
     val score: Double
         get() = when (parent!!.nodeType) {
             NodeType.PLAYER_NODE -> playersScore.getOrDefault(parent.player, 0.0)  // player node
@@ -64,6 +65,11 @@ class TreeNode<T: AbstractGameState<T>>(
             else -> Double.NaN  // terminal node
         }
 
+    /**
+     * Checks whether this node has had any children created.
+     *
+     * @return true if any child was create, false otherwise
+     */
     fun hasChildren(): Boolean {
         return children != null
     }
@@ -83,6 +89,11 @@ class TreeNode<T: AbstractGameState<T>>(
         return remappedScore / games + UCB_C * Math.sqrt(2 * Math.log(parent.games.toDouble()) / games)
     }
 
+    /**
+     * Updates the node scores by adding to each player a certain amount.
+     *
+     * @param newScore the quantities to be added to the score of each player
+     */
     @Synchronized
     fun updateScores(newScore: Map<PlayerTurn,Double>) {
         newScore.forEach {
@@ -95,6 +106,7 @@ class TreeNode<T: AbstractGameState<T>>(
 
     /**
      * Exports the tree starting from this node to a file in JSON format.
+     *
      * @param jsonName Name of the output file.
      */
     fun export(jsonName: String) {
@@ -119,6 +131,8 @@ class TreeNode<T: AbstractGameState<T>>(
 
     /**
      * Creates children for the current node, if the node has no children yet.
+     *
+     * @param generator a random generator
      */
     @Synchronized
     fun createChildren(generator: RandomWithTracker) {
@@ -170,6 +184,18 @@ class TreeNode<T: AbstractGameState<T>>(
         }
     }
 
+    /**
+     * Samples a child from a stochastic node. This is done by taking the parent's state and re-applying the node
+     * action. This produces a next state drawing from the distribution dictated by the game mechanics.
+     *
+     * @param generator a random generator
+     *
+     * @return a pair containing: 1) all the numbers that were drawn in the new state generation process (which are used
+     * as a unique identifier for the child) and 2) a node containing the new state, or null if that state has been
+     * already generated in some previous call to this method on this node
+     *
+     * @throws Exception if the node is not a stochastic node
+     */
     @Synchronized
     fun sampleChild(generator: RandomWithTracker): Pair<List<Int>,TreeNode<T>?> {
 
@@ -204,6 +230,12 @@ class TreeNode<T: AbstractGameState<T>>(
         /** The value of the constant C of UCB 1  */
         private const val UCB_C = 3.0
 
+        /**
+         * Exports the data of a node in JSON format.
+         *
+         * @param node the node to export
+         * @param generator the JSON generator to use to output the data
+         */
         @Synchronized
         private fun <T: AbstractGameState<T>> exportNode(node: TreeNode<T>, generator: JsonGenerator) {
             generator.writeStartObject()
@@ -233,6 +265,11 @@ class TreeNode<T: AbstractGameState<T>>(
         }
     }
 
+    /**
+     * Creates a human-readable string representation of the node.
+     *
+     * @return a string representation of the node
+     */
     override fun toString(): String {
         val builder = StringBuilder()
         children!!.values

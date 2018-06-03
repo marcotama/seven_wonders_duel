@@ -9,14 +9,23 @@ import java.util.*
 import java.util.logging.Level
 
 /**
- * Executes UCT on the given node.
+ * Executes UCT iterations.
+ *
+ * @param manager the manager of the MCTS execution
+ * @param workerId an identifier for this worker
  */
-class UctWorker<T: AbstractGameState<T>>(private var manager: UctParallelizationManager<T>, private val workerId: String) : Runnable {
+class UctWorker<T: AbstractGameState<T>>(
+        private var manager: UctParallelizationManager<T>,
+        private val workerId: String
+) : Runnable {
 
     var timeout: Long = 0
 
     private val generator = RandomWithTracker(Random().nextLong())
 
+    /**
+     * Runs UCT until a timeout is hit.
+     */
     override fun run() {
         while (System.nanoTime() <= timeout) {
             try {
@@ -108,7 +117,9 @@ class UctWorker<T: AbstractGameState<T>>(private var manager: UctParallelization
     /**
      * Performs a playout (a simulated execution of tree moves followed by random moves).
      *
-     * @return Result of the playout
+     * @param gameState_ the game state from which to start the random playout
+     *
+     * @return the result of the playout
      */
     private fun playout(gameState_: T): T {
 
