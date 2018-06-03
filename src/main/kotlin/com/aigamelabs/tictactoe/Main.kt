@@ -1,9 +1,9 @@
-package com.aigamelabs.myfish
+package com.aigamelabs.tictactoe
 
 import com.aigamelabs.game.GameData
 import com.aigamelabs.game.Player
 import com.aigamelabs.game.PlayerTurn
-import com.aigamelabs.myfish.players.*
+import com.aigamelabs.tictactoe.players.*
 import com.aigamelabs.utils.RandomWithTracker
 import org.json.JSONObject
 import java.io.IOException
@@ -69,7 +69,7 @@ class Main {
                 GameState.loadFromJson(JSONObject(content))
             }
             else
-                GameStateFactory.createNewGameState(generator)
+                GameStateFactory.createNewGameState()
 
 
             val gameId = SimpleDateFormat("yyyy-MM-dd HH.mm.ss").format(Calendar.getInstance().time)
