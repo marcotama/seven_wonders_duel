@@ -313,7 +313,6 @@ data class GameState(
             generator.writeEnd()
             generator.write("tile", tile.toString())
             generator.writeEnd()
-
         }
         generator.writeEnd()
 

@@ -2,15 +2,15 @@ package com.aigamelabs.terraforming
 
 import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.game.*
-import com.aigamelabs.terraforming.enums.TileType
+import com.aigamelabs.myfish.next
+import com.aigamelabs.terraforming.enums.*
 import com.aigamelabs.utils.Deck
-import io.vavr.collection.HashSet
+import io.vavr.collection.HashMap
 import io.vavr.collection.Queue
-import io.vavr.collection.Stream
 import io.vavr.collection.Vector
+import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
-import java.util.logging.Level
 import java.util.logging.Logger
 import javax.json.stream.JsonGenerator
 
@@ -21,15 +21,33 @@ data class GameState(
         val oxygen: Int,
         val temperature: Int,
         val board: HashMap<Triple<Int, Int, Int>, TileType>,
-        val discardedWonders: Deck<Card>,
-        val burnedCards: Deck<Card>,
-        val cardStructure : CardStructure?,
-        val militaryBoard: MilitaryBoard,
-        val player2City : PlayerState,
         val decisionQueue: Queue<Decision<GameState>>,
         val gamePhase: GamePhase,
         private val nextPlayer: PlayerTurn
 ): AbstractGameState<GameState>() {
+
+
+    fun update(
+            playerStates_ : HashMap<PlayerTurn,PlayerState>? = null,
+            oxygen_ : Int? = null,
+            temperature_ : Int? = null,
+            board_ : HashMap<Triple<Int, Int, Int>, TileType>? = null,
+            decisionQueue_ : Queue<Decision<GameState>>? = null,
+            gamePhase_: GamePhase? = null,
+            nextPlayer_: PlayerTurn? = null
+    ) : GameState {
+        return GameState(
+                playerStates_ ?: playerStates,
+                oxygen_ ?: oxygen,
+                temperature_ ?: temperature,
+                board_ ?: board,
+                decisionQueue_ ?: decisionQueue,
+                gamePhase_ ?: gamePhase,
+                nextPlayer_ ?: nextPlayer
+        )
+    }
+
+
     private val directions = Vector.of(
             Triple(+1,-1,0),
             Triple(+1,0,-1),
@@ -40,261 +58,40 @@ data class GameState(
     )
 
 
-    fun generateBoard(generator: RandomWithTracker): io.vavr.collection.HashMap<Triple<Int, Int, Int>, BoardTile> {
-        Vector.of(5, 6, 7, 8, 9, 8, 7, 6, 5)
+    fun generateBoard(generator: RandomWithTracker): io.vavr.collection.HashMap<Triple<Int, Int, Int>, TileType> {
+        val entries = LinkedList<Pair<Triple<Int,Int,Int>, TileType>>()
+        Vector.of(5, 6, 7, 8, 9)
                 .forEachIndexed { i, l ->
-                    val x = if (i % 2 == 0) -i + j else -i + j - 1
-                    val y = -i - j
-                    val z = -x - y
-                     {
-
+                    (0 until l).forEach { j ->
+                        val x = -i + j
+                        val y = l - 1 - j
+                        val z = -x - y
+                        entries.add(Pair(Triple(x,y,z), TileType.EMPTY))
                     }
                 }
-
-
-        val entries = LinkedList<Pair<Triple<Int,Int,Int>, BoardTile>>()
-        (0 until 4).forEach { i ->
-            (0 until 7).forEach { j ->
-                val iToken = generator.nextInt(tokens.size)
-                val token = tokens.removeAt(iToken)
-                entries.add(Pair(Triple(x,y,z), token))
-            }
-            (0 until 8).forEach { j ->
-                val x = -i + j - 1
-                val y = -i - j
-                val z = -x - y
-                val iToken = generator.nextInt(tokens.size)
-                val token = tokens.removeAt(iToken)
-                entries.add(Pair(Triple(x,y,z), token))
-            }
-        }
+        Vector.of(8, 7, 6, 5)
+                .forEachIndexed { i, l ->
+                    (0 until l).forEach { j ->
+                        val x = l - 1 + j
+                        val y = -i - j
+                        val z = -x - y
+                        entries.add(Pair(Triple(x,y,z), TileType.EMPTY))
+                    }
+                }
         return io.vavr.collection.HashMap.ofAll(entries.toMap())
     }
 
-    fun update(
-            activeScienceDeck_ : Deck<Card>? = null,
-            unusedScienceDeck_ : Deck<Card>? = null,
-            wondersForPickDeck_ : Deck<Card>? = null,
-            unusedWondersDeck_ : Deck<Card>? = null,
-            burnedDeck_ : Deck<Card>? = null,
-            cardStructure_ : CardStructure? = null,
-            militaryBoard_ : MilitaryBoard? = null,
-            player1City_ : PlayerState? = null,
-            player2City_ : PlayerState? = null,
-            decisionQueue_ : Queue<Decision<GameState>>? = null,
-            gamePhase_: GamePhase? = null,
-            nextPlayer_: PlayerTurn? = null
-    ) : GameState {
-        return GameState(
-                activeScienceDeck_ ?: availableProgressTokens,
-                unusedScienceDeck_ ?: discardedProgressTokens,
-                wondersForPickDeck_ ?: wondersForPick,
-                unusedWondersDeck_ ?: discardedWonders,
-                burnedDeck_ ?: burnedCards,
-                cardStructure_ ?: cardStructure,
-                militaryBoard_ ?: militaryBoard,
-                player1City_ ?: player1City,
-                player2City_ ?: player2City,
-                decisionQueue_ ?: decisionQueue,
-                gamePhase_ ?: gamePhase,
-                nextPlayer_ ?: nextPlayer
-        )
-    }
-
     override fun isGameOver(): Boolean {
-        val gameOverPhases = setOf(GamePhase.MILITARY_SUPREMACY, GamePhase.SCIENCE_SUPREMACY, GamePhase.CIVILIAN_VICTORY)
-        return gameOverPhases.contains(gamePhase)
+        return gamePhase == GamePhase.GAME_OVER
     }
 
-    fun getPlayerCity(playerTurn : PlayerTurn) : PlayerState {
-        return when (playerTurn) {
-            PlayerTurn.PLAYER_1 -> player1City
-            PlayerTurn.PLAYER_2 -> player2City
-            else -> throw Exception("This game only allows 2 players; $playerTurn does not exist.")
-        }
+    fun getPlayerStatus(playerTurn : PlayerTurn) : PlayerState {
+        return playerStates[playerTurn]
+                .getOrElseThrow { throw Exception("The player specified is not playing: $playerTurn.") }
     }
 
     private fun updateBoard(generator: RandomWithTracker, logger: Logger? = null) : GameState {
-        if (cardStructure != null && !cardStructure.isEmpty())
-            return this
-
-        when (gamePhase) {
-            GamePhase.WONDERS_SELECTION -> {
-                return if (wondersForPick.size() == 0 && discardedWonders.size() == 4) {
-                    logger?.info("Switching to Age I")
-                    // Setup cards structure
-                    val newCardStructure = CardStructureFactory.makeFirstAgeCardStructure(generator)
-                    // Add main turn decision
-                    update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.FIRST_AGE)
-                } else {
-                    // Wonder selection is handled by ChooseStartingWonder
-                    this
-                }
-            }
-            GamePhase.FIRST_AGE -> {
-                return if (cardStructure!!.isEmpty()) {
-                    logger?.info("Switching to Age II")
-                    val newCardStructure = CardStructureFactory.makeSecondCardStructure(generator)
-                    update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.SECOND_AGE)
-                            .addSelectStartingPlayerDecision()
-                } else {
-                    this
-                }
-            }
-            GamePhase.SECOND_AGE -> {
-                return if (cardStructure!!.isEmpty()) {
-                    logger?.info("Switching to Age III")
-                    val newCardStructure = CardStructureFactory.makeThirdAgeCardStructure(generator)
-                    update(cardStructure_ = newCardStructure, gamePhase_ = GamePhase.THIRD_AGE)
-                            .addSelectStartingPlayerDecision()
-                } else {
-                    this
-                }
-            }
-
-            GamePhase.THIRD_AGE -> {
-                return if (cardStructure!!.isEmpty()) {
-                    logger?.info("Civilian victory")
-                    update(gamePhase_ = GamePhase.CIVILIAN_VICTORY)
-                } else {
-                    this
-                }
-            }
-            else -> {
-                return this
-            }
-        }
-    }
-
-    /**
-     * Checks whether the current state should be flagged for science supremacy.
-     */
-    fun testScienceSupremacy(playerTurn: PlayerTurn) : Boolean {
-        val playerCity = getPlayerCity(playerTurn)
-        val hasLawToken = !playerCity.progressTokens.filter { it.enhancement == Enhancement.LAW }.isEmpty
-        val symbolsFromGreenCards = playerCity.buildings
-                .filter{ it.scienceSymbol != ScienceSymbol.NONE}
-                .map { it.scienceSymbol }
-                .distinct().size()
-        val distinctScienceSymbols = symbolsFromGreenCards + if (hasLawToken) 1 else 0
-
-        return distinctScienceSymbols >= 6
-    }
-
-    /**
-     * Checks whether the current state should be flagged for military supremacy.
-     */
-    fun testMilitarySupremacy(player: PlayerTurn): Boolean {
-        return militaryBoard.isMilitarySupremacy() && militaryBoard.getDisadvantagedPlayer() == player.opponent()
-    }
-
-    /**
-     * Checks whether the current state should be flagged for science supremacy and it returns an accordingly updated
-     * state.
-     */
-    fun checkScienceSupremacy(playerTurn: PlayerTurn): GameState {
-        return if (testScienceSupremacy(playerTurn))
-            update(gamePhase_ = GamePhase.SCIENCE_SUPREMACY)
-        else
-            this
-    }
-
-    /**
-     * Checks whether the current state should be flagged for military supremacy and it returns an accordingly updated
-     * state.
-     */
-    fun checkMilitarySupremacy(): GameState {
-        return if (militaryBoard.isMilitarySupremacy()) {
-            update(gamePhase_ = GamePhase.MILITARY_SUPREMACY)
-        }
-        else this
-    }
-
-    private fun calculateVictoryPoints(player : PlayerTurn, logger: Logger?) : Int {
-        val playerCity = getPlayerCity(player)
-        val opponentCity = getPlayerCity(player.opponent())
-        val logMsg = StringBuilder()
-        var total = 0
-
-        playerCity.buildings.forEach{
-            val multiplier = getMultiplier(it.victoryPointsFormula, it.victoryPointsReferenceCity, playerCity, opponentCity)
-            val contribution = it.victoryPoints * multiplier
-            if (contribution > 0)
-                logMsg.append("  $contribution pts from $it\n")
-            total += contribution
-        }
-
-        playerCity.wonders.forEach{
-            val multiplier = getMultiplier(it.victoryPointsFormula, it.victoryPointsReferenceCity, playerCity, opponentCity)
-            val contribution = it.victoryPoints * multiplier
-            if (contribution > 0)
-                logMsg.append("  $contribution pts from $it\n")
-            total += contribution
-        }
-
-        playerCity.progressTokens.forEach{
-            val multiplier = getMultiplier(it.victoryPointsFormula, it.victoryPointsReferenceCity, playerCity, opponentCity)
-            val contribution = it.victoryPoints * multiplier
-            if (contribution > 0)
-                logMsg.append("  $contribution pts from $it\n")
-            total += contribution
-        }
-
-        val mathTokenContribution = if (playerCity.hasProgressToken(Enhancement.MATHEMATICS))
-            3 * playerCity.progressTokens.size() else 0
-        if (mathTokenContribution > 0)
-            logMsg.append("  $mathTokenContribution pts from Math progress token\n")
-
-        val coinsContribution = playerCity.coins / 3
-        if (coinsContribution > 0)
-            logMsg.append("  $coinsContribution pts from coins\n")
-
-        val militaryContribution = militaryBoard.getVictoryPoints(player)
-        if (militaryContribution > 0)
-            logMsg.append("  $militaryContribution pts from military advantage\n")
-
-        logger?.log(Level.INFO, logMsg.toString())
-        return total + mathTokenContribution + coinsContribution + militaryContribution
-    }
-
-    private fun getMultiplier(formula: Formula, cityForFormula: CityForFormula, playerCity: PlayerState, opponentCity: PlayerState) : Int {
-
-        // From highest city
-        val fhc = { c : CardColor -> Math.max(playerCity.countBuildingsByColor(c), opponentCity.countBuildingsByColor(c)) }
-        // From player city
-        val fpc = { c : CardColor -> playerCity.countBuildingsByColor(c) }
-
-        return when (cityForFormula) {
-            CityForFormula.NOT_APPLICABLE -> when (formula) {
-                Formula.ABSOLUTE -> { 1 }
-                else -> { throw Exception("Formula for victory points is not ABSOLUTE but reference city is NOT_APPLICABLE")}
-            }
-            CityForFormula.CITY_WITH_MOST_UNITS  -> when (formula) {
-                Formula.PER_BROWN_AND_GRAY_CARD -> { fhc(CardColor.BROWN) + fhc(CardColor.GRAY) }
-                Formula.PER_BROWN_CARD -> { fhc(CardColor.BROWN) }
-                Formula.PER_GRAY_CARD -> { fhc(CardColor.GRAY) }
-                Formula.PER_GREEN_CARD -> { fhc(CardColor.GREEN) }
-                Formula.PER_BLUE_CARD -> { fhc(CardColor.BLUE) }
-                Formula.PER_GOLD_CARD -> { fhc(CardColor.GOLD) }
-                Formula.PER_RED_CARD -> { fhc(CardColor.RED) }
-                Formula.PER_THREE_COINS -> { Math.max(playerCity.coins, opponentCity.coins) / 3 }
-                Formula.PER_WONDER -> { Math.max(playerCity.wonders.size(), opponentCity.wonders.size()) }
-                Formula.ABSOLUTE -> { throw Exception("Formula for victory points is ABSOLUTE but reference city is not NOT_APPLICABLE")}
-
-            }
-            CityForFormula.YOUR_CITY-> when (formula) {
-                Formula.PER_BROWN_AND_GRAY_CARD -> { fhc(CardColor.BROWN) + fhc(CardColor.GRAY) }
-                Formula.PER_BROWN_CARD -> { fpc(CardColor.BROWN) }
-                Formula.PER_GRAY_CARD -> { fpc(CardColor.GRAY) }
-                Formula.PER_GREEN_CARD -> { fpc(CardColor.GREEN) }
-                Formula.PER_BLUE_CARD -> { fpc(CardColor.BLUE) }
-                Formula.PER_GOLD_CARD -> { fpc(CardColor.GOLD) }
-                Formula.PER_RED_CARD -> { fpc(CardColor.RED) }
-                Formula.PER_THREE_COINS -> { playerCity.coins / 3 }
-                Formula.PER_WONDER -> { playerCity.wonders.size() }
-                Formula.ABSOLUTE -> { throw Exception("Formula for victory points is ABSOLUTE but reference city is not NOT_APPLICABLE")}
-            }
-        }
+        return this
     }
 
     /**
@@ -318,196 +115,6 @@ data class GameState(
     }
 
     /**
-     * Calculates the winner and the victory points
-     */
-    fun calculateWinner(logger: Logger? = null): Triple<GameOutcome, Int, Int> {
-        return when (gamePhase) {
-            GamePhase.CIVILIAN_VICTORY -> {
-                val p1VictoryPoints = calculateVictoryPoints(PlayerTurn.PLAYER_1, logger)
-                val p2VictoryPoints = calculateVictoryPoints(PlayerTurn.PLAYER_2, logger)
-                when {
-                    p1VictoryPoints > p2VictoryPoints -> Triple(GameOutcome.PLAYER_1_VICTORY, p1VictoryPoints, p2VictoryPoints)
-                    p2VictoryPoints > p1VictoryPoints -> Triple(GameOutcome.PLAYER_2_VICTORY, p1VictoryPoints, p2VictoryPoints)
-                    else -> Triple(GameOutcome.TIE, p1VictoryPoints, p2VictoryPoints)
-                }
-            }
-            GamePhase.SCIENCE_SUPREMACY -> when {
-                testScienceSupremacy(PlayerTurn.PLAYER_1) -> Triple(GameOutcome.PLAYER_1_VICTORY, 0, 0)
-                testScienceSupremacy(PlayerTurn.PLAYER_2) -> Triple(GameOutcome.PLAYER_2_VICTORY, 0, 0)
-                else -> throw Exception("Phase is science supremacy, but none of the players satisfy the conditions")
-            }
-            GamePhase.MILITARY_SUPREMACY -> when (militaryBoard.getDisadvantagedPlayer()) {
-                PlayerTurn.PLAYER_2 -> Triple(GameOutcome.PLAYER_1_VICTORY, 0, 0)
-                PlayerTurn.PLAYER_1 -> Triple(GameOutcome.PLAYER_2_VICTORY, 0, 0)
-                else -> throw Exception("Phase is military supremacy but conflict pawn is in the middle")
-            }
-            else -> throw Exception("The game has not finished yet; current phase: $gamePhase")
-        }
-    }
-
-    fun buildBuilding(player: PlayerTurn, card: Card, generator: RandomWithTracker, logger: Logger?, forFree: Boolean): GameState {
-        // Add card to appropriate player city
-        val playerCity = getPlayerCity(player)
-        val opponentCity = getPlayerCity(player.opponent())
-        val coins = if (card.coinsProduced > 0)
-            card.coinsProduced * getMultiplier(card.coinsProducedFormula, card.coinsProducedReferenceCity, playerCity, opponentCity)
-        else
-            0
-        val cost = if (forFree)
-            0
-        else
-            playerCity.canBuild(card, opponentCity) ?: throw Exception("Building not affordable $card")
-        val updatedPlayerCity = playerCity.update(buildings_ = playerCity.buildings.add(card), coins_ = playerCity.coins + coins - cost)
-
-        // Handle military cards
-        val updatedMilitaryBoard: MilitaryBoard
-        val updatedOpponentCity: PlayerState
-        if (card.color == CardColor.RED) {
-            val hasStrategyToken = !playerCity.progressTokens.filter { it.enhancement == Enhancement.STRATEGY }.isEmpty
-            val militaryShift = if (hasStrategyToken) card.militaryPoints + 1 else card.militaryPoints
-            val additionOutcome = militaryBoard.addMilitaryPointsTo(militaryShift, player)
-            updatedMilitaryBoard = additionOutcome.second
-            // Apply penalty to opponent city, if any
-            val opponentPenalty = additionOutcome.first
-            updatedOpponentCity = if (opponentPenalty > 0)
-                opponentCity.update(coins_ = opponentCity.coins - opponentPenalty)
-            else
-                opponentCity
-        } else {
-            // Unchanged
-            updatedMilitaryBoard = militaryBoard
-            updatedOpponentCity = opponentCity
-        }
-
-        val updatedPlayer1City = if (player == PlayerTurn.PLAYER_1) updatedPlayerCity else updatedOpponentCity
-        val updatedPlayer2City = if (player == PlayerTurn.PLAYER_2) updatedPlayerCity else updatedOpponentCity
-        var updatedGameState = update(
-                player1City_ = updatedPlayer1City,
-                player2City_ = updatedPlayer2City,
-                militaryBoard_ = updatedMilitaryBoard
-        )
-
-        updatedGameState = if (card.color == CardColor.GREEN && updatedPlayerCity.twoScienceCardsWithSymbol(card.scienceSymbol))
-            updatedGameState.addSelectProgressTokenDecision(player)
-        else
-            updatedGameState.addMainTurnDecision(generator, logger)
-
-        return when {
-            card.color == CardColor.GREEN -> updatedGameState.checkScienceSupremacy(player)
-            card.color == CardColor.RED -> updatedGameState.checkMilitarySupremacy()
-            else -> updatedGameState
-        }
-    }
-
-    fun addMilitaryProgress(strength: Int, player: PlayerTurn): GameState {
-
-        // Move military tokens
-        val militaryOutcome = militaryBoard.addMilitaryPointsTo(strength, player)
-
-        // Deal with any burning any coins
-        return if (militaryOutcome.first == 0) {
-            update(militaryBoard_ = militaryOutcome.second)
-        } else {
-            val playerCity = getPlayerCity(player)
-            val opponentCity = getPlayerCity(player.opponent())
-            val updatedOpponentCity = opponentCity.removeCoins(militaryOutcome.first)
-            val updatedPlayer1City = if (player == PlayerTurn.PLAYER_1) playerCity else updatedOpponentCity
-            val updatedPlayer2City = if (player == PlayerTurn.PLAYER_2) playerCity else updatedOpponentCity
-            update(player1City_ = updatedPlayer1City, player2City_ = updatedPlayer2City,
-                    militaryBoard_ = militaryOutcome.second)
-        }
-    }
-
-    fun addSelectStartingPlayerDecision(): GameState {
-        val choosingPlayer = militaryBoard.getDisadvantagedPlayer() ?: nextPlayer.opponent() // Last player of the previous age
-        val actions: List<Action<GameState>> = Stream.of(PlayerTurn.PLAYER_1, PlayerTurn.PLAYER_2)
-                .map { ChooseNextPlayer(choosingPlayer, it) }
-                .toMutableList()
-        val decision = Decision(choosingPlayer, Vector.ofAll(actions))
-        return enqueue(decision)
-    }
-
-    fun addMainTurnDecision(generator: RandomWithTracker, logger: Logger?): GameState {
-        val updatedGameState = updateBoard(generator, logger)
-        return if (updatedGameState.decisionQueue.isEmpty)
-            updatedGameState.addMainTurnDecisionHelper()
-        else
-            updatedGameState
-    }
-
-    private fun addMainTurnDecisionHelper(): GameState {
-
-        val playerCity = getPlayerCity(nextPlayer)
-        val opponentCity = getPlayerCity(nextPlayer.opponent())
-        val canBuildSomeWonders =
-                !playerCity.unbuiltWonders.filter { playerCity.canBuild(it, opponentCity) != null }.isEmpty &&
-                        getPlayerCity(nextPlayer.opponent()).wonders.size() < 4
-
-        val availCards = cardStructure!!.availableCards()
-        // The player can always burn any uncovered card for money
-        var actions: Vector<Action<GameState>> = availCards.map { BurnForMoney(nextPlayer, it) }
-        // If the player can afford at least a wonder, then he can also sacrifice any uncovered card to build the wonder
-        if (canBuildSomeWonders) {
-            actions = actions.appendAll(availCards.map { BurnForWonder(nextPlayer, it) })
-        }
-        // The player can also build a card, if the city can afford it
-        actions = actions.appendAll(availCards
-                .filter { playerCity.canBuild(it, opponentCity) != null }
-                .map { BuildBuilding(nextPlayer, it) }
-        )
-        val decision = Decision(nextPlayer, actions)
-        return enqueue(decision)
-    }
-
-    fun addBurnOpponentBuildingDecision(player: PlayerTurn, color: CardColor): GameState {
-        val opponentCity = getPlayerCity(player.opponent())
-        val burnable = opponentCity.getBurnableBuildings(color)
-        if (burnable.isEmpty)
-            throw Exception("There are no $color buildings to burn")
-        else {
-            val actions: HashSet<Action<GameState>> = burnable.map { BurnOpponentCard(player, it) }
-            val decision = Decision(player, Vector.ofAll(actions))
-            return enqueue(decision)
-        }
-    }
-
-    fun addSelectProgressTokenDecision(player: PlayerTurn): GameState {
-        val actions: Vector<Action<GameState>> = availableProgressTokens.cards
-                .map { ChooseProgressToken(player, it) }
-        val decision = Decision(player, Vector.ofAll(actions))
-        return enqueue(decision)
-    }
-
-    fun addSelectDiscardedProgressTokenDecision(player: PlayerTurn): GameState {
-        val actions: Vector<Action<GameState>> = discardedProgressTokens.cards
-                .map { ChooseUnusedProgressToken(player, it) }
-        val decision = Decision(player, Vector.ofAll(actions))
-        return enqueue(decision)
-    }
-
-    fun addSelectBurnedBuildingToBuildDecision(player: PlayerTurn): GameState {
-        val actions: Vector<Action<GameState>> = burnedCards.cards
-                .map { BuildBurned(player, it) }
-        val decision = Decision(player, Vector.ofAll(actions))
-        return enqueue(decision)
-    }
-
-    fun addSelectWonderToBuildDecision(player: PlayerTurn): GameState {
-        val playerCity = getPlayerCity(player)
-        val opponentCity = getPlayerCity(player.opponent())
-        val options = playerCity.unbuiltWonders
-                .filter { playerCity.canBuild(it, opponentCity) != null }
-                .map { BuildWonder(player, it) }
-        val decision = Decision(player, Vector.ofAll(options))
-        return enqueue(decision)
-
-    }
-
-    fun swapNextPlayer(): GameState {
-        return update(nextPlayer_ = nextPlayer.opponent())
-    }
-
-    /**
      * Advances the game by one step by applying the given action to the next decision in the queue. Does not detect
      * cheating.
      */
@@ -522,21 +129,37 @@ data class GameState(
     /**
      * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
      */
+//playerStates
+//oxygen
+//temperature
+//board
     override fun toJson(generator: JsonGenerator, name: String?) {
         if (name == null) generator.writeStartObject()
         else generator.writeStartObject(name)
-        availableProgressTokens.toJson(generator, "available_progress_tokens")
-        discardedProgressTokens.toJson(generator, "discarded_progress_tokens")
-        wondersForPick.toJson(generator, "wonders_for_pick")
-        discardedWonders.toJson(generator, "unused_wonders")
-        burnedCards.toJson(generator, "burned_cards")
 
-        cardStructure?.toJson(generator, "card_structure")
+        generator.write("oxygen", oxygen)
+        generator.write("temperature", temperature)
 
-        militaryBoard.toJson(generator, "military_board")
+        generator.writeStartObject("player_states")
+        playerStates.forEach {
+            it._2.toJson(generator, it._1.toString())
+        }
+        generator.writeEnd()
 
-        player1City.toJson(generator, "player_1_city")
-        player2City.toJson(generator, "player_2_city")
+        generator.writeStartArray("board")
+        board.forEach {
+            val coords = it._1
+            val tile = it._2
+            generator.writeStartObject()
+            generator.writeStartArray("coords")
+            generator.write(coords.first)
+            generator.write(coords.second)
+            generator.write(coords.third)
+            generator.writeEnd()
+            generator.write("tile", tile.toString())
+            generator.writeEnd()
+        }
+        generator.writeEnd()
 
         generator.writeStartArray("decision_queue")
         decisionQueue.forEach { it.toJson(generator, null) }
@@ -550,27 +173,17 @@ data class GameState(
 
     override fun toString(): String {
         val ret = StringBuilder()
+        ret.append("Game phase: $gamePhase\n\n")
+        ret.append("Oxygen: $oxygen\n\n")
+        ret.append("Temperature: $temperature\n\n")
+        playerStates.forEach {
+            ret.append("Player ${it._1} state: \n\n ${it._2}")
+        }
         ret.append(
-                "Game phase: $gamePhase\n\n",
-                "Player 1 city:\n\n  ${getPlayerCity(PlayerTurn.PLAYER_1).toString()
-                        .replace("\n", "\n  ")}\n",
-                "Player 2 city:\n\n  ${getPlayerCity(PlayerTurn.PLAYER_2).toString()
-                        .replace("\n", "\n  ")}\n",
-                "Available progress tokens:\n",
-                availableProgressTokens.cards.fold("", { acc, s -> "$acc  $s\n"}) + "\n",
-                "Discarded progress tokens:\n",
-                discardedProgressTokens.cards.fold("", { acc, s -> "$acc  $s\n"}) + "\n",
-                "Wonders for picking:\n",
-                wondersForPick.cards.fold("", { acc, s -> "$acc  $s\n"}) + "\n",
-                "Discarded wonders:\n",
-                discardedWonders.cards.fold("", { acc, s -> "$acc  $s\n"}) + "\n",
-                "Burned cards:\n",
-                burnedCards.cards.fold("", { acc, s -> "$acc  $s\n"}) + "\n",
-                "Military board:\n${militaryBoard.toString().replace("\n", "\n  ")}\n\n",
                 "Next player: $nextPlayer\n",
                 "Decision queue:\n" +
                         decisionQueue.mapIndexed { index, decision -> "  #$index (${decision.player}) options:\n" +
-                                decision.options.fold("", { acc, s -> "$acc    $s\n"}) + "\n"
+                                decision.options.fold("") { acc, s -> "$acc    $s\n"} + "\n"
                         }
         )
         return ret.toString()
@@ -581,32 +194,28 @@ data class GameState(
         operator fun Regex.contains(text: CharSequence): Boolean = this.matches(text)
 
         fun loadFromJson(obj: JSONObject): GameState {
-            val availableProgressTokens = loadDeckFromJson(obj.getJSONObject("available_progress_tokens"))
-            val discardedProgressTokens = loadDeckFromJson(obj.getJSONObject("discarded_progress_tokens"))
-            val wondersForPick = loadDeckFromJson(obj.getJSONObject("wonders_for_pick"))
-            val discardedWonders = loadDeckFromJson(obj.getJSONObject("unused_wonders"))
-            val burnedCards = loadDeckFromJson(obj.getJSONObject("burned_cards"))
-            val militaryBoard = MilitaryBoard.loadFromJson(obj.getJSONObject("military_board"))
-            val cardStructure = CardStructure.loadFromJson(obj.getJSONObject("card_structure"))
-            val player1City = PlayerState.loadFromJson(obj.getJSONObject("player_1_city"))
-            val player2City = PlayerState.loadFromJson(obj.getJSONObject("player_2_city"))
+            val oxygen = obj.getInt("oxygen")
+            val temperature = obj.getInt("temperature")
 
-            val nextPlayer = when (obj.getString("next_player")) {
-                "PLAYER_1" -> PlayerTurn.PLAYER_1
-                "PLAYER_2" -> PlayerTurn.PLAYER_2
-                else -> throw Exception("Player unknown ${obj.getString("next_player")}")
-            }
+            val playerStatesObj = obj.getJSONObject("player_states")
+            val playerStates = HashMap.ofAll(playerStatesObj.toMap()
+                    .map { Pair(getPlayerFromString(it.key), PlayerState.loadFromJson(it.value as JSONObject)) }
+                    .toMap()
+            )
 
-            val buildBuildingPattern = Regex("Build ([A-Za-z ]+)")
-            val buildBurnedPattern = Regex("Build burned card ([A-Za-z ]+)")
-            val buildWonderPattern = Regex("Build wonder ([A-Za-z ]+)")
-            val burnForCoinsPattern = Regex("Burn ([A-Za-z ]+) for coins")
-            val burnForWonderPattern = Regex("Burn ([A-Za-z ]+) to build wonder")
-            val burnOpponentCardPattern = Regex("Burn opponent card ([A-Za-z ]+)")
-            val chooseNextPlayerPattern = Regex("Choose ([A-Za-z_90-9]+) as next player")
-            val chooseStartingWonderPattern = Regex("Choose ([A-Za-z ]+) as starting wonder")
-            val chooseProgressTokenPattern = Regex("Choose progress token ([A-Za-z ]+)")
-            val chooseUnusedProgressTokenPattern = Regex("Choose unused progress token ([A-Za-z ]+)")
+            val boardObj = obj.getJSONArray("board")
+            val board = HashMap.ofAll((boardObj as JSONArray)
+                    .map {
+                        (it as JSONObject)
+                        val coords = it.getJSONArray("coords")
+                        val x = coords[0] as Int
+                        val y = coords[1] as Int
+                        val z = coords[2] as Int
+                        val tile = getTileTypeFromString(it.getString("tile"))
+                        Pair(Triple(x, y, z), tile)
+                    }.toMap())
+
+            val nextPlayer = getPlayerFromString(obj.getString("next_player")).next(playerStates.size())
 
             val decisionQueue = Queue.ofAll<Decision<GameState>>(obj.getJSONArray("decision_queue").map { decisionObj ->
                 decisionObj as JSONObject
@@ -617,78 +226,23 @@ data class GameState(
                 }
                 val options = Vector.ofAll(decisionObj.getJSONArray("options").map { option ->
                     option as String
-                    when (option) {
-                        in buildBurnedPattern -> {
-                            val cardName = buildBurnedPattern.matchEntire(option)!!.groupValues[1]
-                            BuildBurned(player, CardFactory.getByName(cardName))
-                        }
-                        in buildWonderPattern -> {
-                            val cardName = buildWonderPattern.matchEntire(option)!!.groupValues[1]
-                            BuildWonder(player, CardFactory.getByName(cardName))
-                        }
-                        in buildBuildingPattern -> {
-                            val cardName = buildBuildingPattern.matchEntire(option)!!.groupValues[1]
-                            BuildBuilding(player, CardFactory.getByName(cardName))
-                        }
-                        in burnForCoinsPattern -> {
-                            val cardName = burnForCoinsPattern.matchEntire(option)!!.groupValues[1]
-                            BurnForMoney(player, CardFactory.getByName(cardName))
-                        }
-                        in burnForWonderPattern -> {
-                            val cardName = burnForWonderPattern.matchEntire(option)!!.groupValues[1]
-                            BurnForWonder(player, CardFactory.getByName(cardName))
-                        }
-                        in burnOpponentCardPattern -> {
-                            val cardName = burnOpponentCardPattern.matchEntire(option)!!.groupValues[1]
-                            BurnOpponentCard(player, CardFactory.getByName(cardName))
-                        }
-                        in chooseNextPlayerPattern -> {
-                            val playerStr = chooseNextPlayerPattern.matchEntire(option)!!.groupValues[1]
-                            val playerChoice = when (playerStr) {
-                                "PLAYER_1" -> PlayerTurn.PLAYER_1
-                                "PLAYER_2" -> PlayerTurn.PLAYER_2
-                                else -> throw Exception("Player unknown ${obj.getString("next_player")}")
-                            }
-                            ChooseNextPlayer(player, playerChoice)
-                        }
-                        in chooseStartingWonderPattern -> {
-                            val cardName = chooseStartingWonderPattern.matchEntire(option)!!.groupValues[1]
-                            BuildBuilding(player, CardFactory.getByName(cardName))
-                        }
-                        in chooseProgressTokenPattern -> {
-                            val cardName = chooseProgressTokenPattern.matchEntire(option)!!.groupValues[1]
-                            ChooseProgressToken(player, CardFactory.getByName(cardName))
-                        }
-                        in chooseUnusedProgressTokenPattern -> {
-                            val cardName = chooseUnusedProgressTokenPattern.matchEntire(option)!!.groupValues[1]
-                            ChooseUnusedProgressToken(player, CardFactory.getByName(cardName))
-                        }
-                        else -> throw Exception("Action $option not found")
+                    when (option) {throw Exception("Action $option not found")
                     }
                 })
                 Decision(player, options)
             })
 
             val gamePhase = when (obj.getString("game_phase")) {
-                "WONDERS_SELECTION" -> GamePhase.WONDERS_SELECTION
-                "FIRST_AGE" -> GamePhase.FIRST_AGE
-                "SECOND_AGE" -> GamePhase.SECOND_AGE
-                "THIRD_AGE" -> GamePhase.THIRD_AGE
-                "SCIENCE_SUPREMACY" -> GamePhase.SCIENCE_SUPREMACY
-                "MILITARY_SUPREMACY" -> GamePhase.MILITARY_SUPREMACY
-                "CIVILIAN_VICTORY" -> GamePhase.CIVILIAN_VICTORY
+                "CHOOSE_CORPORATION" -> GamePhase.CHOOSE_CORPORATION
+                "MAIN_GAME" -> GamePhase.MAIN_GAME
+                "GAME_OVER" -> GamePhase.GAME_OVER
                 else -> throw Exception("Game phase unknown ${obj.getString("game_phase")}")
             }
             return GameState(
-                    availableProgressTokens = availableProgressTokens,
-                    discardedProgressTokens = discardedProgressTokens,
-                    wondersForPick = wondersForPick,
-                    discardedWonders = discardedWonders,
-                    burnedCards = burnedCards,
-                    militaryBoard = militaryBoard,
-                    cardStructure = cardStructure,
-                    player1City = player1City,
-                    player2City = player2City,
+                    oxygen = oxygen,
+                    temperature = temperature,
+                    playerStates = playerStates,
+                    board = board,
                     gamePhase = gamePhase,
                     nextPlayer = nextPlayer,
                     decisionQueue = decisionQueue
@@ -719,4 +273,26 @@ fun loadDeckFromJson(obj: JSONObject): Deck<Card> {
 // This function is not in the PlayerTurn class because it assumes a 2-players game
 fun PlayerTurn.opponent() : PlayerTurn {
     return if (this == PlayerTurn.PLAYER_1) PlayerTurn.PLAYER_2 else PlayerTurn.PLAYER_1
+}
+
+
+fun getPlayerFromString(s: String): PlayerTurn {
+    return when (s) {
+        "PLAYER_1" -> PlayerTurn.PLAYER_1
+        "PLAYER_2" -> PlayerTurn.PLAYER_2
+        "PLAYER_3" -> PlayerTurn.PLAYER_3
+        "PLAYER_4" -> PlayerTurn.PLAYER_4
+        else -> throw Exception("Player unknown $s")
+    }
+}
+
+
+fun getTileTypeFromString(s: String): TileType {
+    return when (s) {
+        "EMPTY" -> TileType.EMPTY
+        "CITY" -> TileType.CITY
+        "GREENERY" -> TileType.GREENERY
+        "OCEAN" -> TileType.OCEAN
+        else -> throw Exception("Unknown tile")
+    }
 }
