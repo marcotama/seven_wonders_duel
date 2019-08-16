@@ -283,6 +283,7 @@ class KeyboardPlayer(
             PlayerTurn.PLAYER_2 -> '2'
             PlayerTurn.PLAYER_3 -> '3'
             PlayerTurn.PLAYER_4 -> '4'
+            else -> throw Exception("Player $playerTurn is not supposed to be playing")
         }
     }
 
