@@ -39,12 +39,12 @@ abstract class AsciiHexPrinter {
     protected fun restrictToLength(str: String?, length: Int): String {
         var result = "  "
         if (str != null) {
-            if (str.length > length) {
-                result = str.toUpperCase().substring(0, length)
+            result = if (str.length > length) {
+                str.toUpperCase().substring(0, length)
             } else if (str.length < length) {
-                result = pad(str.toUpperCase(), length - str.length)
+                pad(str.toUpperCase(), length - str.length)
             } else {
-                result = str
+                str
             }
         }
 
@@ -62,10 +62,10 @@ abstract class AsciiHexPrinter {
         var s = s
         var n = n
         while (n > 0) {
-            if (n % 2 == 0) {
-                s = " " + s
+            s = if (n % 2 == 0) {
+                " $s"
             } else {
-                s = s + " "
+                "$s "
             }
             n--
         }

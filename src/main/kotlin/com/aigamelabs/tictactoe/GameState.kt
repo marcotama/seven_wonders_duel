@@ -171,14 +171,14 @@ data class GameState(
         val ret = StringBuilder()
         ret.append(
                 "Board:\n",
-                board.fold("", { acc, it ->
+                board.fold("") { acc, it ->
                     val coords = it._1
                     val tile = it._2
                     "$acc\n  $coords: $tile"
-                }),
+                },
                 "Decision queue:\n",
                 decisionQueue.mapIndexed { index, decision -> "  #$index (${decision.player}) options:\n" +
-                        decision.options.fold("", { acc, s -> "$acc    $s\n"}) + "\n"
+                        decision.options.fold("") { acc, s -> "$acc    $s\n"} + "\n"
                 },
                 "Next player: $nextPlayer\n",
                 "Game phase: $gamePhase\n\n"

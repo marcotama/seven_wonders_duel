@@ -87,6 +87,6 @@ class CharGrid(private val width: Int, private val height: Int) {
 
     companion object {
 
-        private val LINE_BREAK = "\n"
+        private const val LINE_BREAK = "\n"
     }
 }

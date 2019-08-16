@@ -115,7 +115,7 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player<GameStat
             logger?.info("Querying ${thisDecision.player}; options:\n" +
                     thisDecision.options
                             .map { "  $it\n" }
-                            .fold("", { a, b -> a + b }) + "\n"
+                            .fold("") { a, b -> a + b } + "\n"
             )
             players[thisDecision.player]!!.decide(gameState)
         }
@@ -123,7 +123,7 @@ class Game(gameId: String, private val players : Map<PlayerTurn, Player<GameStat
             logger?.info("Skipping query for ${thisDecision.player} (only one option)\n" +
                     thisDecision.options
                             .map { "  $it\n" }
-                            .fold("", { a, b -> a + b }) + "\n"
+                            .fold("") { a, b -> a + b } + "\n"
             )
             thisDecision.options[0]
         }

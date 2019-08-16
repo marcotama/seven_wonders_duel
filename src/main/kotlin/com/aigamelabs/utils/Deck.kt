@@ -12,7 +12,7 @@ data class Deck<T>(val name: String, private val groups: Vector<Pair<Vector<T>,I
 
     val cards: Vector<T>
     get() {
-        return groups.fold(Vector.empty<T>(), { acc, d -> acc.appendAll(d.first) })
+        return groups.fold(Vector.empty<T>()) { acc, d -> acc.appendAll(d.first) }
     }
 
     private val numCards = groups.map { it.first.size() - it.second }.sum().toInt()
@@ -104,7 +104,7 @@ data class Deck<T>(val name: String, private val groups: Vector<Pair<Vector<T>,I
         return if (cards.isEmpty)
             "<Empty>"
         else {
-            val tmp = cards.map { it }.foldLeft("", { acc, el -> "$acc$el, " })
+            val tmp = cards.map { it }.foldLeft("") { acc, el -> "$acc$el, " }
             tmp.substring(0, tmp.length - 2)
         }
     }

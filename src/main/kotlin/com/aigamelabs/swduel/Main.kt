@@ -99,7 +99,7 @@ class Main {
                 "DDA" -> MctsDDA(player, "DDA(HS)", gameId, gameData, logsPath)
                 "Random" -> RandomPlayer("Random", gameData)
                 "Human" -> KeyboardPlayer(player, "Keyboard", gameId, gameData, logsPath)
-                else -> throw Exception("Unknown player controller " + playerClass)
+                else -> throw Exception("Unknown player controller $playerClass")
             }
         }
     }

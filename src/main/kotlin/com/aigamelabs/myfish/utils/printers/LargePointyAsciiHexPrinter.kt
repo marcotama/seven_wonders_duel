@@ -48,7 +48,7 @@ class LargePointyAsciiHexPrinter : AsciiHexPrinter() {
 
     companion object {
 
-        val TEMPLATE = (
+        const val TEMPLATE = (
                 "     /#\\     \n"  // 0 - 13
 
                         + "   /# # #\\   \n"

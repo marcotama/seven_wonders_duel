@@ -14,7 +14,7 @@ data class Decision<T: AbstractGameState<T>>(val player: PlayerTurn, val options
      */
     override fun toString (): String {
         return "Decision for player $player; options:" +
-                options.map { "  $it\n" }.fold("", {acc, s -> "$acc$s"})
+                options.map { "  $it\n" }.fold("") { acc, s -> "$acc$s"}
     }
 
     /**

@@ -2,8 +2,6 @@ package com.aigamelabs.utils
 
 import io.vavr.collection.Stream
 import io.vavr.collection.Vector
-import org.json.JSONObject
-import javax.json.stream.JsonGenerator
 
 /**
  * Implements a graph using an adjacency matrix.
@@ -15,7 +13,7 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
      * Creates an empty graph with the given capacity
      */
     constructor(numVertices: Int) :
-            this(Vector.fill(numVertices, {null}), Vector.fill(numVertices * numVertices, {false}))
+            this(Vector.fill(numVertices) {null}, Vector.fill(numVertices * numVertices) {false})
 
     /**
      * Stores the given element as the i-th vertex.
@@ -111,7 +109,7 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
     private fun hasIncomingEdges(i: Int) : Boolean {
         return Stream.ofAll(0 until numVertices)
                 .map { adjMatrix[toIndex(it, i)] }
-                .fold(false, { a, b -> a || b } )
+                .fold(false) { a, b -> a || b }
     }
 
     /**
@@ -153,12 +151,12 @@ data class Graph<T>(val vertices: Vector<T?>, val adjMatrix : Vector<Boolean>) {
     override fun toString() : String {
         return "Vertices: " +
                 vertices.zipWithIndex()
-                        .fold("", { acc, pair -> acc + "\n" + pair._1 + ": " + pair._2} ) +
+                        .fold("") { acc, pair -> acc + "\n" + pair._1 + ": " + pair._2} +
                 "\n\nEdges:" +
                 (0 until numVertices * numVertices)
                         .filter { adjMatrix[it]}
                         .map { toCoords(it, numVertices) }
-                        .fold("", { acc, pair -> acc + "\n" + pair.first + " -> " + pair.second} )/* +
+                        .fold("") { acc, pair -> acc + "\n" + pair.first + " -> " + pair.second}/* +
                 "\n\nAdjacency matrix:" +
                 (0 until numVertices).map { i ->
                     (0 until numVertices).map { j ->

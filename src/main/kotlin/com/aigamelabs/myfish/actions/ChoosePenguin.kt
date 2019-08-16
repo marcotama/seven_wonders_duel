@@ -1,11 +1,10 @@
 package com.aigamelabs.myfish.actions
 
 import com.aigamelabs.game.Action
-import com.aigamelabs.game.Player
-import com.aigamelabs.utils.RandomWithTracker
 import com.aigamelabs.game.PlayerTurn
 import com.aigamelabs.myfish.GameState
 import com.aigamelabs.myfish.enums.PenguinId
+import com.aigamelabs.utils.RandomWithTracker
 import java.util.logging.Logger
 
 class ChoosePenguin(player: PlayerTurn, val penguinId: PenguinId) : Action<GameState>(player) {

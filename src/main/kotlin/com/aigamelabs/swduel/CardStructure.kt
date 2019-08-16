@@ -77,7 +77,7 @@ class CardStructure(var graph: Graph<CardPlaceholder>, var faceDownPool: Deck<Ca
     override fun toString(): String {
         return "$graph\n\nFace-down cards pool:\n" +
                 faceDownPool.cards.map { "  ${it.name}\n" }
-                .fold("", { acc, s -> "$acc$s"}) + "\n"
+                .fold("") { acc, s -> "$acc$s"} + "\n"
     }
 
     companion object {

@@ -70,7 +70,7 @@ class AsciiBoard
 
         val hex = printer.getHex(line1, line2, line3, fillerChar)
         val charCoordinates = printer.mapHexCoordsToCharCoords(hexQ, hexR)
-        val lines = hex.split("\n".toRegex()).dropLastWhile({ it.isEmpty() }).toTypedArray()
+        val lines = hex.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
 
         for (i in lines.indices) {
             val content = lines[i]
