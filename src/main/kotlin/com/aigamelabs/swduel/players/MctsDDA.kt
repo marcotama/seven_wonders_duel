@@ -16,7 +16,7 @@ class MctsDDA(
         playerId,
         gameId,
         gameData,
-        ActionSelection.get(ActionSelector.HIGHEST_SCORE),
+        ActionSelection.get(ActionSelector.SCORE_CLOSEST_TO_VALUE, target=0.5),
         PlayerTurn.getPlayers(gameData.controllers.size)
                 .map {
                     if (player == it)

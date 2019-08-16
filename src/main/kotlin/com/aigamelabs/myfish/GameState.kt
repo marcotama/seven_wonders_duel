@@ -102,7 +102,7 @@ data class GameState(
     }
 
     private fun getFishesOnTile(location: Triple<Int,Int,Int>):Int {
-        val boardTile = board[location].getOrElseThrow({Exception("Location $location does not exist")})!!
+        val boardTile = board[location].getOrElseThrow {Exception("Location $location does not exist")}!!
         return when (boardTile) {
             BoardTile.TILE_WITH_1_FISH -> 1
             BoardTile.TILE_WITH_2_FISH -> 2
@@ -260,15 +260,15 @@ data class GameState(
         if (canAnyoneMove)
             throw Exception("Game is not over yet")
         else {
-            val maxScore = PlayerTurn.values().map { score[it].getOrElse({0}) }.max()
+            val maxScore = PlayerTurn.values().map { score[it].getOrElse {0} }.max()
             val winners = PlayerTurn.values().filter { score[it].getOrElse(0) == maxScore }
-            val p1Score = score[PlayerTurn.PLAYER_1].getOrElse({0})
+            val p1Score = score[PlayerTurn.PLAYER_1].getOrElse {0}
             logger?.log(Level.INFO, "Player 1 ate $p1Score fishes")
-            val p2Score = score[PlayerTurn.PLAYER_2].getOrElse({0})
+            val p2Score = score[PlayerTurn.PLAYER_2].getOrElse {0}
             logger?.log(Level.INFO, "Player 2 ate $p2Score fishes")
-            val p3Score = score[PlayerTurn.PLAYER_3].getOrElse({0})
+            val p3Score = score[PlayerTurn.PLAYER_3].getOrElse {0}
             logger?.log(Level.INFO, "Player 3 ate $p3Score fishes")
-            val p4Score = score[PlayerTurn.PLAYER_4].getOrElse({0})
+            val p4Score = score[PlayerTurn.PLAYER_4].getOrElse {0}
             logger?.log(Level.INFO, "Player 4 ate $p4Score fishes")
             return Tuple5(HashSet.ofAll(winners), p1Score, p2Score, p3Score, p4Score)
         }
@@ -313,7 +313,6 @@ data class GameState(
             generator.writeEnd()
             generator.write("tile", tile.toString())
             generator.writeEnd()
-
         }
         generator.writeEnd()
 
@@ -351,31 +350,31 @@ data class GameState(
         val ret = StringBuilder()
         ret.append(
                 "Board:\n",
-                board.fold("", { acc, it ->
+                board.fold("") { acc, it ->
                     val coords = it._1
                     val tile = it._2
                     "$acc\n  $coords: $tile"
-                }),
+                },
                 "Penguins:\n",
-                penguins.fold("", { acc, playerPenguins ->
+                penguins.fold("") { acc, playerPenguins ->
                     val player = playerPenguins._1
                     val coords = playerPenguins._2
-                    val s = coords.fold("  $player>:\n", { acc2, it ->
+                    val s = coords.fold("  $player>:\n") { acc2, it ->
                         val penguinId = it._1
                         val penguinCoords = it._2
                         "$acc2    $penguinId: $penguinCoords"
-                    })
+                    }
                     "$acc$s"
-                }),
+                },
                 "Score:\n",
-                score.fold("", { acc, it ->
+                score.fold("") { acc, it ->
                     val player = it._1
                     val score = it._2
                     "$acc\n  $player: $score"
-                }),
+                },
                 "Decision queue:\n",
                 decisionQueue.mapIndexed { index, decision -> "  #$index (${decision.player}) options:\n" +
-                        decision.options.fold("", { acc, s -> "$acc    $s\n"}) + "\n"
+                        decision.options.fold("") { acc, s -> "$acc    $s\n"} + "\n"
                 },
                 "Next player: $nextPlayer\n",
                 "Game phase: $gamePhase\n\n"

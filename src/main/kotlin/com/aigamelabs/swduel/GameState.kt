@@ -518,20 +518,20 @@ data class GameState(
                 "Player 2 city:\n\n  ${getPlayerCity(PlayerTurn.PLAYER_2).toString()
                         .replace("\n", "\n  ")}\n",
                 "Available progress tokens:\n",
-                availableProgressTokens.cards.fold("", { acc, s -> "$acc  $s\n"}) + "\n",
+                availableProgressTokens.cards.fold("") { acc, s -> "$acc  $s\n"} + "\n",
                 "Discarded progress tokens:\n",
-                discardedProgressTokens.cards.fold("", { acc, s -> "$acc  $s\n"}) + "\n",
+                discardedProgressTokens.cards.fold("") { acc, s -> "$acc  $s\n"} + "\n",
                 "Wonders for picking:\n",
-                wondersForPick.cards.fold("", { acc, s -> "$acc  $s\n"}) + "\n",
+                wondersForPick.cards.fold("") { acc, s -> "$acc  $s\n"} + "\n",
                 "Discarded wonders:\n",
-                discardedWonders.cards.fold("", { acc, s -> "$acc  $s\n"}) + "\n",
+                discardedWonders.cards.fold("") { acc, s -> "$acc  $s\n"} + "\n",
                 "Burned cards:\n",
-                burnedCards.cards.fold("", { acc, s -> "$acc  $s\n"}) + "\n",
+                burnedCards.cards.fold("") { acc, s -> "$acc  $s\n"} + "\n",
                 "Military board:\n${militaryBoard.toString().replace("\n", "\n  ")}\n\n",
                 "Next player: $nextPlayer\n",
                 "Decision queue:\n" +
                         decisionQueue.mapIndexed { index, decision -> "  #$index (${decision.player}) options:\n" +
-                                decision.options.fold("", { acc, s -> "$acc    $s\n"}) + "\n"
+                                decision.options.fold("") { acc, s -> "$acc    $s\n"} + "\n"
                         }
         )
         return ret.toString()
