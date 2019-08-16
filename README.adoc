@@ -1,0 +1,99 @@
+= Game and MCTS-based AIs
+
+This repository contains a Kotlin implementation of the mechanics of some board games, as well as some _Monte Carlo Tree-Search_ based player agents.
+The games implemented so far are:
+
+* link:https://boardgamegeek.com/boardgame/173346/7-wonders-duel[Seven Wonders: Duel]
+* link:https://boardgamegeek.com/boardgame/8203/hey-s-my-fish[Hey, That's My Fish!]
+* link:https://boardgamegeek.com/boardgame/11901/tic-tac-toe[Tic-tac-toe]
+* link:https://boardgamegeek.com/boardgame/929/great-dalmuti[The Great Dalmuti] (in development)
+
+Some of these games involve information unknown to some players. If no player knows such information, the information is not encoded in the game state, but its probability distribution is; this means that the information (e.g. the card on top of a deck) is drawn from the distribution at run-time. If any player knows the information, this is stored in the game state (e.g. the cards in the hand of a player).
+
+When the software is run, the entirety of the information in the game state is printed in the command line. This means two things:
+
+* The user will have an information advantage, and is therefore expected to have no stakes in the game.
+* If a game is played that has unknown information, it is the game itself that decides the outcome of random draws.
+
+
+== Motivation
+This repository was started as part of a research project in the context of Dynamic Difficulty Adjustment in video games.
+One of the automatic agents, in fact, implements a technique proposed by us in a citenp:[demediuk2017monte] and more extensively described in citenp:[tamassia2017artificial].
+We wished to study this technique in different domains, so we turned to board games, which differ from the fighting game originally used.
+
+== Playability
+At this time, the game is not easy to play by humans, as no graphical user interface (GUI) has been implemented yet (feel free to contact us if you would like to contribute a GUI). However, a simple command-line interface (CLI) allows human players to play.
+While technically it is possible to play solely with the CLI, we recommend that you setup the physical game on your desk as well, for a more intuitive understanding of the game state.
+
+== How to use
+The software has an entry point for every game; namely:
+
+* `com.aigamelabs.swduel.Main`
+* `com.aigamelabs.myfish.Main`
+* `com.aigamelabs.tictactoe.Main`
+* `com.aigamelabs.greatdalmuti.Main`
+
+All of these entry points take the following parameters via the command line:
+
+*   `-P1` and `-P2`, followed by one of the supported controllers, sets the controller for the two players;
+*   `-L` followed by a path on the file system specifies where the logs of the game are to be saved;
+*   [optional] `-S` followed by the location of a JSON file, specifies a file with a game state to be used as initial game state; game states are stored by the framework at each step.
+
+The software saves log files for each game:
+*   `<game_time>_game.json` stores a JSON array of alternating game states (in the form of JSON objects) and decisions (in the form of strings)
+*   `<game_time>_game.log` stores the options and choices of both players in a human-readable format
+
+MCTS-based bots also save log files:
+*   `<game_time>\_player\_<bot_name>.log`: stores information about how many times UCT is run for each action as well as errors;
+*   `<game_time>\_player\_<bot_name>.json`: stores the result of MCTS analysis for every decision; namely, the chance of victory for every action as per MCTS assessment.
+
+To create a JSON file to load as a starting game state, the best way is to open the JSON log of a game and copy-paste the state you are interested in in a new JSON file.
+
+Example command:
+`java com.aigamelabs.swduel.Main -P1 MCTS_Military -P2 Random -L /home/marco/seven_wonders_duel_logs/`
+
+=== Seven Wonders: Duel
+
+The available controllers for the game are:
+*   `MCTS`: just aims at winning, using Monte Carlo Tree Search running for a certain amount of seconds on all but one of your CPUs;
+*   `MCTS_Civilian`: aims at winning via civilian victory (i.e., all cards are drawn but no player achieved neither military nor science supremacy)
+*   `MCTS_Science`: aims at winning via science supremacy;
+*   `MCTS_Military`: aims at winning via military supremacy;
+*   `DDA`: always chooses the action that has a chance of victory closest to 50%;
+*   `Human`: queries a player via command-line for actions to take (can optionally run MCTS for the player and show the chance of victory for each action)
+*   `Random`: chooses its actions at random.
+
+=== Hey! That's My Fish!
+
+The available controllers for the game are:
+*   `MCTS`: just aims at winning, using Monte Carlo Tree Search running for a certain amount of seconds on all but one of your CPUs;
+*   `DDA`: always chooses the action that has a chance of victory closest to 50%;
+*   `Human`: queries a player via command-line for actions to take (can optionally run MCTS for the player and show the chance of victory for each action)
+*   `Random`: chooses its actions at random.
+
+=== Tic-tac-toe
+
+The available controllers for the game are:
+*   `MCTS`: just aims at winning, using Monte Carlo Tree Search running for a certain amount of seconds on all but one of your CPUs;
+*   `DDA`: always chooses the action that has a chance of victory closest to 50%;
+*   `Human`: queries a player via command-line for actions to take (can optionally run MCTS for the player and show the chance of victory for each action)
+*   `Random`: chooses its actions at random.
+
+=== The Great Dalmuti
+
+The available controllers for the game are:
+*   `MCTS`: just aims at winning, using Monte Carlo Tree Search running for a certain amount of seconds on all but one of your CPUs;
+*   `DDA`: always chooses the action that has a chance of victory closest to 50%;
+*   `Human`: queries a player via command-line for actions to take (can optionally run MCTS for the player and show the chance of victory for each action)
+*   `Random`: chooses its actions at random.
+
+== Known Issues
+Currently, the DDA agent does not work.
+
+== To do
+* Edit _Hey! That's My Fish!_ entry point to allow for 3 or 4 players;
+* Think how _The Great Dalmuti_ game state could encode the advantages/disadvantages of some players (due to the initial cards exchange) without revealing their cards to the agents;
+* GUIs: this would be a great plus for obvious reasons;
+* Other games: the code provides interfaces to implement additional games for which MCTS bots can be easily written by reusing code;
+* Tests: our test coverage is far from complete;
+* Allow users to input the outcome of random draws.
