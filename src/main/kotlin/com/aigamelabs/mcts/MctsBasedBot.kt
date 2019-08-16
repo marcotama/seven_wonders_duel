@@ -24,7 +24,7 @@ import javax.json.stream.JsonGenerator
  * @author Marco Tamassia
  */
 abstract class MctsBasedBot<T: AbstractGameState<T>>(
-        player: PlayerTurn,
+        private val player: PlayerTurn,
         private val playerId: String,
         private val gameId: String,
         gameData: GameData,
@@ -166,6 +166,7 @@ abstract class MctsBasedBot<T: AbstractGameState<T>>(
 	 */
     override fun decide(gameState: T): Action<T> {
         lastAction = manager.run(gameState)
+        println(String.format("Decision of %s (player %d)", playerId, PlayerTurn.getPlayerNumber(player)))
         println(manager.rootNode!!)
         logDecision()
         return lastAction!!
