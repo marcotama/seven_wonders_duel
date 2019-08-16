@@ -573,6 +573,7 @@ fun PlayerTurn.next(numPlayers: Int) : PlayerTurn {
             PlayerTurn.PLAYER_2 -> PlayerTurn.PLAYER_3
             PlayerTurn.PLAYER_3 -> PlayerTurn.PLAYER_4
             PlayerTurn.PLAYER_4 -> PlayerTurn.PLAYER_1
+            else -> throw Exception("$this is not supposed to be playing")
         }
         else -> throw Exception("Cannot have less than 2 or more than 4 players")
     }
