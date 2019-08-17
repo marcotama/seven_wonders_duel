@@ -58,7 +58,7 @@ data class GameState(
     )
 
 
-    fun generateBoard(generator: RandomWithTracker): io.vavr.collection.HashMap<Triple<Int, Int, Int>, TileType> {
+    fun generateBoard(generator: RandomWithTracker): HashMap<Triple<Int, Int, Int>, TileType> {
         val entries = LinkedList<Pair<Triple<Int,Int,Int>, TileType>>()
         Vector.of(5, 6, 7, 8, 9)
                 .forEachIndexed { i, l ->
@@ -78,7 +78,7 @@ data class GameState(
                         entries.add(Pair(Triple(x,y,z), TileType.EMPTY))
                     }
                 }
-        return io.vavr.collection.HashMap.ofAll(entries.toMap())
+        return HashMap.ofAll(entries.toMap())
     }
 
     override fun isGameOver(): Boolean {
@@ -129,10 +129,6 @@ data class GameState(
     /**
      * Dumps the object content in JSON. Assumes the object structure is opened and closed by the caller.
      */
-//playerStates
-//oxygen
-//temperature
-//board
     override fun toJson(generator: JsonGenerator, name: String?) {
         if (name == null) generator.writeStartObject()
         else generator.writeStartObject(name)
@@ -226,7 +222,8 @@ data class GameState(
                 }
                 val options = Vector.ofAll(decisionObj.getJSONArray("options").map { option ->
                     option as String
-                    when (option) {throw Exception("Action $option not found")
+                    when (option) {
+                        else -> throw Exception("Action $option not found")
                     }
                 })
                 Decision(player, options)

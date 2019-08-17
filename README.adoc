@@ -49,8 +49,19 @@ MCTS-based bots also save log files:
 
 To create a JSON file to load as a starting game state, the best way is to open the JSON log of a game and copy-paste the state you are interested in in a new JSON file.
 
-Example command:
+Example command using vanilla Java:
 `java com.aigamelabs.swduel.Main -P1 MCTS_Military -P2 Random -L /home/marco/seven_wonders_duel_logs/`
+
+=== Gradle
+Gradle tasks are configured, one per task:
+
+* `swduel`
+* `myfish`
+* `tictactoe`
+* `greatdalmuti.`
+
+Example command using Gradle:
+` gradle tictactoe --args="-P1 DDA -P2 MCTS -L /home/marco/seven_wonders_duel_logs/"`
 
 === Seven Wonders: Duel
 

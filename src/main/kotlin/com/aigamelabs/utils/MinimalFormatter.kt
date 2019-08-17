@@ -13,8 +13,7 @@ import java.util.logging.LogRecord
 
 class MinimalFormatter : Formatter() {
 
-    private val lineSeparator = java.security.AccessController.doPrivileged(
-            sun.security.action.GetPropertyAction("line.separator"))
+    private val lineSeparator = "\n"
 
     /**
      * Format the given LogRecord.
