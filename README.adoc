@@ -7,6 +7,7 @@ The games implemented so far are:
 * link:https://boardgamegeek.com/boardgame/8203/hey-s-my-fish[Hey, That's My Fish!]
 * link:https://boardgamegeek.com/boardgame/11901/tic-tac-toe[Tic-tac-toe]
 * link:https://boardgamegeek.com/boardgame/929/great-dalmuti[The Great Dalmuti] (in development)
+* link:https://boardgamegeek.com/boardgame/167791/terraforming-mars[Terraforming Mars] (in development)
 
 Some of these games involve information unknown to some players. If no player knows such information, the information is not encoded in the game state, but its probability distribution is; this means that the information (e.g. the card on top of a deck) is drawn from the distribution at run-time. If any player knows the information, this is stored in the game state (e.g. the cards in the hand of a player).
 
@@ -31,7 +32,6 @@ The software has an entry point for every game; namely:
 * `com.aigamelabs.swduel.Main`
 * `com.aigamelabs.myfish.Main`
 * `com.aigamelabs.tictactoe.Main`
-* `com.aigamelabs.greatdalmuti.Main`
 
 All of these entry points take the following parameters via the command line:
 
@@ -58,14 +58,31 @@ Gradle tasks are configured, one per task:
 * `swduel`
 * `myfish`
 * `tictactoe`
-* `greatdalmuti.`
 
-Example command using Gradle:
-` gradle tictactoe --args="-P1 DDA -P2 MCTS -L /home/marco/seven_wonders_duel_logs/"`
+which can be run as easily as:
+`gradle tictactoe --args="-P1 DDA -P2 MCTS -L /home/marco/seven_wonders_duel_logs/"`
+provided you installed Gradle
+
+* Instructions link:https://gradle.org/install/[on Gradle's website]
+* At the time of writing, the easiest way is:
+** on Ubuntu, to install SDKMAN (`curl -s "https://get.sdkman.io" | bash`) and to then install Gradle `sdk install gradle 5.6`
+** on MacOS, to install Brew (`/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`) and to then install Gradle `brew install gradle`
+
+==== Jars
+Gradle can generate a portable jar using
+`gradle jar`
+which can be executed via
+`java -classpath build/lib/<name-of-the-jar-file> -P1 MCTS_Military -P2 Random -L /home/marco/seven_wonders_duel_logs/ com.aigamelabs.tictactoe.Main`
+
+If the command seems too long, you can have Gradle generate cross-platform running scripts for each entry-point (aka game) using
+`gradle tictactoeStartScript`
+and then running
+`./build/bin/tictactoe -P1 MCTS_Military -P2 Random -L /home/marco/seven_wonders_duel_logs/ com.aigamelabs.tictactoe.Main`
 
 === Seven Wonders: Duel
 
 The available controllers for the game are:
+
 *   `MCTS`: just aims at winning, using Monte Carlo Tree Search running for a certain amount of seconds on all but one of your CPUs;
 *   `MCTS_Civilian`: aims at winning via civilian victory (i.e., all cards are drawn but no player achieved neither military nor science supremacy)
 *   `MCTS_Science`: aims at winning via science supremacy;
@@ -77,6 +94,7 @@ The available controllers for the game are:
 === Hey! That's My Fish!
 
 The available controllers for the game are:
+
 *   `MCTS`: just aims at winning, using Monte Carlo Tree Search running for a certain amount of seconds on all but one of your CPUs;
 *   `DDA`: always chooses the action that has a chance of victory closest to 50%;
 *   `Human`: queries a player via command-line for actions to take (can optionally run MCTS for the player and show the chance of victory for each action)
@@ -85,18 +103,19 @@ The available controllers for the game are:
 === Tic-tac-toe
 
 The available controllers for the game are:
+
 *   `MCTS`: just aims at winning, using Monte Carlo Tree Search running for a certain amount of seconds on all but one of your CPUs;
 *   `DDA`: always chooses the action that has a chance of victory closest to 50%;
 *   `Human`: queries a player via command-line for actions to take (can optionally run MCTS for the player and show the chance of victory for each action)
 *   `Random`: chooses its actions at random.
 
-=== The Great Dalmuti
-
-The available controllers for the game are:
-*   `MCTS`: just aims at winning, using Monte Carlo Tree Search running for a certain amount of seconds on all but one of your CPUs;
-*   `DDA`: always chooses the action that has a chance of victory closest to 50%;
-*   `Human`: queries a player via command-line for actions to take (can optionally run MCTS for the player and show the chance of victory for each action)
-*   `Random`: chooses its actions at random.
+//=== The Great Dalmuti
+//
+//The available controllers for the game are:
+//*   `MCTS`: just aims at winning, using Monte Carlo Tree Search running for a certain amount of seconds on all but one of your CPUs;
+//*   `DDA`: always chooses the action that has a chance of victory closest to 50%;
+//*   `Human`: queries a player via command-line for actions to take (can optionally run MCTS for the player and show the chance of victory for each action)
+//*   `Random`: chooses its actions at random.
 
 == Known Issues
 Currently, the DDA agent does not work.

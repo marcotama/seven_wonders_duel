@@ -39,60 +39,70 @@ sourceCompatibility = '1.8'
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
-//
-//
-//// Gradle with multiple entry points
-//// Credits: https://gist.github.com/itzg/9276597
-//
-//startScripts.setActions Arrays.asList()
-//
-//jar {
-//    manifest {
-//        // Make sure the app's jar can be used with a simple -cp
-//        attributes 'Class-Path': configurations.runtime.collect { "${it.getName()}" }.join(' ')
-//    }
-//}
-//
-//// copy the dependency jars alongside the built jar for development-time running
-//jar {
-//    doLast {
-//        copy {
-//            from files(configurations.runtime)
-//            into 'build/libs'
-//        }
-//    }
-//}
-//
-//task tictactoeStartScript(type:CreateStartScripts) {
-//    applicationName = 'Tic-tac-toe'
-//    classpath = jar.outputs.files
-//    mainClassName = 'com.aigamelabs.tictactoe.Main'
-//    outputDir = file('build/bin')
-//}
-//
-//task myfishStartScript(type:CreateStartScripts) {
-//    applicationName = 'Hey! That\'s my fish!'
-//    classpath = jar.outputs.files
-//    mainClassName = 'com.aigamelabs.myfish.Main'
-//    outputDir = file('build/bin')
-//}
-//
-//task swduelStartScript(type:CreateStartScripts) {
-//    applicationName = 'Seven Wonders: Duel'
-//    classpath = jar.outputs.files
-//    mainClassName = 'com.aigamelabs.swduel.Main'
-//    outputDir = file('build/bin')
-//}
-//
-//applicationDistribution.from(tictactoeStartScript) {
-//    into 'bin'
-//}
-//applicationDistribution.from(myfishStartScript) {
-//    into 'bin'
-//}
-//applicationDistribution.from(swduelStartScript) {
-//    into 'bin'
-//}
+
+
+// Gradle with multiple entry points
+// Credits: https://gist.github.com/itzg/9276597
+
+startScripts.setActions Arrays.asList()
+
+//Fix
+//CreateStartScripts `jar.outputs.files + project.configurations.runtime` adds `lib` to path.
+//Seems hardcoded solution. Need to figure out how they are generated.
+project.libsDirName = 'lib'
+
+jar {
+    manifest {
+        // Make sure the app's jar can be used with a simple -cp
+        attributes 'Class-Path': configurations.runtime.collect { "${it.getName()}" }.join(' ')
+    }
+
+    // This line of code recursively collects and copies all of a project's files
+    // and adds them to the JAR itself. One can extend this task, to skip certain
+    // files or particular types at will
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+// copy the dependency jars alongside the built jar for development-time running
+jar {
+    doLast {
+        copy {
+            from files(configurations.runtime)
+            into 'build/libs'
+        }
+    }
+}
+
+task tictactoeStartScript(type:CreateStartScripts) {
+    applicationName = 'tictactoe'
+    classpath = jar.outputs.files
+    mainClassName = 'com.aigamelabs.tictactoe.Main'
+    outputDir = file('build/bin')
+}
+
+task myfishStartScript(type:CreateStartScripts) {
+    applicationName = 'myfish'
+    classpath = jar.outputs.files
+    mainClassName = 'com.aigamelabs.myfish.Main'
+    outputDir = file('build/bin')
+}
+
+task swduelStartScript(type:CreateStartScripts) {
+    applicationName = 'swduel'
+    classpath = jar.outputs.files
+    mainClassName = 'com.aigamelabs.swduel.Main'
+    outputDir = file('build/bin')
+}
+
+applicationDistribution.from(tictactoeStartScript) {
+    into 'bin'
+}
+applicationDistribution.from(myfishStartScript) {
+    into 'bin'
+}
+applicationDistribution.from(swduelStartScript) {
+    into 'bin'
+}
 
 task(tictactoe, dependsOn: 'classes', type: JavaExec) {
     main = 'com.aigamelabs.tictactoe.Main'
