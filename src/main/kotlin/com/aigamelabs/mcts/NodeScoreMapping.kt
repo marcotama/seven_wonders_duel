@@ -1,5 +1,7 @@
 package com.aigamelabs.mcts
 
+import kotlin.math.abs
+
 class NodeScoreMapping {
 
     companion object {
@@ -17,7 +19,7 @@ class NodeScoreMapping {
                 nodeScoreMapper: NodeScoreMapper
         ): (Double) -> Double {
             when (nodeScoreMapper) {
-                NodeScoreMapper.DISTANCE_FROM_MIDPOINT -> return { v -> 1 - 2 * Math.abs(0.5 - v) }
+                NodeScoreMapper.DISTANCE_FROM_MIDPOINT -> return { v -> 1 - 2 * abs(0.5 - v) }
                 NodeScoreMapper.IDENTITY -> return { v -> v }
             }
         }
